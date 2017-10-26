@@ -1,0 +1,43 @@
+# docker-compose run --service-ports --entrypoint /bin/sh demo
+
+# apk add -t .gyp --no-cache git python g++ make bash
+# cd /app
+# npm install --production; npm link;
+# truffle compile
+# npm start -- --host 0.0.0.0 --public $DOCKER_HOST:8080
+# apk del .gyp
+
+demo:
+  image: desmart/truffle
+  #image: node:7-alpine
+  links:
+    - testrpc
+  volumes:
+    - .:/app
+  ports:
+   - "8080:8080"
+  environment:
+    DOCKER_HOST: 192.168.99.100
+    RPC_HOST: 192.168.99.100
+    RPC_PORT: 8545
+
+# docker-compose run --service-ports --entrypoint /bin/sh geth
+# geth attach http://$RPC_HOST:$RPC_PORT
+# eth.accounts
+
+geth:
+  image: ethereum/client-go
+  links:
+    - testrpc
+  volumes:
+    - .:/app
+  environment:
+    RPC_HOST: 192.168.99.100
+    RPC_PORT: 8545
+
+# public 8545 because we will access it outside the docker network
+testrpc:
+  ports:
+   - "8545:8545"
+  image: desmart/testrpc
+
