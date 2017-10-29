@@ -13,7 +13,7 @@ export default class App extends React.Component {
       this.state = {
         lifTokenAddress: window.localStorage.lifTokenAddress || '0x0000000000000000000000000000000000000000',
         showPassword: false,
-        walleyKeystore: {},
+        walletKeystore: JSON.parse(window.localStorage.wallet) || {},
         loading: false,
         walletSection: 'open',
         ethBalance: 0,
@@ -28,7 +28,8 @@ export default class App extends React.Component {
       self.setState({loading: true});
       web3.eth.accounts.wallet.create(1);
       let wallet = web3.eth.accounts.wallet.encrypt(self.state.password)[0];
-      self.setState({walletSection: 'show', walleyKeystore: wallet, loading: false});
+      window.localStorage.wallet = JSON.stringify(wallet);
+      self.setState({walletSection: 'show', walletKeystore: wallet, loading: false});
     }
 
     // Open an encrypted wallet and saved the encrypted wallet in state
@@ -36,8 +37,8 @@ export default class App extends React.Component {
       var self = this;
       self.setState({loading: true, walletError: false});
       try {
-        let wallet = web3.eth.accounts.wallet.decrypt([self.state.walleyKeystore], self.state.password)
-        self.setState({walletSection: 'show', walleyKeystore: self.state.walleyKeystore, loading: false});
+        let wallet = web3.eth.accounts.wallet.decrypt([self.state.walletKeystore], self.state.password)
+        self.setState({walletSection: 'show', walletKeystore: self.state.walletKeystore, loading: false});
         self.updateBalances();
       } catch(e) {
         console.log(e);
@@ -53,13 +54,13 @@ export default class App extends React.Component {
 
       self.setState({
         ethBalance: web3.utils.fromWei(
-          await web3.eth.getBalance(self.state.walleyKeystore.address),
+          await web3.eth.getBalance(self.state.walletKeystore.address),
           'ether'
         ),
         lifBalance: web3.utils.fromWei(
           await web3.eth.call({
             to: self.state.lifTokenAddress, // contract address
-            data: lifContract.methods.balanceOf(self.state.walleyKeystore.address).encodeABI()
+            data: lifContract.methods.balanceOf(self.state.walletKeystore.address).encodeABI()
           }),
           'ether'
         )
@@ -106,14 +107,14 @@ export default class App extends React.Component {
                 <input
                   type="text"
                   class="form-control"
-                  value={JSON.stringify(self.state.walleyKeystore)}
-                  defaultValue={JSON.stringify(self.state.walleyKeystore)}
+                  value={JSON.stringify(self.state.walletKeystore)}
+                  defaultValue={JSON.stringify(self.state.walletKeystore)}
                   placeholder="This password will be used to encrypt your new wallet. Use a strong one!"
                   onChange={(event) => {
-                    self.setState({ walleyKeystore: event.target.value, walletError: false });
+                    self.setState({ walletKeystore: event.target.value, walletError: false });
                   }}/>
                 <span class="input-group-addon">
-                  <a class="fa fa-download" style={{color:'#555'}} href={"data:application/json;base64,"+window.btoa(JSON.stringify(self.state.walleyKeystore))} download="WT Keystore.json"></a>
+                  <a class="fa fa-download" style={{color:'#555'}} href={"data:application/json;base64,"+window.btoa(JSON.stringify(self.state.walletKeystore))} download="WT Keystore.json"></a>
                 </span>
                 <span class="input-group-addon" onClick={() => {
                   document.getElementById('inputFile').click();
@@ -126,7 +127,7 @@ export default class App extends React.Component {
                         var base64 = reader.result;
                         var fileData = window.atob(base64.split(';base64,')[1]);
                         self.setState({
-                          walleyKeystore: JSON.parse(fileData)
+                          walletKeystore: JSON.parse(fileData)
                         });
                       };
                     })(event.target.files[0]);
@@ -169,7 +170,7 @@ export default class App extends React.Component {
           :
           <div>
             <div class="row justify-content-around">
-              <h2>Wallet <small>0x{self.state.walleyKeystore.address}</small></h2>
+              <h2>Wallet <small>0x{self.state.walletKeystore.address}</small></h2>
             </div>
             <hr></hr>
             <div class="row justify-content-around">
