@@ -11,7 +11,7 @@ export default class App extends React.Component {
       super();
       this.state = {
         indexAddress: '0x0000000000000000000000000000000000000000',
-        walleyKeystore: window.localStorage.wallet || '',
+        walletKeystore: JSON.parse(window.localStorage.wallet) || '',
         loading: false
       }
     }
