@@ -17,7 +17,12 @@ export default class App extends React.Component {
         loading: false,
         walletSection: 'open',
         ethBalance: 0,
-        lifBalance: 0
+        lifBalance: 0,
+        receiverAddress: '',
+        sendAmount: 0,
+        gasAmount: 21000,
+        txData: '0x',
+        currency: 'ETH'
       }
 
     }
@@ -38,6 +43,8 @@ export default class App extends React.Component {
       self.setState({loading: true, walletError: false});
       try {
         let wallet = web3.eth.accounts.wallet.decrypt([self.state.walletKeystore], self.state.password)
+        console.log('openWallet wallet:');
+        console.log(wallet);
         self.setState({walletSection: 'show', walletKeystore: self.state.walletKeystore, loading: false});
         self.updateBalances();
       } catch(e) {
@@ -57,14 +64,46 @@ export default class App extends React.Component {
           await web3.eth.getBalance(self.state.walletKeystore.address),
           'ether'
         ),
-        lifBalance: web3.utils.fromWei(
+        lifBalance: web3.utils.hexToNumber(
           await web3.eth.call({
             to: self.state.lifTokenAddress, // contract address
             data: lifContract.methods.balanceOf(self.state.walletKeystore.address).encodeABI()
-          }),
-          'ether'
+          })
         )
       })
+    }
+
+    async sendTx() {
+      console.log('called sendEth');
+      if(this.state.currency === 'ETH') {
+        let txObject = {
+          to: this.state.receiverAddress,
+          value: web3.utils.toWei(this.state.sendAmount, 'ether'),
+          gas: this.state.gasAmount,
+          data: this.state.txData
+        };
+        let signedTx = await web3.eth.accounts.signTransaction(txObject, web3.eth.accounts.wallet.decrypt([this.state.walletKeystore], this.state.password)[0].privateKey);
+        console.log(signedTx);
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
+      } else if (this.state.currency === 'LIF') {
+        let LifToken = new web3.eth.Contract(LifABI, this.state.lifTokenAddress);
+        let method = LifToken.methods.transfer(this.state.receiverAddress, this.state.sendAmount);
+        let callData = method.encodeABI();
+
+        let txObject = {
+          to: this.state.lifTokenAddress,
+          gas: 52000,
+          data: callData
+        }
+        let signedTx = await web3.eth.accounts.signTransaction(txObject, web3.eth.accounts.wallet.decrypt([this.state.walletKeystore], this.state.password)[0].privateKey);
+        console.log(signedTx);
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
+      }
+
+    }
+
+    async sendLif() {
+      console.log('called sendLif');
     }
 
     render() {
@@ -180,8 +219,74 @@ export default class App extends React.Component {
             </div>
             <hr></hr>
             <div class="row justify-content-around">
-              <button class="btn btn-primary">Send ETH</button>
-              <button class="btn btn-primary">Send Lif</button>
+              <div class="col-md-6">
+                <h3>Send ETH or LIF</h3>
+                <form key="sendForm" onSubmit={(e) => {e.preventDefault(); self.sendTx()}}>
+                  <div class="form-group">
+                    <label>Currency:</label>
+                    <div class="input-group">
+                      <select class="form-control" defaultValue={self.state.currency} onChange={(event) => self.setState({ currency: event.target.value })}>
+                        <option value="ETH">ETH</option>
+                        <option value="LIF">LIF</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>To:</label>
+                    <div class="input-group">
+                      <input
+                        type="text"
+                        class="form-control"
+                        autoFocus="true"
+                        defaultValue={self.state.receiverAddress}
+                        placeholder="Receiver Address"
+                        onChange={(event) => self.setState({ receiverAddress: event.target.value })}/>
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label>Amount:</label>
+                    <div class="input-group">
+                      <input
+                        type="number"
+                        class="form-control"
+                        autoFocus="true"
+                        defaultValue={self.state.sendAmount}
+                        placeholder="Amount to send"
+                        onChange={(event) => self.setState({ sendAmount: event.target.value })}/>
+                      <span class="input-group-addon">{self.state.currency}</span>
+                    </div>
+                  </div>
+                  {self.state.currency === 'ETH' &&
+                  <div id="advanced">
+                    <div class="form-group">
+                      <label>Gas:</label>
+                      <div class="input-group">
+                        <input
+                          type="number"
+                          class="form-control"
+                          autoFocus="true"
+                          defaultValue={self.state.gasAmount}
+                          placeholder="Amount of gas"
+                          min="21000"
+                          onChange={(event) => self.setState({ gasAmount: event.target.value })}/>
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <label>Data:</label>
+                      <div class="input-group">
+                        <input
+                          type="text"
+                          class="form-control"
+                          autoFocus="true"
+                          defaultValue={self.state.txData}
+                          placeholder="Hex encoded data"
+                          onChange={(event) => self.setState({ txData: event.target.value })}/>
+                      </div>
+                    </div>
+                  </div>}
+                  <input type="submit" class="btn btn-primary" value="Send" />
+                </form>
+              </div>
             </div>
           </div>
           }
