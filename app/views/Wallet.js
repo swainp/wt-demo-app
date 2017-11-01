@@ -13,7 +13,7 @@ export default class App extends React.Component {
       this.state = {
         lifTokenAddress: window.localStorage.lifTokenAddress || '0x0000000000000000000000000000000000000000',
         showPassword: false,
-        walletKeystore: JSON.parse(window.localStorage.wallet) || {},
+        walletKeystore: {},
         loading: false,
         walletSection: 'open',
         ethBalance: 0,
@@ -27,6 +27,17 @@ export default class App extends React.Component {
 
     }
 
+    componentWillMount() {
+      if(web3.eth.accounts.wallet[0]) {
+        this.setState({walletSection: 'show', walletKeystore: web3.eth.accounts.wallet[0], loading: false}, () => { this.updateBalances()});
+      }
+      else if(window.localStorage.wallet) {
+        this.setState({walletKeystore: JSON.parse(window.localStorage.wallet)});
+      } else {
+        this.setState({walletSection: 'create'});
+      }
+    }
+
     // Create a wallet without extra entropy and encrypt it with the password
     async createWallet(){
       var self = this;
@@ -34,7 +45,8 @@ export default class App extends React.Component {
       web3.eth.accounts.wallet.create(1);
       let wallet = web3.eth.accounts.wallet.encrypt(self.state.password)[0];
       window.localStorage.wallet = JSON.stringify(wallet);
-      self.setState({walletSection: 'show', walletKeystore: wallet, loading: false});
+      wallet = web3.eth.accounts.wallet.decrypt([wallet], self.state.password);
+      self.setState({walletSection: 'show', walletKeystore: wallet[0], loading: false});
     }
 
     // Open an encrypted wallet and saved the encrypted wallet in state
@@ -43,10 +55,7 @@ export default class App extends React.Component {
       self.setState({loading: true, walletError: false});
       try {
         let wallet = web3.eth.accounts.wallet.decrypt([self.state.walletKeystore], self.state.password)
-        console.log('openWallet wallet:');
-        console.log(wallet);
-        self.setState({walletSection: 'show', walletKeystore: self.state.walletKeystore, loading: false});
-        self.updateBalances();
+        this.setState({walletSection: 'show', walletKeystore: wallet[0], loading: false}, () => { self.updateBalances()});
       } catch(e) {
         console.log(e);
         self.setState({loading: false, walletError: true});
@@ -56,6 +65,7 @@ export default class App extends React.Component {
     // Update the ETH and Lif balances
     async updateBalances() {
       var self = this;
+      self.setState({ethBalance: '...', lifBalance: '...'});
 
       let lifContract = new web3.eth.Contract(LifABI, self.state.lifTokenAddress);
 
@@ -74,7 +84,7 @@ export default class App extends React.Component {
     }
 
     async sendTx() {
-      console.log('called sendEth');
+      var self = this;
       if(this.state.currency === 'ETH') {
         let txObject = {
           to: this.state.receiverAddress,
@@ -82,9 +92,11 @@ export default class App extends React.Component {
           gas: this.state.gasAmount,
           data: this.state.txData
         };
-        let signedTx = await web3.eth.accounts.signTransaction(txObject, web3.eth.accounts.wallet.decrypt([this.state.walletKeystore], this.state.password)[0].privateKey);
-        console.log(signedTx);
-        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
+        let signedTx = await web3.eth.accounts.signTransaction(txObject, this.state.walletKeystore.privateKey);
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', (receipt) => {
+          console.log(receipt);
+          self.updateBalances();
+        });
       } else if (this.state.currency === 'LIF') {
         let LifToken = new web3.eth.Contract(LifABI, this.state.lifTokenAddress);
         let method = LifToken.methods.transfer(this.state.receiverAddress, this.state.sendAmount);
@@ -95,15 +107,13 @@ export default class App extends React.Component {
           gas: 52000,
           data: callData
         }
-        let signedTx = await web3.eth.accounts.signTransaction(txObject, web3.eth.accounts.wallet.decrypt([this.state.walletKeystore], this.state.password)[0].privateKey);
-        console.log(signedTx);
-        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', console.log);
+        let signedTx = await web3.eth.accounts.signTransaction(txObject, this.state.walletKeystore.privateKey);
+        web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', (receipt) => {
+          console.log(receipt);
+          self.updateBalances();
+        });
       }
 
-    }
-
-    async sendLif() {
-      console.log('called sendLif');
     }
 
     render() {
@@ -168,6 +178,7 @@ export default class App extends React.Component {
                         self.setState({
                           walletKeystore: JSON.parse(fileData)
                         });
+                        window.localStorage.wallet = JSON.parse(fileData);
                       };
                     })(event.target.files[0]);
                     if (event.target.files && event.target.files[0])
@@ -209,7 +220,7 @@ export default class App extends React.Component {
           :
           <div>
             <div class="row justify-content-around">
-              <h2>Wallet <small>0x{self.state.walletKeystore.address}</small></h2>
+              <h2>Wallet <small>{self.state.walletKeystore.address}</small></h2>
             </div>
             <hr></hr>
             <div class="row justify-content-around">
