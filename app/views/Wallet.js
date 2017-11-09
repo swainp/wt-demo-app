@@ -132,6 +132,7 @@ export default class App extends React.Component {
                   class="form-control"
                   autoFocus="true"
                   defaultValue={self.state.password}
+                  required
                   placeholder="This password will be used to encrypt your new wallet. Use a strong one!"
                   onChange={(event) => self.setState({ password: event.target.value })}/>
                 <span class="input-group-addon">
@@ -178,7 +179,7 @@ export default class App extends React.Component {
                         self.setState({
                           walletKeystore: JSON.parse(fileData)
                         });
-                        window.localStorage.wallet = JSON.parse(fileData);
+                        window.localStorage.wallet = fileData;
                       };
                     })(event.target.files[0]);
                     if (event.target.files && event.target.files[0])
