@@ -265,6 +265,12 @@ export default class App extends React.Component {
         case 'setUnitActive':
           args.push(self.state.unitInfo.active);
           break;
+        case 'setDefaultPrice':
+          args.push(self.state.unitInfo.defaultPrice);
+          break;
+        case 'setDefaultLifPrice':
+          args.push(self.state.unitInfo.defaultLifPrice);
+          break;
       }
 
       try {
@@ -1086,10 +1092,32 @@ export default class App extends React.Component {
             <div></div>
           ),
           setDefaultLifPrice: (
-            <div></div>
+            <div class="form-group">
+              <label>Default Lif Price</label>
+              <input
+                type="number"
+                class="form-control"
+                autoFocus="true"
+                value={self.state.unitInfo.defaultLifPrice}
+                onChange={(event) => {
+                  self.setState({unitInfo: Object.assign(self.state.unitInfo, {defaultLifPrice: Number(event.target.value)}) });
+                }}
+              />
+            </div>
           ),
           setDefaultPrice: (
-            <div></div>
+            <div class="form-group">
+              <label>Default Price</label>
+              <input
+                type="number"
+                class="form-control"
+                autoFocus="true"
+                value={self.state.unitInfo.defaultPrice}
+                onChange={(event) => {
+                  self.setState({unitInfo: Object.assign(self.state.unitInfo, {defaultPrice: Number(event.target.value)}) });
+                }}
+              />
+            </div>
           ),
           setUnitSpecialLifPrice: (
             <div></div>
@@ -1210,7 +1238,7 @@ export default class App extends React.Component {
                         <td class="shortCell">{entryTypeInfo.description}</td>
                         <td class="text-center">{entryTypeInfo.maxGuests}</td>
                         <td class="text-center">{unit[1].defaultPrice}{unit[1].currencyCode}</td>
-                        <td class="text-center">{unit[1].active}</td>
+                        <td class="text-center">{unit[1].active ? 'Active' : 'Inactive'}</td>
                         <td class="text-center">
                           <button class="btn btn-primary btn-sm"
                                   onClick={() => self.setState({section: 'editHotelUnit', unit: unit[0], unitInfo: unit[1]})}>
