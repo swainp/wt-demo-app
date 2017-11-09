@@ -5,7 +5,7 @@ import ReactModal from "react-modal";
 import moment from 'moment';
 
 import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(WEB3PROVIDER));
+var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));
 
 import Select from 'react-select';
 var _ = require('lodash');
@@ -17,14 +17,17 @@ export default class App extends React.Component {
       this.state = {
         indexAddress: '0x0000000000000000000000000000000000000000',
         hotels: [],
+        hotelOptions: [],
         hotel: {
           name: '',
           address: '',
           units: []
         },
+        newUnitType: {},
         newUnit: {},
         editUnit: {},
-        newUnitType: false,
+        editHotelUnitFunction: 'setActive',
+        createNewUnitType: false,
         showPassword: false,
         hotelSelected: '',
         txs: [],
@@ -34,26 +37,38 @@ export default class App extends React.Component {
         loading: false,
         section: 'hotels',
         userType: 'unknown',
-        hotelSection: 'list'
+        hotelSection: 'list',
+        hotelManager: {}
       }
     }
 
-    // componentWillMount(){
-    //   if (
-    //     window.localStorage.indexAddress
-    //     && window.localStorage.indexAddress.length > 0
-    //     && web3.eth.getCode(window.localStorage.indexAddress) != '0x0'
-    //     && window.localStorage.userType == 'Hotel'
-    //     && window.localStorage.wallet.length > 0
-    //   )
-    //     {
-    //     wtHotelLib.setIndex(window.localStorage.indexAddress);
-    //     wtHotelLib.wallet.setKeystore(window.localStorage.wallet);
-    //     this.setState({indexAddress: window.localStorage.indexAddress});
-    //     this.updateData();
-    //   } else
-    //     window.location.replace(window.location.origin+'/#/');
-    // }
+    componentWillMount(){
+      if (
+        window.localStorage.wtIndexAddress
+        && window.localStorage.wtIndexAddress.length > 0
+        && web3.eth.getCode(window.localStorage.wtIndexAddress) != '0x0'
+        // && window.localStorage.userType == 'Hotel'
+        // && window.localStorage.wallet.length > 0
+      )
+        {
+        let hotelManager = new HotelManager({
+          indexAddress: window.localStorage.wtIndexAddress,
+          owner: JSON.parse(window.localStorage.wallet).address,
+          web3: web3,
+          gasMargin: 1.5
+        })
+        console.log(hotelManager);
+        console.log(web3);
+        hotelManager.setWeb3(web3);
+        //hotelManager.WTIndex.setProvider(web3.currentProvider);
+        this.setState({hotelManager: hotelManager}, ()=>{this.getHotels()});
+        // wtHotelLib.setIndex(window.localStorage.indexAddress);
+        // wtHotelLib.wallet.setKeystore(window.localStorage.wallet);
+        // this.setState({indexAddress: window.localStorage.indexAddress});
+        // this.updateData();
+      } else
+        window.location.replace(window.location.origin+'/#/');
+    }
 
     // logout(){
     //   wtHotelLib.wallet.closeWallet();
@@ -62,26 +77,31 @@ export default class App extends React.Component {
     //   window.location.reload();
     // }
 
-    // async createHotel(){
-    //   var self = this;
-    //   self.setState({loading: true, createHotelError: false});
-    //   try {
-    //     let newHotel = await wtHotelLib.createHotel(self.state.password, self.state.newHotelName, self.state.newHotelDescription);
-    //     await self.updateData();
-    //     self.selectHotel(newHotel.address);
-    //     self.setState({wtHotel: { address: newHotel.address, name: await newHotel.name(), unitTypes:[] },
-    //       loading: false,
-    //       section: 'hotels',
-    //       hotelSection: 'list',
-    //       newHotelName: '',
-    //       newHotelDescription: '',
-    //       password: ''});
-    //   }
-    //   catch(e) {
-    //     console.log("Error creating the hotel", e);
-    //     self.setState({loading: false, createHotelError: true});
-    //   }
-    // }
+    async createHotel(){
+      var self = this;
+      self.setState({loading: true, createHotelError: false});
+      try {
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
+        let newHotel = await self.state.hotelManager.createHotel(self.state.newHotelName, self.state.newHotelDescription);
+        console.log(newHotel);
+        await self.getHotels();
+        self.setState({loading: false, hotelSection: "list"});
+        //self.selectHotel(newHotel.address);
+        // await self.updateData();
+        // self.selectHotel(newHotel.address);
+        // self.setState({wtHotel: { address: newHotel.address, name: await newHotel.name(), unitTypes:[] },
+        //   loading: false,
+        //   section: 'hotels',
+        //   hotelSection: 'list',
+        //   newHotelName: '',
+        //   newHotelDescription: '',
+        //   password: ''});
+      }
+      catch(e) {
+        console.log("Error creating the hotel", e);
+        self.setState({loading: false, createHotelError: true});
+      }
+    }
 
     // async editHotel(){
     //   var self = this;
@@ -131,23 +151,23 @@ export default class App extends React.Component {
 
     // }
 
-    // async addHotelUnit(){
+    // async addHotelUnitType(){
     //   var self = this;
-    //   self.setState({loading: true, addHotelUnitError: false});
+    //   self.setState({loading: true, addHotelUnitTypeError: false});
 
     //   try {
-    //     if (_.findIndex(self.state.hotel.units,{ type: self.state.newUnit.type}) < 0)
-    //       await wtHotelLib.addUnitType(self.state.password, self.state.hotel.address, self.state.newUnit.type);
+    //     if (_.findIndex(self.state.hotel.units,{ type: self.state.newUnitType.type}) < 0)
+    //       await wtHotelLib.addUnitType(self.state.password, self.state.hotel.address, self.state.newUnitType.type);
 
     //     await wtHotelLib.addUnit(
     //       self.state.password,
     //       self.state.hotel.address,
-    //       self.state.newUnit.type,
-    //       self.state.newUnit.name,
-    //       self.state.newUnit.description,
+    //       self.state.newUnitType.type,
+    //       self.state.newUnitType.name,
+    //       self.state.newUnitType.description,
     //       1,
-    //       self.state.newUnit.maxGuests,
-    //       self.state.newUnit.price+' '+self.state.newUnit.currency
+    //       self.state.newUnitType.maxGuests,
+    //       self.state.newUnitType.price+' '+self.state.newUnitType.currency
     //     );
     //     await self.updateData();
     //     // select hotel again, so it uses the fresh version (that includes the just created room)
@@ -156,11 +176,113 @@ export default class App extends React.Component {
     //   }
     //   catch(e) {
     //     console.log("Error adding hotel room", e);
-    //     self.setState({loading: false, addHotelUnitError: true});
+    //     self.setState({loading: false, addHotelUnitTypeError: true});
     //   }
     // }
 
-    // startEditHotelUnit(val) {
+    async addUnit(){
+      var self = this;
+      self.setState({loading: true, addHotelUnitTypeError: false});
+
+      try {
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
+        let tx = await self.state.hotelManager.addUnit(self.state.hotel.address, self.state.unitType);
+        console.log(tx);
+
+        await self.getHotels();
+        // select hotel again, so it uses the fresh version (that includes the just created room)
+        self.selectHotel(self.state.hotel.address);
+        self.setState({section: 'hotels', hotelSection: 'list', loading: false});
+      }
+      catch(e) {
+        console.log("Error adding hotel room", e);
+        self.setState({loading: false, addHotelUnitTypeError: true});
+      }
+    }
+
+    async addUnitType(){
+      var self = this;
+      self.setState({loading: true, addHotelUnitTypeError: false});
+
+      try {
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
+        let tx = await self.state.hotelManager.addUnitType(self.state.hotel.address, self.state.newUnitType.type);
+        console.log(tx);
+
+        await self.getHotels();
+        // select hotel again, so it uses the fresh version (that includes the just created room)
+        self.selectHotel(self.state.hotel.address);
+        self.setState({section: 'hotels', hotelSection: 'list', loading: false});
+      }
+      catch(e) {
+        console.log("Error adding hotel room", e);
+        self.setState({loading: false, addHotelUnitTypeError: true});
+      }
+    }
+
+    async editUnitType() {
+      var self = this;
+      self.setState({loading: true, addHotelUnitTypeError: false});
+
+      try {
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
+
+        await self.state.hotelManager.editUnitType(
+          self.state.hotel.address,
+          self.state.unitType,
+          (self.state.newUnitType.description || self.state.unitTypeInfo.description),
+          (self.state.newUnitType.minGuests || self.state.unitTypeInfo.minGuests),
+          (self.state.newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests),
+          (self.state.newUnitType.price || self.state.unitTypeInfo.price)
+        );
+
+        await self.getHotels();
+        // select hotel again, so it uses the fresh version (that includes the just created room)
+        self.selectHotel(self.state.hotel.address);
+        self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
+
+      } catch(e) {
+        console.log("Error adding hotel room", e);
+        self.setState({loading: false, addHotelUnitTypeError: true});
+      }
+    }
+
+    async editHotelUnit() {
+      var self = this;
+      self.setState({loading: true, addHotelUnitError: false});
+
+      let args = [
+        self.state.hotel.address,
+        self.state.unit
+      ]
+      //async setCurrencyCode(hotelAddress: Address, unitAddress: Address, code: Number, converter: Function, convertStart: Date, convertEnd: Date)
+      //async setDefaultLifPrice(hotelAddress: Address, unitAddress: Address, price: String | Number | BN)
+      //async setDefaultPrice(hotelAddress: Address, unitAddress: Address, price: Number)
+      //async setUnitActive(hotelAddress: Address, unitAddress: Address, active: Boolean)
+      //async setUnitSpecialLifPrice(hotelAddress: Address, unitAddress: Address, price: String | Number | BN, fromDate: Date, amountDays: Number)
+      //async setUnitSpecialPrice(hotelAddress: Address, unitAddress: Addres, price: Number, fromDate: Date, amountDays: Number)
+      switch(self.state.editHotelUnitFunction) {
+        case 'setUnitActive':
+          args.push(self.state.unitInfo.active);
+          break;
+      }
+
+      try {
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
+
+        await self.state.hotelManager[self.state.editHotelUnitFunction](...args);
+
+        await self.getHotels();
+        // select hotel again, so it uses the fresh version (that includes the just created room)
+        self.selectHotel(self.state.hotel.address);
+        self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
+      } catch(e) {
+        console.log("Error adding hotel room", e);
+        self.setState({loading: false, addHotelUnitError: true});
+      }
+    }
+
+    // starteditHotelUnitType(val) {
     //   var self = this;
     //   var editUnit = self.state.editUnit;
     //   editUnit.index = val.index;
@@ -171,7 +293,7 @@ export default class App extends React.Component {
     //   editUnit.price = val.price.split(' ')[0];
     //   editUnit.currency = val.price.split(' ')[1] || 'USD';
     //   editUnit.type = val.type.replace(/\W+/g, "");
-    //   self.setState({editUnit: editUnit, section: 'editHotelUnit'});
+    //   self.setState({editUnit: editUnit, section: 'editHotelUnitType'});
     // }
 
     // loadBookings(){
@@ -183,9 +305,9 @@ export default class App extends React.Component {
     //   });
     // }
 
-    // async editHotelUnit(){
+    // async editHotelUnitType(){
     //   var self = this;
-    //   self.setState({loading: true, editHotelUnitError: false});
+    //   self.setState({loading: true, editHotelUnitTypeError: false});
 
     //   try {
     //     await wtHotelLib.editUnit(
@@ -206,26 +328,35 @@ export default class App extends React.Component {
     //   }
     //   catch(e) {
     //     console.log("Error updating the hotel room", e);
-    //     self.setState({loading: false, editHotelUnitError: true});
+    //     self.setState({loading: false, editHotelUnitTypeError: true});
     //   }
     // }
 
-    // selectHotel(address) {
-    //   var selectedHotel = wtHotelLib.hotels[address];
-    //   selectedHotel.address = address;
+    selectHotel(address) {
+      var selectedHotel = this.state.hotels[address];
+      selectedHotel.address = address;
+      let unitTypeOptions = [];
+      Object.entries(selectedHotel.unitTypes).forEach(([key, value]) => {
+        unitTypeOptions.push({ value: key, label: key})
+      });
+      console.log('selectedHotel');
+      console.log(selectedHotel);
 
-    //   this.setState({
-    //     hotel: selectedHotel,
-    //     newUnitType: selectedHotel.units.length == 0
-    //   });
-    // }
+      this.setState({
+        hotel: selectedHotel,
+        createNewUnitType: selectedHotel.unitTypeNames.length == 0,
+        unitType: unitTypeOptions[0] ? unitTypeOptions[0].value: '',
+        unitTypeInfo: unitTypeOptions[0] ? selectedHotel.unitTypes[unitTypeOptions[0].value].info : '',
+        unitTypeOptions: unitTypeOptions
+      });
+    }
 
-    // async loadHotel(address){
-    //   await this.setState({loading: true});
-    //   await this.updateData();
-    //   this.selectHotel(address);
-    //   await this.setState({loading: false});
-    // }
+    async loadHotel(address){
+      await this.setState({loading: true});
+      //await this.updateData();
+      this.selectHotel(address);
+      await this.setState({loading: false});
+    }
 
     // loadTxs(){
     //   var self = this;
@@ -261,6 +392,19 @@ export default class App extends React.Component {
     //   }
     //   this.setState({hotels: hotels, loading: false});
     // }
+
+    async getHotels() {
+      this.setState({loading: true});
+      let hotels = await this.state.hotelManager.getHotels();
+      console.log(hotels);
+      let hotelOptions = [];
+      if(hotels) {
+        Object.entries(hotels).forEach(([key, value]) => {
+          hotelOptions.push({ value: key, label: value.name})
+        });
+      }
+      this.setState({hotels: hotels, hotelOptions: hotelOptions, loading: false});
+    }
 
     render() {
       var self = this;
@@ -346,8 +490,8 @@ export default class App extends React.Component {
             <Select
               name="Hotels"
               clearable={false}
+              options={self.state.hotelOptions}
               value={self.state.hotel.address}
-              options={self.state.hotels}
               onChange={ (val) => self.loadHotel(val.value)}
             />
           </div>
@@ -507,9 +651,9 @@ export default class App extends React.Component {
         </form>
 
       var addHotelUnit =
-        <form class="box" onSubmit={(e) => {e.preventDefault(); self.addHotelUnit()}}>
+      <div>
           <h3>
-            Add Hotel Room
+            Add Room
             <div class="pull-right">
               <button type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list'})}>Back to hotel details</button>
             </div>
@@ -519,159 +663,266 @@ export default class App extends React.Component {
           {(self.state.addHotelUnitError)
             ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
             : null}
-          {self.state.newUnitType ?
-            <div class="form-group">
-              <label>New Room Type</label>
-              <input
-                type="text"
-                autoFocus="true"
-                class="form-control"
-                value={self.state.newUnit.type}
-                onChange={(event) => {
-                  var newUnit = self.state.newUnit;
-                  newUnit.type = event.target.value
-                  self.setState({ newUnit: newUnit });
-                }}
-              />
-              <button class="btn btn-link" onClick={() => self.setState({newUnitType: false})}>
-                Or pick an existing room type
-              </button>
+            <form class="box" onSubmit={(e) => {e.preventDefault(); self.addUnit()}}>
+              <div class="form-group">
+                <label>Room Type</label>
+                <Select
+                  name="Room Types"
+                  clearable={false}
+                  value={self.state.unitType}
+                  autoFocus="true"
+                  placeholder="Double Room"
+                  options={self.state.unitTypeOptions}
+                  onChange={(e) => {
+                    self.setState({ unitType: e.value, unitTypeInfo: self.state.hotel.unitTypes[e.value].info });
+                  }}
+                />
+                <button type="button" class="btn btn-link" onClick={() => self.setState({createNewUnitType: true})}>
+                  Or create a new room type
+                </button>
+              </div>
+              <div class="form-group">
+                <label>Your Wallet Password</label>
+                <div class="input-group">
+                  <input
+                    type={self.state.showPassword ? "text" : "password"}
+                    class="form-control"
+                    defaultValue={self.state.password}
+                    required
+                    onChange={(event) => {
+                      self.setState({ password: event.target.value, addHotelUnitTypeError: false });
+                    }}
+                  />
+                  <span class="input-group-addon">
+                    {self.state.showPassword ?
+                      <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
+                    :
+                      <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
+                    }
+                  </span>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Add Room</button>
+              {(self.state.addHotelUnitError)
+                ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
+                : null}
+            </form>
+          </div>
+
+
+      var addHotelUnitType =
+      <div>
+          <h3>
+            Add/Edit Room Type
+            <div class="pull-right">
+              <button type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list'})}>Back to hotel details</button>
             </div>
+          </h3>
+          <h4>{self.state.hotel.name}</h4>
+          <hr></hr>
+          {(self.state.addHotelUnitTypeError)
+            ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
+            : null}
+          {self.state.createNewUnitType ?
+            <form class="box" onSubmit={(e) => {e.preventDefault(); self.addUnitType()}}>
+              <div class="form-group">
+                <label>New Room Type</label>
+                <input
+                  type="text"
+                  autoFocus="true"
+                  class="form-control"
+                  value={self.state.newUnitType.type}
+                  onChange={(event) => {
+                    var newUnitType = self.state.newUnitType;
+                    newUnitType.type = event.target.value
+                    self.setState({ newUnitType: newUnitType });
+                  }}
+                />
+                {self.state.unitTypeOptions[0] &&
+                <button type="button" class="btn btn-link" onClick={() => self.setState({createNewUnitType: false})}>
+                  Or edit an existing room type
+                </button>}
+              </div>
+              <div class="form-group">
+                <label>Your Wallet Password</label>
+                <div class="input-group">
+                  <input
+                    type={self.state.showPassword ? "text" : "password"}
+                    class="form-control"
+                    defaultValue={self.state.password}
+                    required
+                    onChange={(event) => {
+                      self.setState({ password: event.target.value, addHotelUnitTypeError: false });
+                    }}
+                  />
+                  <span class="input-group-addon">
+                    {self.state.showPassword ?
+                      <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
+                    :
+                      <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
+                    }
+                  </span>
+                </div>
+              </div>
+              <button type="submit" class="btn btn-primary btn-block">Add Room Type</button>
+              {(self.state.addHotelUnitTypeError)
+                ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
+                : null}
+            </form>
           :
+            <form class="box" onSubmit={(e) => {e.preventDefault(); self.editUnitType()}}>
             <div class="form-group">
               <label>Room Type</label>
               <Select
-                name="Hotels"
+                name="Room Types"
                 clearable={false}
-                value={self.state.newUnit}
+                value={self.state.unitType}
                 autoFocus="true"
                 placeholder="Double Room"
-                options={_.uniqBy(self.state.hotel.units, 'type')}
-                labelKey="type"
-                onChange={(val) => {
-                  var newUnit = self.state.newUnit;
-                  newUnit.type = val.type.replace(/\W+/g, "");
-                  newUnit.value = val.type.replace(/\W+/g, "");
-                  self.setState({ newUnit: newUnit });
+                options={self.state.unitTypeOptions}
+                onChange={(e) => {
+                  self.setState({ unitType: e.value, unitTypeInfo: self.state.hotel.unitTypes[e.value].info, newUnitType: {} });
                 }}
               />
-              <button class="btn btn-link" onClick={() => self.setState({newUnitType: true})}>
+              <button type="button" class="btn btn-link" onClick={() => self.setState({createNewUnitType: true})}>
                 Or create a new room type
               </button>
             </div>
-          }
-          <hr></hr>
-          <div class="form-group">
-            <label>Room name</label>
-            <input
-              type="text"
-              class="form-control"
-              placeholder="Privilege Double Room with Balcony"
-              value={self.state.newUnit.name}
-              onChange={(event) => {
-                var newUnit = self.state.newUnit;
-                newUnit.name = event.target.value
-                self.setState({ newUnit: newUnit });
-              }}
-            />
-          </div>
-          <div class="form-group">
-            <label>Room description</label>
-            <input
-              type="text"
-              class="form-control"
-              placeholder="A fancy and spacious room with the best amenities"
-              value={self.state.newUnit.description}
-              onChange={(event) => {
-                var newUnit = self.state.newUnit;
-                newUnit.description = event.target.value
-                self.setState({ newUnit: newUnit });
-              }}
-            />
-          </div>
-          <div class="form-group">
-            <label>Maximum Guests</label>
-            <input
-              type="number"
-              class="form-control"
-              value={self.state.newUnit.maxGuests}
-              onChange={(event) => {
-                var newUnit = self.state.newUnit;
-                newUnit.maxGuests = event.target.value
-                self.setState({ newUnit: newUnit });
-              }}
-            />
-          </div>
-          <div class="form-group">
-            <label>Price</label>
-            <div class="input-group">
+            <hr></hr>
+            {self.state.unitTypeInfo &&
+            <div>
+            {/* <div class="form-group">
+              <label>Room name</label>
               <input
                 type="text"
                 class="form-control"
-                placeholder="Price per night, including taxes"
-                value={self.state.newUnit.price}
+                placeholder="Privilege Double Room with Balcony"
+                value={self.state.unitTypeInfo.name}
                 onChange={(event) => {
-                  var newUnit = self.state.newUnit;
-                  newUnit.price = event.target.value
-                  self.setState({ newUnit: newUnit });
+                  var newUnitType = self.state.newUnitType;
+                  newUnitType.name = event.target.value
+                  self.setState({ newUnitType: newUnitType });
                 }}
               />
-              <div class="input-group-btn">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  {self.state.newUnit.currency || 'USD'} <span class="caret"></span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-right">
-                  <li onClick={() => {
-                    var newUnit = self.state.newUnit;
-                    newUnit.currency = 'USD'
-                    self.setState({ newUnit: newUnit });
-                  }}><a>USD</a></li>
-                  <li onClick={() => {
-                    var newUnit = self.state.newUnit;
-                    newUnit.currency = 'Lif'
-                    self.setState({ newUnit: newUnit });
-                  }}><a>Lif</a></li>
-                </ul>
+            </div> */}
+            <div class="form-group">
+              <label>Room description</label>
+              <input
+                type="text"
+                class="form-control"
+                placeholder="A fancy and spacious room with the best amenities"
+                value={self.state.newUnitType.description || self.state.unitTypeInfo.description || ''}
+                onChange={(event) => {
+                  var newUnitType = self.state.newUnitType;
+                  newUnitType.description = event.target.value
+                  self.setState({ newUnitType: newUnitType });
+                }}
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label>Minimum Guests</label>
+              <input
+                type="number"
+                class="form-control"
+                required
+                value={self.state.newUnitType.minGuests || self.state.unitTypeInfo.minGuests || ''}
+                onChange={(event) => {
+                  var newUnitType = self.state.newUnitType;
+                  newUnitType.minGuests = event.target.value
+                  self.setState({ newUnitType: newUnitType });
+                }}
+              />
+            </div>
+            <div class="form-group">
+              <label>Maximum Guests</label>
+              <input
+                type="number"
+                class="form-control"
+                required
+                value={self.state.newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests || ''}
+                onChange={(event) => {
+                  var newUnitType = self.state.newUnitType;
+                  newUnitType.maxGuests = event.target.value
+                  self.setState({ newUnitType: newUnitType });
+                }}
+              />
+            </div>
+            <div class="form-group">
+              <label>Price</label>
+              <div class="input-group">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Price per night, including taxes"
+                  required
+                  value={self.state.newUnitType.price || self.state.unitTypeInfo.price || ''}
+                  onChange={(event) => {
+                    var newUnitType = self.state.newUnitType;
+                    newUnitType.price = event.target.value
+                    self.setState({ newUnitType: newUnitType });
+                  }}
+                />
+                <div class="input-group-btn">
+                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {self.state.newUnitType.currency || 'USD'} <span class="caret"></span>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-right">
+                    <li onClick={() => {
+                      var newUnitType = self.state.newUnitType;
+                      newUnitType.currency = 'USD'
+                      self.setState({ newUnitType: newUnitType });
+                    }}><a>USD</a></li>
+                    <li onClick={() => {
+                      var newUnitType = self.state.newUnitType;
+                      newUnitType.currency = 'Lif'
+                      self.setState({ newUnitType: newUnitType });
+                    }}><a>Lif</a></li>
+                  </ul>
+                </div>
               </div>
             </div>
-          </div>
-          <div class="form-group">
-            <label>Your Wallet Password</label>
-            <div class="input-group">
-              <input
-                type={self.state.showPassword ? "text" : "password"}
-                class="form-control"
-                defaultValue={self.state.password}
-                onChange={(event) => {
-                  self.setState({ password: event.target.value, addHotelUnitError: false });
-                }}
-              />
-              <span class="input-group-addon">
-                {self.state.showPassword ?
-                  <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
-                :
-                  <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
-                }
-              </span>
+            </div>}
+            <div class="form-group">
+              <label>Your Wallet Password</label>
+              <div class="input-group">
+                <input
+                  type={self.state.showPassword ? "text" : "password"}
+                  class="form-control"
+                  defaultValue={self.state.password}
+                  required
+                  onChange={(event) => {
+                    self.setState({ password: event.target.value, addHotelUnitTypeError: false });
+                  }}
+                />
+                <span class="input-group-addon">
+                  {self.state.showPassword ?
+                    <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
+                  :
+                    <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
+                  }
+                </span>
+              </div>
             </div>
+            <button type="submit" class="btn btn-primary btn-block">Update Room Type</button>
+            {(self.state.addHotelUnitTypeError)
+              ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
+              : null}
+                      </form>
+          }
           </div>
-          <button type="submit" class="btn btn-primary btn-block">Add Hotel Room</button>
-          {(self.state.addHotelUnitError)
-            ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
-            : null}
-        </form>
 
-      var editHotelUnit =
-      <form class="box" onSubmit={(e) => {e.preventDefault(); self.editHotelUnit()}}>
+      var editHotelUnitType =
+      <form class="box" onSubmit={(e) => {e.preventDefault(); self.editHotelUnitType()}}>
         <h3>
-          Edit Hotel Room
+          Edit Room Type
           <div class="pull-right">
             <button type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list'})}>Back to hotels</button>
           </div>
         </h3>
         <h4>{self.state.hotel.name}</h4>
         <hr></hr>
-        {(self.state.editHotelUnitError)
+        {(self.state.editHotelUnitTypeError)
           ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred updating the hotel room, is that the correct password?</p>
           : null}
         <div class="form-group">
@@ -681,6 +932,7 @@ export default class App extends React.Component {
             class="form-control"
             placeholder="Privilege Double Room with Balcony"
             autoFocus="true"
+            required
             value={self.state.editUnit.name}
             onChange={(event) => {
               var editUnit = self.state.editUnit;
@@ -695,6 +947,7 @@ export default class App extends React.Component {
             type="text"
             class="form-control"
             placeholder="A fancy and spacious room with the best amenities"
+            required
             value={self.state.editUnit.description}
             onChange={(event) => {
               var editUnit = self.state.editUnit;
@@ -708,6 +961,7 @@ export default class App extends React.Component {
           <input
             type="number"
             class="form-control"
+            required
             value={self.state.editUnit.maxGuests}
             onChange={(event) => {
               var editUnit = self.state.editUnit;
@@ -722,6 +976,7 @@ export default class App extends React.Component {
             <input
               type="text"
               class="form-control"
+              required
               value={self.state.editUnit.price}
               onChange={(event) => {
                 var editUnit = self.state.editUnit;
@@ -754,9 +1009,10 @@ export default class App extends React.Component {
             <input
               type={self.state.showPassword ? "text" : "password"}
               class="form-control"
+              required
               defaultValue={self.state.password}
               onChange={(event) => {
-                self.setState({ password: event.target.value, editHotelUnitError: false });
+                self.setState({ password: event.target.value, editHotelUnitTypeError: false });
               }}
             />
             <span class="input-group-addon">
@@ -769,10 +1025,107 @@ export default class App extends React.Component {
           </div>
         </div>
         <button type="submit" class="btn btn-primary btn-block">Update Hotel Room</button>
-        {(self.state.editHotelUnitError)
+        {(self.state.editHotelUnitTypeError)
           ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred updating the hotel room, is that the correct password?</p>
           : null}
       </form>
+
+
+      let editHotelUnitFunctions = [
+        {value: 'setUnitActive', label: 'Active'},
+        {value: 'setCurrencyCode', label: 'Currency Code'},
+        {value: 'setDefaultLifPrice', label: 'Default Lif Price'},
+        {value: 'setDefaultPrice', label: 'Default Price'},
+        {value: 'setUnitSpecialLifPrice', label: 'Special Lif Price'},
+        {value: 'setUnitSpecialPrice', label: 'Special Price'}
+      ]
+
+      var editHotelUnit =
+      <div>
+      {self.state.unit &&
+      <form class="box" onSubmit={(e) => {e.preventDefault(); self.editHotelUnit()}}>
+        <h3>
+          Edit Hotel Room
+          <div class="pull-right">
+            <button type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list'})}>Back to hotels</button>
+          </div>
+        </h3>
+        <h4>{self.state.hotel.name} {self.state.unit.substring(2,6)}</h4>
+        <div class="form-group">
+          <Select
+            name="Edit Parameter"
+            clearable={false}
+            value={self.state.editHotelUnitFunction}
+            autoFocus="true"
+            options={editHotelUnitFunctions}
+            onChange={(e) => {
+              self.setState({ editHotelUnitFunction: e.value });
+            }}
+          />
+        </div>
+        <hr></hr>
+        {(self.state.editHotelUnitTypeError)
+          ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred updating the hotel room, is that the correct password?</p>
+          : null}
+        {{
+          setUnitActive: (
+            <div class="form-group">
+              <label>Active</label>
+              <input
+                type="checkbox"
+                class="form-control"
+                autoFocus="true"
+                checked={self.state.unitInfo.active}
+                onChange={(event) => {
+                  self.setState({unitInfo: Object.assign(self.state.unitInfo, {active: event.target.checked}) });
+                }}
+              />
+            </div>
+          ),
+          setCurrencyCode: (
+            <div></div>
+          ),
+          setDefaultLifPrice: (
+            <div></div>
+          ),
+          setDefaultPrice: (
+            <div></div>
+          ),
+          setUnitSpecialLifPrice: (
+            <div></div>
+          ),
+          setUnitSpecialPrice: (
+            <div></div>
+          ),
+        }[self.state.editHotelUnitFunction]}
+        <div class="form-group">
+          <label>Your Wallet Password</label>
+          <div class="input-group">
+            <input
+              type={self.state.showPassword ? "text" : "password"}
+              class="form-control"
+              required
+              defaultValue={self.state.password}
+              onChange={(event) => {
+                self.setState({ password: event.target.value, editHotelUnitTypeError: false });
+              }}
+            />
+            <span class="input-group-addon">
+              {self.state.showPassword ?
+                <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
+              :
+                <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
+              }
+            </span>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-block">Update Hotel Room</button>
+        {(self.state.editHotelUnitTypeError)
+          ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred updating the hotel room, is that the correct password?</p>
+          : null}
+      </form>}
+      </div>
+
 
       var hotels =
         <div class="box">
@@ -784,13 +1137,17 @@ export default class App extends React.Component {
           </h3>
           <div class="form-group">
             <label>Choose a hotel</label>
-            <Select
-              name="Hotels"
-              clearable={false}
-              options={self.state.hotels}
-              onChange={ (val) => self.loadHotel(val.value)}
-              value={self.state.hotel.address}
-            />
+            {self.state.hotels ?
+              <Select
+                name="Hotels"
+                clearable={false}
+                options={self.state.hotelOptions}
+                onChange={ (val) => self.loadHotel(val.value)}
+                value={self.state.hotel.address}
+              />
+            :
+              <div>No hotels, click the button on the right to add one.</div>
+            }
           </div>
           {self.state.hotel.address != ''
           ? <div>
@@ -820,6 +1177,10 @@ export default class App extends React.Component {
                 Rooms
                 <div class="pull-right">
                   <button class="btn btn-primary btn-sm"
+                          onClick={() => self.setState({section: 'addHotelUnitType'})}>
+                    + Room Type
+                  </button>
+                  <button class="btn btn-primary btn-sm"
                           onClick={() => self.setState({section: 'addHotelUnit'})}>
                     + Hotel Room
                   </button>
@@ -829,7 +1190,7 @@ export default class App extends React.Component {
                 <thead>
                   <tr>
                     <th class="text-center">Type</th>
-                    <th class="text-center">Name</th>
+                    <th class="text-center">ID</th>
                     <th class="text-center">Description</th>
                     <th class="text-center">Guests</th>
                     <th class="text-center">Price</th>
@@ -838,18 +1199,21 @@ export default class App extends React.Component {
                   </tr>
                 </thead>
                 <tbody>
-                  {self.state.hotel.units.map(function(unit, i){
+                  {Object.entries(self.state.hotel.units).map(function(unit, i){
+                    console.log('unit');
+                    console.log(unit[1]);
+                    let entryTypeInfo = self.state.hotel.unitTypes[unit[1].unitType].info
                     return (
                       <tr key={'unit'+i} class="pointer" onClick={() => console.log(unit)}>
-                        <td class="text-center">{unit.type}</td>
-                        <td class="text-center">{unit.name}</td>
-                        <td class="shortCell">{unit.description}</td>
-                        <td class="text-center">{unit.maxGuests}</td>
-                        <td class="text-center">{unit.price}</td>
-                        <td class="text-center">{unit.active}</td>
+                        <td class="text-center">{unit[1].unitType}</td>
+                        <td class="text-center">{unit[0].substring(2,6)}</td>
+                        <td class="shortCell">{entryTypeInfo.description}</td>
+                        <td class="text-center">{entryTypeInfo.maxGuests}</td>
+                        <td class="text-center">{unit[1].defaultPrice}{unit[1].currencyCode}</td>
+                        <td class="text-center">{unit[1].active}</td>
                         <td class="text-center">
                           <button class="btn btn-primary btn-sm"
-                                  onClick={() => self.startEditHotelUnit(unit)}>
+                                  onClick={() => self.setState({section: 'editHotelUnit', unit: unit[0], unitInfo: unit[1]})}>
                             Edit
                           </button>
                         </td>
@@ -998,8 +1362,12 @@ export default class App extends React.Component {
                 <div>{createHotel}</div>
               : self.state.section == 'hotels' && self.state.hotelSection == 'list' ?
                 <div>{hotels}</div>
+              : (self.state.section == 'addHotelUnitType' || self.state.createNewUnitType) ?
+                <div>{addHotelUnitType}</div>
               : self.state.section == 'addHotelUnit' ?
                 <div>{addHotelUnit}</div>
+              : self.state.section == 'editHotelUnitType' ?
+                <div>{editHotelUnitType}</div>
               : self.state.section == 'editHotelUnit' ?
                 <div>{editHotelUnit}</div>
               : <div>{hotelBookings}</div>}
