@@ -27,6 +27,7 @@ export default class App extends React.Component {
         newUnit: {},
         editUnit: {},
         editHotelUnitFunction: 'setActive',
+        editHotelFunction: 'changeHotelInfo',
         createNewUnitType: false,
         showPassword: false,
         hotelSelected: '',
@@ -244,6 +245,53 @@ export default class App extends React.Component {
       } catch(e) {
         console.log("Error adding hotel room", e);
         self.setState({loading: false, addHotelUnitTypeError: true});
+      }
+    }
+
+    async editHotel() {
+      var self = this;
+      self.setState({loading: true, editHotelError: false});
+
+      let args = [
+        self.state.hotel.address
+      ]
+      //async changeHotelAddress(hotelAddress: Address, lineOne: String, lineTwo: String, zipCode: String, country: String)
+      //async changeHotelInfo(hotelAddress: Address, name: String, description: String)
+      //async changeHotelLocation(hotelAddress: Address, timezone: Number, latitude: Number, longitude: Number)
+      //async setRequireConfirmation(hotelAddress: Address, value: Boolean)
+      switch(self.state.editHotelFunction) {
+        case 'changeHotelAddress':
+          args.push(self.state.hotel.lineOne);
+          args.push(self.state.hotel.lineTwo);
+          args.push(self.state.hotel.zip);
+          args.push(self.state.hotel.country);
+          break;
+        case 'changeHotelInfo':
+          args.push(self.state.hotel.name);
+          args.push(self.state.hotel.description);
+          break;
+        case 'changeHotelLocation':
+          args.push(self.state.hotel.timezone);
+          args.push(self.state.hotel.latitude);
+          args.push(self.state.hotel.longitude);
+          break;
+        case 'setRequireConfirmation':
+          args.push(self.state.hotel.waitConfirmation);
+          break;
+      }
+
+      try {
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
+
+        await self.state.hotelManager[self.state.editHotelFunction](...args);
+
+        await self.getHotels();
+        // select hotel again, so it uses the fresh version (that includes the just created room)
+        self.selectHotel(self.state.hotel.address);
+        self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
+      } catch(e) {
+        console.log("Error editing hotel room", e);
+        self.setState({loading: false, editHotelError: true});
       }
     }
 
@@ -483,6 +531,18 @@ export default class App extends React.Component {
             : null}
         </form>
 
+        //async changeHotelAddress(hotelAddress: Address, lineOne: String, lineTwo: String, zipCode: String, country: String)
+        //async changeHotelInfo(hotelAddress: Address, name: String, description: String)
+        //async changeHotelLocation(hotelAddress: Address, timezone: Number, latitude: Number, longitude: Number)
+        //async setRequireConfirmation(hotelAddress: Address, value: Boolean)
+
+        let editHotelFunctions = [
+          {value: 'changeHotelAddress', label: 'Address'},
+          {value: 'changeHotelInfo', label: 'Main Info'},
+          {value: 'changeHotelLocation', label: 'Location'},
+          {value: 'setRequireConfirmation', label: 'Confirmation Required'},
+        ]
+
       var editHotel =
         <form class="box" onSubmit={(e) => {e.preventDefault(); self.editHotel()}}>
           <h3>
@@ -501,133 +561,155 @@ export default class App extends React.Component {
               onChange={ (val) => self.loadHotel(val.value)}
             />
           </div>
+          <hr></hr>
           {(self.state.hotel.address != "") ?
           <div>
+            <div class="form-group">
+              <Select
+                name="Edit Parameter"
+                clearable={false}
+                value={self.state.editHotelFunction}
+                autoFocus="true"
+                options={editHotelFunctions}
+                onChange={(e) => {
+                  self.setState({ editHotelFunction: e.value });
+                }}
+              />
+            </div>
             <hr></hr>
             {self.state.editHotelError
               ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>There was an error editing the hotel, is that the correct wallet password?</p>
               : null}
-            <div class="form-group">
-              <label>Name</label>
-              <input
-                type="text"
-                autoFocus="true"
-                class="form-control"
-                value={self.state.hotel.name}
-                onChange={(event) => {
-                  var newEditHotel = self.state.hotel;
-                  newEditHotel.name = event.target.value
-                  self.setState({ hotel: newEditHotel });
-                }}
-              />
-            </div>
-            <div class="form-group">
-              <label>Description</label>
-              <input
-                type="text"
-                class="form-control"
-                value={self.state.hotel.description}
-                onChange={(event) => {
-                  var newEditHotel = self.state.hotel;
-                  newEditHotel.description = event.target.value
-                  self.setState({ hotel: newEditHotel });
-                }}
-              />
-            </div>
-            <div class="form-group">
-              <label>Address One</label>
-              <input
-                type="text"
-                class="form-control"
-                value={self.state.hotel.lineOne}
-                onChange={(event) => {
-                  var newEditHotel = self.state.hotel;
-                  newEditHotel.lineOne = event.target.value
-                  self.setState({ hotel: newEditHotel });
-                }}
-              />
-            </div>
-            <div class="form-group">
-              <label>Address Two</label>
-              <input
-                type="text"
-                class="form-control"
-                value={self.state.hotel.lineTwo}
-                onChange={(event) => {
-                  var newEditHotel = self.state.hotel;
-                  newEditHotel.lineTwo = event.target.value
-                  self.setState({ hotel: newEditHotel });
-                }}
-              />
-            </div>
-            <div class="form-group">
-              <label>Zip Code</label>
-              <input
-                type="text"
-                class="form-control"
-                value={self.state.hotel.zip}
-                onChange={(event) => {
-                  var newEditHotel = self.state.hotel;
-                  newEditHotel.zip = event.target.value
-                  self.setState({ hotel: newEditHotel });
-                }}
-              />
-            </div>
-            <div class="form-group">
-              <label>Country</label>
-              <input
-                type="text"
-                class="form-control"
-                value={self.state.hotel.country}
-                onChange={(event) => {
-                  var newEditHotel = self.state.hotel;
-                  newEditHotel.country = event.target.value
-                  self.setState({ hotel: newEditHotel });
-                }}
-              />
-            </div>
-            <div class="form-group">
-              <label>Timezone</label>
-              <input
-                type="number"
-                min="0"
-                max="24"
-                step="1"
-                class="form-control"
-                value={self.state.hotel.timezone}
-                onChange={(event) => {
-                  var newEditHotel = self.state.hotel;
-                  newEditHotel.timezone = event.target.value
-                  self.setState({ hotel: newEditHotel });
-                }}
-              />
-            </div>
-            <div class="form-group">
-              <label>Latitude</label>
-              <input
-                type="text"
-                class="form-control"
-                value={self.state.hotel.latitude}
-                onChange={(event) => {
-                  var newEditHotel = self.state.hotel;
-                  newEditHotel.latitude = event.target.value
-                  self.setState({ hotel: newEditHotel });
-                }}
-              />
-            </div>
-            <div class="form-group">
-              <label>Longitude</label>
-              <input
-                type="text"
-                class="form-control"
-                value={self.state.hotel.longitude}
-                onChange={(event) => {
-                  var newEditHotel = self.state.hotel;
-                  newEditHotel.longitude = event.target.value
-                  self.setState({ hotel: newEditHotel });
-                }}
-              />
-            </div>
+            {{
+              changeHotelAddress: (
+                <div>
+                  <div class="form-group">
+                    <label>Address One</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      value={self.state.hotel.lineOne || ''}
+                      onChange={(e) => {
+                        self.setState({ hotel: Object.assign(self.state.hotel, {lineOne: e.target.value}) });
+                      }}
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Address Two</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      value={self.state.hotel.lineTwo || ''}
+                      onChange={(e) => {
+                        self.setState({ hotel: Object.assign(self.state.hotel, {lineTwo: e.target.value}) });
+                      }}
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Zip Code</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      value={self.state.hotel.zip}
+                      onChange={(e) => {
+                        self.setState({ hotel: Object.assign(self.state.hotel, {zip: e.target.value}) });
+                      }}
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Country</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      value={self.state.hotel.country}
+                      onChange={(e) => {
+                        self.setState({ hotel: Object.assign(self.state.hotel, {country: e.target.value}) });
+                      }}
+                    />
+                  </div>
+                </div>
+              ),
+              changeHotelInfo: (
+                <div>
+                  <div class="form-group">
+                    <label>Name</label>
+                    <input
+                      type="text"
+                      autoFocus="true"
+                      class="form-control"
+                      value={self.state.hotel.name}
+                      onChange={(e) => {
+                        self.setState({ hotel: Object.assign(self.state.hotel, {name: e.target.value}) });
+                      }}
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Description</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      value={self.state.hotel.description}
+                      onChange={(e) => {
+                        self.setState({ hotel: Object.assign(self.state.hotel, {description: e.target.value}) });
+                      }}
+                    />
+                  </div>
+                </div>
+              ),
+              changeHotelLocation: (
+                <div>
+                  <div class="form-group">
+                    <label>Timezone</label>
+                    <input
+                      type="number"
+                      min="0"
+                      max="24"
+                      step="1"
+                      class="form-control"
+                      value={self.state.hotel.timezone}
+                      onChange={(e) => {
+                        self.setState({ hotel: Object.assign(self.state.hotel, {timezone: Number(e.target.value)}) });
+                      }}
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Latitude</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      value={self.state.hotel.latitude}
+                      onChange={(e) => {
+                        self.setState({ hotel: Object.assign(self.state.hotel, {latitude: Number(e.target.value)}) });
+                      }}
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Longitude</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      value={self.state.hotel.longitude}
+                      onChange={(e) => {
+                        self.setState({ hotel: Object.assign(self.state.hotel, {longitude: Number(e.target.value)}) });
+                      }}
+                    />
+                  </div>
+                </div>
+              ),
+              setRequireConfirmation: (
+                <div class="form-group">
+                  <label>Confirmation Required</label>
+                  <input
+                    type="checkbox"
+                    class="form-control"
+                    checked={self.state.hotel.waitConfirmation}
+                    onChange={(e) => {
+                      self.setState({ hotel: Object.assign(self.state.hotel, {waitConfirmation: e.target.checked}) });
+                    }}
+                  />
+                </div>
+              )
+            }[self.state.editHotelFunction]}
             <div class="form-group">
               <label>Your Wallet Password</label>
               <div class="input-group">
