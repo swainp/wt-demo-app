@@ -3,6 +3,7 @@ import {Link} from "react-router";
 import ReactModal from "react-modal";
 
 import moment from 'moment';
+import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));
@@ -39,7 +40,9 @@ export default class App extends React.Component {
         section: 'hotels',
         userType: 'unknown',
         hotelSection: 'list',
-        hotelManager: {}
+        hotelManager: {},
+        specialLifPrice: '',
+        specialPrice: ''
       }
     }
 
@@ -318,6 +321,19 @@ export default class App extends React.Component {
           break;
         case 'setDefaultLifPrice':
           args.push(self.state.unitInfo.defaultLifPrice);
+          break;
+        case 'setCurrencyCode':
+          args.push(self.state.unitInfo.currencyCode);
+          break;
+        case 'setUnitSpecialLifPrice':
+          args.push(Number(self.state.specialLifPrice));
+          args.push(self.state.startDate.toDate());
+          args.push(self.state.endDate.diff(self.state.startDate, 'days'));
+          break;
+        case 'setUnitSpecialPrice':
+          args.push(Number(self.state.specialPrice));
+          args.push(self.state.startDate.toDate());
+          args.push(self.state.endDate.diff(self.state.startDate, 'days'));
           break;
       }
 
@@ -1171,7 +1187,18 @@ export default class App extends React.Component {
             </div>
           ),
           setCurrencyCode: (
-            <div></div>
+            <div class="form-group">
+              <label>Currency Code</label>
+              <input
+                type="number"
+                class="form-control"
+                autoFocus="true"
+                value={self.state.unitInfo.currencyCode}
+                onChange={(event) => {
+                  self.setState({unitInfo: Object.assign(self.state.unitInfo, {currencyCode: Number(event.target.value)}) });
+                }}
+              />
+            </div>
           ),
           setDefaultLifPrice: (
             <div class="form-group">
@@ -1202,10 +1229,56 @@ export default class App extends React.Component {
             </div>
           ),
           setUnitSpecialLifPrice: (
-            <div></div>
+            <div>
+              <div class="form-group">
+                <label>Date Range</label>
+                <DateRangePicker
+                  startDate={self.state.startDate} // momentPropTypes.momentObj or null,
+                  endDate={self.state.endDate} // momentPropTypes.momentObj or null,
+                  onDatesChange={({ startDate, endDate }) => self.setState({ startDate, endDate })} // PropTypes.func.isRequired,
+                  focusedInput={self.state.focusedInput} // PropTypes.oneOf([START_DATE, END_DATE]) or null,
+                  onFocusChange={focusedInput => self.setState({ focusedInput: focusedInput })} // PropTypes.func.isRequired,
+                />
+              </div>
+              <div class="form-group">
+                <label>Lif Price</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  autoFocus="true"
+                  value={self.state.specialLifPrice}
+                  onChange={(e) => {
+                    self.setState({ specialLifPrice: e.target.value});
+                  }}
+                />
+              </div>
+            </div>
           ),
           setUnitSpecialPrice: (
-            <div></div>
+            <div>
+              <div class="form-group">
+                <label>Date Range</label>
+                <DateRangePicker
+                  startDate={self.state.startDate} // momentPropTypes.momentObj or null,
+                  endDate={self.state.endDate} // momentPropTypes.momentObj or null,
+                  onDatesChange={({ startDate, endDate }) => self.setState({ startDate, endDate })} // PropTypes.func.isRequired,
+                  focusedInput={self.state.focusedInput} // PropTypes.oneOf([START_DATE, END_DATE]) or null,
+                  onFocusChange={focusedInput => self.setState({ focusedInput: focusedInput })} // PropTypes.func.isRequired,
+                />
+              </div>
+              <div class="form-group">
+                <label>Price</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  autoFocus="true"
+                  value={self.state.specialPrice}
+                  onChange={(e) => {
+                    self.setState({ specialPrice: e.target.value});
+                  }}
+                />
+              </div>
+            </div>
           ),
         }[self.state.editHotelUnitFunction]}
         <div class="form-group">
