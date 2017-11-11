@@ -29,6 +29,7 @@ export default class App extends React.Component {
         editUnit: {},
         editHotelUnitFunction: 'setActive',
         editHotelFunction: 'changeHotelInfo',
+        editHotelUnitTypeFunction: 'editUnitType',
         createNewUnitType: false,
         showPassword: false,
         hotelSelected: '',
@@ -228,25 +229,40 @@ export default class App extends React.Component {
       var self = this;
       self.setState({loading: true, addHotelUnitTypeError: false});
 
+      let args = [
+        self.state.hotel.address,
+        self.state.unitType
+      ]
+      //async addAmenity(hotelAddress: Address, unitType: String, amenity: Number): Promievent
+      //async removeAmenity(hotelAddress: Address, unitType: String, amenity: Number): Promievent
+      //async editUnitType(hotelAddress: Address, unitType: String, description: String, minGuests: Number, maxGuests: Number, price: String): Promievent
+      //async removeUnitType(hotelAddress: Address, unitType: String): Promievent
+      switch(self.state.editHotelUnitTypeFunction) {
+        case 'addAmenity':
+        case 'removeAmenity':
+          args.push(self.state.amenityCode);
+          break;
+        case 'editUnitType':
+          args.push((self.state.newUnitType.description || self.state.unitTypeInfo.description));
+          args.push((self.state.newUnitType.minGuests || self.state.unitTypeInfo.minGuests));
+          args.push((self.state.newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests));
+          args.push((self.state.newUnitType.price || self.state.unitTypeInfo.price));
+          break;
+        case 'removeUnitType':
+          break;
+      }
+
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
 
-        await self.state.hotelManager.editUnitType(
-          self.state.hotel.address,
-          self.state.unitType,
-          (self.state.newUnitType.description || self.state.unitTypeInfo.description),
-          (self.state.newUnitType.minGuests || self.state.unitTypeInfo.minGuests),
-          (self.state.newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests),
-          (self.state.newUnitType.price || self.state.unitTypeInfo.price)
-        );
+        await self.state.hotelManager[self.state.editHotelUnitTypeFunction](...args);
 
         await self.getHotels();
         // select hotel again, so it uses the fresh version (that includes the just created room)
         self.selectHotel(self.state.hotel.address);
         self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
-
       } catch(e) {
-        console.log("Error adding hotel room", e);
+        console.log("Error editing unit type", e);
         self.setState({loading: false, addHotelUnitTypeError: true});
       }
     }
@@ -262,6 +278,7 @@ export default class App extends React.Component {
       //async changeHotelInfo(hotelAddress: Address, name: String, description: String)
       //async changeHotelLocation(hotelAddress: Address, timezone: Number, latitude: Number, longitude: Number)
       //async setRequireConfirmation(hotelAddress: Address, value: Boolean)
+      //async removeHotel(address: Address): Promievent
       switch(self.state.editHotelFunction) {
         case 'changeHotelAddress':
           args.push(self.state.hotel.lineOne);
@@ -281,6 +298,8 @@ export default class App extends React.Component {
         case 'setRequireConfirmation':
           args.push(self.state.hotel.waitConfirmation);
           break;
+        case 'removeHotel':
+          break;
       }
 
       try {
@@ -290,7 +309,8 @@ export default class App extends React.Component {
 
         await self.getHotels();
         // select hotel again, so it uses the fresh version (that includes the just created room)
-        self.selectHotel(self.state.hotel.address);
+        if(self.state.editHotelFunction !== 'removeHotel')
+          self.selectHotel(self.state.hotel.address);
         self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
       } catch(e) {
         console.log("Error editing hotel room", e);
@@ -312,6 +332,7 @@ export default class App extends React.Component {
       //async setUnitActive(hotelAddress: Address, unitAddress: Address, active: Boolean)
       //async setUnitSpecialLifPrice(hotelAddress: Address, unitAddress: Address, price: String | Number | BN, fromDate: Date, amountDays: Number)
       //async setUnitSpecialPrice(hotelAddress: Address, unitAddress: Addres, price: Number, fromDate: Date, amountDays: Number)
+      //async removeUnit(hotelAddress: Address, unitAddress: Address): Promievent
       switch(self.state.editHotelUnitFunction) {
         case 'setUnitActive':
           args.push(self.state.unitInfo.active);
@@ -334,6 +355,8 @@ export default class App extends React.Component {
           args.push(Number(self.state.specialPrice));
           args.push(self.state.startDate.toDate());
           args.push(self.state.endDate.diff(self.state.startDate, 'days'));
+          break;
+        case 'removeUnit':
           break;
       }
 
@@ -417,6 +440,7 @@ export default class App extends React.Component {
         createNewUnitType: selectedHotel.unitTypeNames.length == 0,
         unitType: unitTypeOptions[0] ? unitTypeOptions[0].value: '',
         unitTypeInfo: unitTypeOptions[0] ? selectedHotel.unitTypes[unitTypeOptions[0].value].info : '',
+        amenities: unitTypeOptions[0] ? selectedHotel.unitTypes[unitTypeOptions[0].value].amenities : '',
         unitTypeOptions: unitTypeOptions
       });
     }
@@ -551,12 +575,14 @@ export default class App extends React.Component {
         //async changeHotelInfo(hotelAddress: Address, name: String, description: String)
         //async changeHotelLocation(hotelAddress: Address, timezone: Number, latitude: Number, longitude: Number)
         //async setRequireConfirmation(hotelAddress: Address, value: Boolean)
+        //async removeHotel(address: Address): Promievent
 
         let editHotelFunctions = [
           {value: 'changeHotelAddress', label: 'Address'},
           {value: 'changeHotelInfo', label: 'Main Info'},
           {value: 'changeHotelLocation', label: 'Location'},
           {value: 'setRequireConfirmation', label: 'Confirmation Required'},
+          {value: 'removeHotel', label: 'Remove this hotel'}
         ]
 
       var editHotel =
@@ -724,6 +750,11 @@ export default class App extends React.Component {
                     }}
                   />
                 </div>
+              ),
+              removeHotel: (
+                <div class="form-group">
+                  <label>Enter your password below to remove this hotel</label>
+                </div>
               )
             }[self.state.editHotelFunction]}
             <div class="form-group">
@@ -814,6 +845,13 @@ export default class App extends React.Component {
           </div>
 
 
+      let editHotelUnitTypeFunctions = [
+        {value: 'editUnitType', label: 'Main Info'},
+        {value: 'addAmenity', label: 'Add Amenity'},
+        {value: 'removeAmenity', label: 'Remove Amenity'},
+        {value: 'removeUnitType', label: 'Remove this room type'}
+      ]
+
       var addHotelUnitType =
       <div>
           <h3>
@@ -875,118 +913,155 @@ export default class App extends React.Component {
             </form>
           :
             <form class="box" onSubmit={(e) => {e.preventDefault(); self.editUnitType()}}>
-            <div class="form-group">
-              <label>Room Type</label>
-              <Select
-                name="Room Types"
-                clearable={false}
-                value={self.state.unitType}
-                autoFocus="true"
-                placeholder="Double Room"
-                options={self.state.unitTypeOptions}
-                onChange={(e) => {
-                  self.setState({ unitType: e.value, unitTypeInfo: self.state.hotel.unitTypes[e.value].info, newUnitType: {} });
-                }}
-              />
-              <button type="button" class="btn btn-link" onClick={() => self.setState({createNewUnitType: true})}>
-                Or create a new room type
-              </button>
-            </div>
-            <hr></hr>
-            {self.state.unitTypeInfo &&
-            <div>
-            {/* <div class="form-group">
-              <label>Room name</label>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="Privilege Double Room with Balcony"
-                value={self.state.unitTypeInfo.name}
-                onChange={(event) => {
-                  var newUnitType = self.state.newUnitType;
-                  newUnitType.name = event.target.value
-                  self.setState({ newUnitType: newUnitType });
-                }}
-              />
-            </div> */}
-            <div class="form-group">
-              <label>Room description</label>
-              <input
-                type="text"
-                class="form-control"
-                placeholder="A fancy and spacious room with the best amenities"
-                value={self.state.newUnitType.description || self.state.unitTypeInfo.description || ''}
-                onChange={(event) => {
-                  var newUnitType = self.state.newUnitType;
-                  newUnitType.description = event.target.value
-                  self.setState({ newUnitType: newUnitType });
-                }}
-                required
-              />
-            </div>
-            <div class="form-group">
-              <label>Minimum Guests</label>
-              <input
-                type="number"
-                class="form-control"
-                required
-                value={self.state.newUnitType.minGuests || self.state.unitTypeInfo.minGuests || ''}
-                onChange={(event) => {
-                  var newUnitType = self.state.newUnitType;
-                  newUnitType.minGuests = event.target.value
-                  self.setState({ newUnitType: newUnitType });
-                }}
-              />
-            </div>
-            <div class="form-group">
-              <label>Maximum Guests</label>
-              <input
-                type="number"
-                class="form-control"
-                required
-                value={self.state.newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests || ''}
-                onChange={(event) => {
-                  var newUnitType = self.state.newUnitType;
-                  newUnitType.maxGuests = event.target.value
-                  self.setState({ newUnitType: newUnitType });
-                }}
-              />
-            </div>
-            <div class="form-group">
-              <label>Price</label>
-              <div class="input-group">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Price per night, including taxes"
-                  required
-                  value={self.state.newUnitType.price || self.state.unitTypeInfo.price || ''}
-                  onChange={(event) => {
-                    var newUnitType = self.state.newUnitType;
-                    newUnitType.price = event.target.value
-                    self.setState({ newUnitType: newUnitType });
+              <div class="form-group">
+                <label>Room Type</label>
+                <Select
+                  name="Room Types"
+                  clearable={false}
+                  value={self.state.unitType}
+                  autoFocus="true"
+                  placeholder="Double Room"
+                  options={self.state.unitTypeOptions}
+                  onChange={(e) => {
+                    self.setState({ unitType: e.value, unitTypeInfo: self.state.hotel.unitTypes[e.value].info, newUnitType: {} });
                   }}
                 />
-                <div class="input-group-btn">
-                  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                    {self.state.newUnitType.currency || 'USD'} <span class="caret"></span>
-                  </button>
-                  <ul class="dropdown-menu dropdown-menu-right">
-                    <li onClick={() => {
-                      var newUnitType = self.state.newUnitType;
-                      newUnitType.currency = 'USD'
-                      self.setState({ newUnitType: newUnitType });
-                    }}><a>USD</a></li>
-                    <li onClick={() => {
-                      var newUnitType = self.state.newUnitType;
-                      newUnitType.currency = 'Lif'
-                      self.setState({ newUnitType: newUnitType });
-                    }}><a>Lif</a></li>
-                  </ul>
-                </div>
+                <button type="button" class="btn btn-link" onClick={() => self.setState({createNewUnitType: true})}>
+                  Or create a new room type
+                </button>
               </div>
-            </div>
-            </div>}
+              <hr></hr>
+              <div class="form-group">
+                <Select
+                  name="Edit Parameter"
+                  clearable={false}
+                  value={self.state.editHotelUnitTypeFunction}
+                  autoFocus="true"
+                  options={editHotelUnitTypeFunctions}
+                  onChange={(e) => {
+                    self.setState({ editHotelUnitTypeFunction: e.value });
+                  }}
+                />
+              </div>
+              <hr></hr>
+              {self.state.unitTypeInfo && {
+                editUnitType: (
+                  <div>
+                    <div class="form-group">
+                      <label>Room description</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        placeholder="A fancy and spacious room with the best amenities"
+                        value={self.state.newUnitType.description || self.state.unitTypeInfo.description || ''}
+                        onChange={(event) => {
+                          var newUnitType = self.state.newUnitType;
+                          newUnitType.description = event.target.value
+                          self.setState({ newUnitType: newUnitType });
+                        }}
+                        required
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Minimum Guests</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        required
+                        value={self.state.newUnitType.minGuests || self.state.unitTypeInfo.minGuests || ''}
+                        onChange={(event) => {
+                          var newUnitType = self.state.newUnitType;
+                          newUnitType.minGuests = event.target.value
+                          self.setState({ newUnitType: newUnitType });
+                        }}
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Maximum Guests</label>
+                      <input
+                        type="number"
+                        class="form-control"
+                        required
+                        value={self.state.newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests || ''}
+                        onChange={(event) => {
+                          var newUnitType = self.state.newUnitType;
+                          newUnitType.maxGuests = event.target.value
+                          self.setState({ newUnitType: newUnitType });
+                        }}
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Price</label>
+                      <div class="input-group">
+                        <input
+                          type="text"
+                          class="form-control"
+                          placeholder="Price per night, including taxes"
+                          required
+                          value={self.state.newUnitType.price || self.state.unitTypeInfo.price || ''}
+                          onChange={(event) => {
+                            var newUnitType = self.state.newUnitType;
+                            newUnitType.price = event.target.value
+                            self.setState({ newUnitType: newUnitType });
+                          }}
+                        />
+                        <div class="input-group-btn">
+                          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            {self.state.newUnitType.currency || 'USD'} <span class="caret"></span>
+                          </button>
+                          <ul class="dropdown-menu dropdown-menu-right">
+                            <li onClick={() => {
+                              var newUnitType = self.state.newUnitType;
+                              newUnitType.currency = 'USD'
+                              self.setState({ newUnitType: newUnitType });
+                            }}><a>USD</a></li>
+                            <li onClick={() => {
+                              var newUnitType = self.state.newUnitType;
+                              newUnitType.currency = 'Lif'
+                              self.setState({ newUnitType: newUnitType });
+                            }}><a>Lif</a></li>
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ),
+                addAmenity: (
+                  <div class="form-group">
+                    <label>Amenity Code</label>
+                    <input
+                      type="number"
+                      class="form-control"
+                      required
+                      value={self.state.amenityCode}
+                      onChange={(e) => {
+                        self.setState({ amenityCode: e.target.value });
+                      }}
+                    />
+                  </div>
+                ),
+                removeAmenity: (
+                  <div class="form-group">
+                    <label>Amenity to Remove</label>
+                    <Select
+                      name="Amenity"
+                      clearable={false}
+                      value={self.state.amenityCode || self.state.amenities[0]}
+                      autoFocus="true"
+                      options={self.state.amenities.map((a)=>{return {value: a, label: a}})}
+                      onChange={(e) => {
+                        self.setState({ amenityCode: e.value });
+                      }}
+                    />
+                  </div>
+                ),
+                removeUnitType: (
+                  <div class="form-group">
+                    <label>Enter your password below to remove this room type</label>
+                  </div>
+                )
+              }[self.state.editHotelUnitTypeFunction]}
+
             <div class="form-group">
               <label>Your Wallet Password</label>
               <div class="input-group">
@@ -1016,132 +1091,14 @@ export default class App extends React.Component {
           }
           </div>
 
-      var editHotelUnitType =
-      <form class="box" onSubmit={(e) => {e.preventDefault(); self.editHotelUnitType()}}>
-        <h3>
-          Edit Room Type
-          <div class="pull-right">
-            <button type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list'})}>Back to hotels</button>
-          </div>
-        </h3>
-        <h4>{self.state.hotel.name}</h4>
-        <hr></hr>
-        {(self.state.editHotelUnitTypeError)
-          ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred updating the hotel room, is that the correct password?</p>
-          : null}
-        <div class="form-group">
-          <label>Room name</label>
-          <input
-            type="text"
-            class="form-control"
-            placeholder="Privilege Double Room with Balcony"
-            autoFocus="true"
-            required
-            value={self.state.editUnit.name}
-            onChange={(event) => {
-              var editUnit = self.state.editUnit;
-              editUnit.name = event.target.value
-              self.setState({ editUnit: editUnit });
-            }}
-          />
-        </div>
-        <div class="form-group">
-          <label>Room description</label>
-          <input
-            type="text"
-            class="form-control"
-            placeholder="A fancy and spacious room with the best amenities"
-            required
-            value={self.state.editUnit.description}
-            onChange={(event) => {
-              var editUnit = self.state.editUnit;
-              editUnit.description = event.target.value
-              self.setState({ editUnit: editUnit });
-            }}
-          />
-        </div>
-        <div class="form-group">
-          <label>Max Guests</label>
-          <input
-            type="number"
-            class="form-control"
-            required
-            value={self.state.editUnit.maxGuests}
-            onChange={(event) => {
-              var editUnit = self.state.editUnit;
-              editUnit.maxGuests = event.target.value
-              self.setState({ editUnit: editUnit });
-            }}
-          />
-        </div>
-        <div class="form-group">
-          <label>Price</label>
-          <div class="input-group">
-            <input
-              type="text"
-              class="form-control"
-              required
-              value={self.state.editUnit.price}
-              onChange={(event) => {
-                var editUnit = self.state.editUnit;
-                editUnit.price = event.target.value
-                self.setState({ editUnit: editUnit });
-              }}
-            />
-            <div class="input-group-btn">
-              <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                {self.state.editUnit.currency} <span class="caret"></span>
-              </button>
-              <ul class="dropdown-menu dropdown-menu-right">
-                <li onClick={() => {
-                  var editUnit = self.state.editUnit;
-                  editUnit.currency = 'USD'
-                  self.setState({ editUnit: editUnit });
-                }}><a>USD</a></li>
-                <li onClick={() => {
-                  var editUnit = self.state.editUnit;
-                  editUnit.currency = 'Lif'
-                  self.setState({ editUnit: editUnit });
-                }}><a>Lif</a></li>
-              </ul>
-            </div>
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Your Wallet Password</label>
-          <div class="input-group">
-            <input
-              type={self.state.showPassword ? "text" : "password"}
-              class="form-control"
-              required
-              defaultValue={self.state.password}
-              onChange={(event) => {
-                self.setState({ password: event.target.value, editHotelUnitTypeError: false });
-              }}
-            />
-            <span class="input-group-addon">
-              {self.state.showPassword ?
-                <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
-              :
-                <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
-              }
-            </span>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Update Hotel Room</button>
-        {(self.state.editHotelUnitTypeError)
-          ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred updating the hotel room, is that the correct password?</p>
-          : null}
-      </form>
-
-
       let editHotelUnitFunctions = [
         {value: 'setUnitActive', label: 'Active'},
         {value: 'setCurrencyCode', label: 'Currency Code'},
         {value: 'setDefaultLifPrice', label: 'Default Lif Price'},
         {value: 'setDefaultPrice', label: 'Default Price'},
         {value: 'setUnitSpecialLifPrice', label: 'Special Lif Price'},
-        {value: 'setUnitSpecialPrice', label: 'Special Price'}
+        {value: 'setUnitSpecialPrice', label: 'Special Price'},
+        {value: 'removeUnit', label: 'Remove this room'}
       ]
 
       var editHotelUnit =
@@ -1280,6 +1237,11 @@ export default class App extends React.Component {
               </div>
             </div>
           ),
+          removeUnit: (
+            <div class="from-group">
+              <label>Enter your password below to remove this room.</label>
+            </div>
+          )
         }[self.state.editHotelUnitFunction]}
         <div class="form-group">
           <label>Your Wallet Password</label>
@@ -1361,7 +1323,7 @@ export default class App extends React.Component {
                 <div class="pull-right">
                   <button class="btn btn-primary btn-sm"
                           onClick={() => self.setState({section: 'addHotelUnitType'})}>
-                    + Room Type
+                    Room Types
                   </button>
                   <button class="btn btn-primary btn-sm"
                           onClick={() => self.setState({section: 'addHotelUnit'})}>
@@ -1549,8 +1511,6 @@ export default class App extends React.Component {
                 <div>{addHotelUnitType}</div>
               : self.state.section == 'addHotelUnit' ?
                 <div>{addHotelUnit}</div>
-              : self.state.section == 'editHotelUnitType' ?
-                <div>{editHotelUnitType}</div>
               : self.state.section == 'editHotelUnit' ?
                 <div>{editHotelUnit}</div>
               : <div>{hotelBookings}</div>}
