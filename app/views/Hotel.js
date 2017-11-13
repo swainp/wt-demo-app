@@ -52,8 +52,6 @@ export default class App extends React.Component {
         window.localStorage.wtIndexAddress
         && window.localStorage.wtIndexAddress.length > 0
         && web3.eth.getCode(window.localStorage.wtIndexAddress) != '0x0'
-        // && window.localStorage.userType == 'Hotel'
-        // && window.localStorage.wallet.length > 0
       )
         {
         let hotelManager = new HotelManager({
