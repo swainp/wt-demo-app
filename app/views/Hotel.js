@@ -62,15 +62,7 @@ export default class App extends React.Component {
           web3: web3,
           gasMargin: 1.5
         })
-        console.log(hotelManager);
-        console.log(web3);
-        hotelManager.setWeb3(web3);
-        //hotelManager.WTIndex.setProvider(web3.currentProvider);
-        this.setState({hotelManager: hotelManager}, ()=>{this.getHotels()});
-        // wtHotelLib.setIndex(window.localStorage.indexAddress);
-        // wtHotelLib.wallet.setKeystore(window.localStorage.wallet);
-        // this.setState({indexAddress: window.localStorage.indexAddress});
-        // this.updateData();
+        this.setState({hotelManager: hotelManager}, () => { this.getHotels() });
       } else
         window.location.replace(window.location.origin+'/#/');
     }
@@ -88,19 +80,8 @@ export default class App extends React.Component {
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
         let newHotel = await self.state.hotelManager.createHotel(self.state.newHotelName, self.state.newHotelDescription);
-        console.log(newHotel);
         await self.getHotels();
         self.setState({loading: false, hotelSection: "list"});
-        //self.selectHotel(newHotel.address);
-        // await self.updateData();
-        // self.selectHotel(newHotel.address);
-        // self.setState({wtHotel: { address: newHotel.address, name: await newHotel.name(), unitTypes:[] },
-        //   loading: false,
-        //   section: 'hotels',
-        //   hotelSection: 'list',
-        //   newHotelName: '',
-        //   newHotelDescription: '',
-        //   password: ''});
       }
       catch(e) {
         console.log("Error creating the hotel", e);
@@ -108,92 +89,12 @@ export default class App extends React.Component {
       }
     }
 
-    // async editHotel(){
-    //   var self = this;
-    //   self.setState({loading: true, editHotelError: false});
-
-    //   try {
-    //     // Edit wtHotel address
-    //     await wtHotelLib.changeHotelInfo(
-    //       self.state.password,
-    //       self.state.hotel.address,
-    //       self.state.hotel.name,
-    //       self.state.hotel.description
-    //     );
-
-    //     // Edit wtHotel address
-    //     await wtHotelLib.changeHotelAddress(
-    //       self.state.password,
-    //       self.state.hotel.address,
-    //       self.state.hotel.lineOne,
-    //       self.state.hotel.lineTwo,
-    //       self.state.hotel.zip,
-    //       self.state.hotel.country
-    //     );
-
-    //     // Edit hotel location
-    //     // To represent 40.426371, -3.703578 GPS position
-    //     // (90 + 40.426371)*10^5, (180 + (-3.703578))*10^5 = 13042637, 17629642
-    //     // Timezone is represented from 0 to 23, being 0 = UTC and 23 = +22UTC
-    //     await wtHotelLib.changeHotelLocation(
-    //       self.state.password,
-    //       self.state.hotel.address,
-    //       parseInt(self.state.hotel.timezone),
-    //       self.state.hotel.latitude,
-    //       self.state.hotel.longitude
-    //     );
-    //     await self.updateData();
-    //     self.setState({
-    //       loading: false,
-    //       hotelSection: 'list',
-    //       password: ''
-    //     });
-    //   }
-    //   catch(e) {
-    //     console.log("Error updating the hotel", e);
-    //     self.setState({loading: false, editHotelError: true});
-    //   }
-
-    // }
-
-    // async addHotelUnitType(){
-    //   var self = this;
-    //   self.setState({loading: true, addHotelUnitTypeError: false});
-
-    //   try {
-    //     if (_.findIndex(self.state.hotel.units,{ type: self.state.newUnitType.type}) < 0)
-    //       await wtHotelLib.addUnitType(self.state.password, self.state.hotel.address, self.state.newUnitType.type);
-
-    //     await wtHotelLib.addUnit(
-    //       self.state.password,
-    //       self.state.hotel.address,
-    //       self.state.newUnitType.type,
-    //       self.state.newUnitType.name,
-    //       self.state.newUnitType.description,
-    //       1,
-    //       self.state.newUnitType.maxGuests,
-    //       self.state.newUnitType.price+' '+self.state.newUnitType.currency
-    //     );
-    //     await self.updateData();
-    //     // select hotel again, so it uses the fresh version (that includes the just created room)
-    //     self.selectHotel(self.state.hotel.address);
-    //     self.setState({section: 'hotels', hotelSection: 'list', loading: false, password: ''});
-    //   }
-    //   catch(e) {
-    //     console.log("Error adding hotel room", e);
-    //     self.setState({loading: false, addHotelUnitTypeError: true});
-    //   }
-    // }
-
     async addUnit(){
       var self = this;
       self.setState({loading: true, addHotelUnitTypeError: false});
-
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
-        let tx = await self.state.hotelManager.addUnit(self.state.hotel.address, self.state.unitType);
-        console.log(tx);
-
+        await self.state.hotelManager.addUnit(self.state.hotel.address, self.state.unitType);
         await self.getHotels();
         // select hotel again, so it uses the fresh version (that includes the just created room)
         self.selectHotel(self.state.hotel.address);
@@ -233,6 +134,7 @@ export default class App extends React.Component {
         self.state.hotel.address,
         self.state.unitType
       ]
+
       //async addAmenity(hotelAddress: Address, unitType: String, amenity: Number): Promievent
       //async removeAmenity(hotelAddress: Address, unitType: String, amenity: Number): Promievent
       //async editUnitType(hotelAddress: Address, unitType: String, description: String, minGuests: Number, maxGuests: Number, price: String): Promievent
@@ -254,16 +156,14 @@ export default class App extends React.Component {
 
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
-
         await self.state.hotelManager[self.state.editHotelUnitTypeFunction](...args);
-
         await self.getHotels();
         // select hotel again, so it uses the fresh version (that includes the just created room)
         self.selectHotel(self.state.hotel.address);
         self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
       } catch(e) {
         console.log("Error editing unit type", e);
-        self.setState({loading: false, addHotelUnitTypeError: true});
+        self.setState({loading: false, addHotelUnitError: true});
       }
     }
 
@@ -326,6 +226,7 @@ export default class App extends React.Component {
         self.state.hotel.address,
         self.state.unit
       ]
+
       //async setCurrencyCode(hotelAddress: Address, unitAddress: Address, code: Number, converter: Function, convertStart: Date, convertEnd: Date)
       //async setDefaultLifPrice(hotelAddress: Address, unitAddress: Address, price: String | Number | BN)
       //async setDefaultPrice(hotelAddress: Address, unitAddress: Address, price: Number)
@@ -362,9 +263,7 @@ export default class App extends React.Component {
 
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
-
         await self.state.hotelManager[self.state.editHotelUnitFunction](...args);
-
         await self.getHotels();
         // select hotel again, so it uses the fresh version (that includes the just created room)
         self.selectHotel(self.state.hotel.address);
@@ -375,20 +274,6 @@ export default class App extends React.Component {
       }
     }
 
-    // starteditHotelUnitType(val) {
-    //   var self = this;
-    //   var editUnit = self.state.editUnit;
-    //   editUnit.index = val.index;
-    //   editUnit.label = val.label;
-    //   editUnit.name = val.name;
-    //   editUnit.description = val.description;
-    //   editUnit.maxGuests = val.maxGuests;
-    //   editUnit.price = val.price.split(' ')[0];
-    //   editUnit.currency = val.price.split(' ')[1] || 'USD';
-    //   editUnit.type = val.type.replace(/\W+/g, "");
-    //   self.setState({editUnit: editUnit, section: 'editHotelUnitType'});
-    // }
-
     // loadBookings(){
     //   var self = this;
     //   self.setState({
@@ -398,33 +283,6 @@ export default class App extends React.Component {
     //   });
     // }
 
-    // async editHotelUnitType(){
-    //   var self = this;
-    //   self.setState({loading: true, editHotelUnitTypeError: false});
-
-    //   try {
-    //     await wtHotelLib.editUnit(
-    //       self.state.password,
-    //       self.state.hotel.address,
-    //       self.state.editUnit.type,
-    //       self.state.editUnit.index,
-    //       self.state.editUnit.name,
-    //       self.state.editUnit.description,
-    //       1,
-    //       self.state.editUnit.maxGuests,
-    //       self.state.editUnit.price+' '+self.state.editUnit.currency
-    //     );
-    //     // load data & select hotel again, so it uses the fresh version (that includes the just edited room)
-    //     await self.updateData();
-    //     self.selectHotel(self.state.hotel.address);
-    //     self.setState({section: 'hotels', hotelSection: 'list', loading: false, password: ''});
-    //   }
-    //   catch(e) {
-    //     console.log("Error updating the hotel room", e);
-    //     self.setState({loading: false, editHotelUnitTypeError: true});
-    //   }
-    // }
-
     selectHotel(address) {
       var selectedHotel = this.state.hotels[address];
       selectedHotel.address = address;
@@ -432,8 +290,6 @@ export default class App extends React.Component {
       Object.entries(selectedHotel.unitTypes).forEach(([key, value]) => {
         unitTypeOptions.push({ value: key, label: key})
       });
-      console.log('selectedHotel');
-      console.log(selectedHotel);
 
       this.setState({
         hotel: selectedHotel,
@@ -447,7 +303,6 @@ export default class App extends React.Component {
 
     async loadHotel(address){
       await this.setState({loading: true});
-      //await this.updateData();
       this.selectHotel(address);
       await this.setState({loading: false});
     }
@@ -490,7 +345,6 @@ export default class App extends React.Component {
     async getHotels() {
       this.setState({loading: true});
       let hotels = await this.state.hotelManager.getHotels();
-      console.log(hotels);
       let hotelOptions = [];
       if(hotels) {
         Object.entries(hotels).forEach(([key, value]) => {
@@ -571,19 +425,13 @@ export default class App extends React.Component {
             : null}
         </form>
 
-        //async changeHotelAddress(hotelAddress: Address, lineOne: String, lineTwo: String, zipCode: String, country: String)
-        //async changeHotelInfo(hotelAddress: Address, name: String, description: String)
-        //async changeHotelLocation(hotelAddress: Address, timezone: Number, latitude: Number, longitude: Number)
-        //async setRequireConfirmation(hotelAddress: Address, value: Boolean)
-        //async removeHotel(address: Address): Promievent
-
-        let editHotelFunctions = [
-          {value: 'changeHotelAddress', label: 'Address'},
-          {value: 'changeHotelInfo', label: 'Main Info'},
-          {value: 'changeHotelLocation', label: 'Location'},
-          {value: 'setRequireConfirmation', label: 'Confirmation Required'},
-          {value: 'removeHotel', label: 'Remove this hotel'}
-        ]
+      let editHotelFunctions = [
+        {value: 'changeHotelAddress', label: 'Address'},
+        {value: 'changeHotelInfo', label: 'Main Info'},
+        {value: 'changeHotelLocation', label: 'Location'},
+        {value: 'setRequireConfirmation', label: 'Confirmation Required'},
+        {value: 'removeHotel', label: 'Remove this hotel'}
+      ]
 
       var editHotel =
         <form class="box" onSubmit={(e) => {e.preventDefault(); self.editHotel()}}>
@@ -825,7 +673,7 @@ export default class App extends React.Component {
                     defaultValue={self.state.password}
                     required
                     onChange={(event) => {
-                      self.setState({ password: event.target.value, addHotelUnitTypeError: false });
+                      self.setState({ password: event.target.value, addHotelUnitError: false });
                     }}
                   />
                   <span class="input-group-addon">
@@ -1345,8 +1193,6 @@ export default class App extends React.Component {
                 </thead>
                 <tbody>
                   {Object.entries(self.state.hotel.units).map(function(unit, i){
-                    console.log('unit');
-                    console.log(unit[1]);
                     let entryTypeInfo = self.state.hotel.unitTypes[unit[1].unitType].info
                     return (
                       <tr key={'unit'+i} class="pointer" onClick={() => console.log(unit)}>
