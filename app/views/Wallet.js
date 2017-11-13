@@ -5,7 +5,10 @@ import ReactModal from "react-modal";
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));
 
-const LifABI = [{"constant": true, "inputs": [], "name": "mintingFinished", "outputs": [{"name": "", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "_spender", "type": "address"}, {"name": "_value", "type": "uint256"} ], "name": "approve", "outputs": [{"name": "", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": true, "inputs": [], "name": "totalSupply", "outputs": [{"name": "", "type": "uint256"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "_from", "type": "address"}, {"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"} ], "name": "transferFrom", "outputs": [{"name": "", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": true, "inputs": [], "name": "DECIMALS", "outputs": [{"name": "", "type": "uint256"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [], "name": "unpause", "outputs": [], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "_to", "type": "address"}, {"name": "_amount", "type": "uint256"} ], "name": "mint", "outputs": [{"name": "", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "_value", "type": "uint256"} ], "name": "burn", "outputs": [], "payable": false, "type": "function"}, {"constant": true, "inputs": [], "name": "paused", "outputs": [{"name": "", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "_spender", "type": "address"}, {"name": "_subtractedValue", "type": "uint256"} ], "name": "decreaseApproval", "outputs": [{"name": "success", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "spender", "type": "address"}, {"name": "value", "type": "uint256"}, {"name": "data", "type": "bytes"} ], "name": "approveData", "outputs": [{"name": "", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": true, "inputs": [{"name": "_owner", "type": "address"} ], "name": "balanceOf", "outputs": [{"name": "balance", "type": "uint256"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [], "name": "finishMinting", "outputs": [{"name": "", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [], "name": "pause", "outputs": [], "payable": false, "type": "function"}, {"constant": true, "inputs": [], "name": "owner", "outputs": [{"name": "", "type": "address"} ], "payable": false, "type": "function"}, {"constant": true, "inputs": [], "name": "NAME", "outputs": [{"name": "", "type": "string"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "_to", "type": "address"}, {"name": "_value", "type": "uint256"} ], "name": "transfer", "outputs": [{"name": "", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "to", "type": "address"}, {"name": "value", "type": "uint256"}, {"name": "data", "type": "bytes"} ], "name": "transferData", "outputs": [{"name": "", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "_spender", "type": "address"}, {"name": "_addedValue", "type": "uint256"} ], "name": "increaseApproval", "outputs": [{"name": "success", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": true, "inputs": [{"name": "_owner", "type": "address"}, {"name": "_spender", "type": "address"} ], "name": "allowance", "outputs": [{"name": "remaining", "type": "uint256"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "from", "type": "address"}, {"name": "to", "type": "address"}, {"name": "value", "type": "uint256"}, {"name": "data", "type": "bytes"} ], "name": "transferDataFrom", "outputs": [{"name": "", "type": "bool"} ], "payable": false, "type": "function"}, {"constant": false, "inputs": [{"name": "newOwner", "type": "address"} ], "name": "transferOwnership", "outputs": [], "payable": false, "type": "function"}, {"constant": true, "inputs": [], "name": "SYMBOL", "outputs": [{"name": "", "type": "string"} ], "payable": false, "type": "function"}, {"anonymous": false, "inputs": [{"indexed": true, "name": "burner", "type": "address"}, {"indexed": false, "name": "value", "type": "uint256"} ], "name": "Burn", "type": "event"}, {"anonymous": false, "inputs": [], "name": "Pause", "type": "event"}, {"anonymous": false, "inputs": [], "name": "Unpause", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": true, "name": "to", "type": "address"}, {"indexed": false, "name": "amount", "type": "uint256"} ], "name": "Mint", "type": "event"}, {"anonymous": false, "inputs": [], "name": "MintFinished", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": true, "name": "previousOwner", "type": "address"}, {"indexed": true, "name": "newOwner", "type": "address"} ], "name": "OwnershipTransferred", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": true, "name": "owner", "type": "address"}, {"indexed": true, "name": "spender", "type": "address"}, {"indexed": false, "name": "value", "type": "uint256"} ], "name": "Approval", "type": "event"}, {"anonymous": false, "inputs": [{"indexed": true, "name": "from", "type": "address"}, {"indexed": true, "name": "to", "type": "address"}, {"indexed": false, "name": "value", "type": "uint256"} ], "name": "Transfer", "type": "event"} ];
+var BN = web3.utils.BN;
+
+const LifABI = Utils.abis.LifToken;
+
 export default class App extends React.Component {
 
     constructor() {
@@ -22,19 +25,31 @@ export default class App extends React.Component {
         sendAmount: 0,
         gasAmount: 21000,
         txData: '0x',
-        currency: 'ETH'
+        currency: 'ETH',
+        lifContract: {}
       }
 
     }
 
     componentWillMount() {
+      let lifContract = new web3.eth.Contract(LifABI, this.state.lifTokenAddress);
       if(web3.eth.accounts.wallet[0]) {
-        this.setState({walletSection: 'show', walletKeystore: web3.eth.accounts.wallet[0], loading: false}, () => { this.updateBalances()});
-      }
-      else if(window.localStorage.wallet) {
-        this.setState({walletKeystore: JSON.parse(window.localStorage.wallet)});
+        this.setState({
+          walletSection: 'show',
+          walletKeystore: web3.eth.accounts.wallet[0],
+          loading: false,
+          lifContract: lifContract
+        }, () => { this.updateBalances()});
+      } else if(window.localStorage.wallet) {
+        this.setState({
+          walletKeystore: JSON.parse(window.localStorage.wallet),
+          lifContract: lifContract
+        });
       } else {
-        this.setState({walletSection: 'create'});
+        this.setState({
+          walletSection: 'create',
+          lifContract: lifContract
+        });
       }
     }
 
@@ -67,20 +82,24 @@ export default class App extends React.Component {
       var self = this;
       self.setState({ethBalance: '...', lifBalance: '...'});
 
-      let lifContract = new web3.eth.Contract(LifABI, self.state.lifTokenAddress);
-
       self.setState({
         ethBalance: web3.utils.fromWei(
           await web3.eth.getBalance(self.state.walletKeystore.address),
           'ether'
         ),
-        lifBalance: web3.utils.hexToNumber(
-          await web3.eth.call({
-            to: self.state.lifTokenAddress, // contract address
-            data: lifContract.methods.balanceOf(self.state.walletKeystore.address).encodeABI()
-          })
-        )
+        lifBalance: await this.getLifBalance(self.state.walletKeystore.address)
       })
+    }
+
+    async getLifBalance(addr) {
+      var self = this;
+      var balanceBN = new BN(web3.utils.toBN(
+        await web3.eth.call({
+          to: self.state.lifTokenAddress, // contract address
+          data: self.state.lifContract.methods.balanceOf(self.state.walletKeystore.address).encodeABI()
+        })
+      ));
+      return parseFloat(balanceBN.toString())/1e+18;
     }
 
     async sendTx() {
@@ -132,6 +151,7 @@ export default class App extends React.Component {
                   class="form-control"
                   autoFocus="true"
                   defaultValue={self.state.password}
+                  required
                   placeholder="This password will be used to encrypt your new wallet. Use a strong one!"
                   onChange={(event) => self.setState({ password: event.target.value })}/>
                 <span class="input-group-addon">
@@ -178,7 +198,7 @@ export default class App extends React.Component {
                         self.setState({
                           walletKeystore: JSON.parse(fileData)
                         });
-                        window.localStorage.wallet = JSON.parse(fileData);
+                        window.localStorage.wallet = fileData;
                       };
                     })(event.target.files[0]);
                     if (event.target.files && event.target.files[0])
