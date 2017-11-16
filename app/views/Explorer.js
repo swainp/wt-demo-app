@@ -8,6 +8,8 @@ import { Carousel } from 'react-responsive-carousel';
 import moment from 'moment';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
 import BookUnit from '../components/BookUnit';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));
@@ -55,11 +57,10 @@ export default class App extends React.Component {
         txs: [],
         transaction: {},
         importKeystore: keyStore,
-        loading: true,
         section: 'hotels',
         hotelSection: 'list',
         hotelManager: {},
-        loadingHotel: false
+        loading: false
       }
     }
 
@@ -95,7 +96,7 @@ export default class App extends React.Component {
 
     async loadHotels() {
       var self = this;
-      self.setState({loadingHotel: true});
+      self.setState({loading: true});
       var hotelsAddrs = await self.state.hotelManager.WTIndex.methods.getHotels().call();
       var hotels = [];
       let totalHotels = hotelsAddrs.length-1;
@@ -104,7 +105,7 @@ export default class App extends React.Component {
       self.setState({
         hotels: hotels,
         totalHotels: totalHotels,
-        loadingHotel: false
+        loading: false
       });
     }
 
@@ -120,7 +121,7 @@ export default class App extends React.Component {
     async loadHotelInfo(hotelAddr) {
       var self = this;
       self.setState({
-        loadingHotel: true,
+        loading: true,
         hotel: {
           address: hotelAddr,
           name: '',
@@ -179,7 +180,7 @@ export default class App extends React.Component {
       console.log('Hotel information:',hotelInfo);
       self.setState({
         hotel: hotelInfo,
-        loadingHotel: false
+        loading: false
       });
     }
 
@@ -215,10 +216,12 @@ export default class App extends React.Component {
         } else {
           await self.state.user.book(...args);
         }
-        self.setState({loading: false })
+        self.setState({loading: false });
+        toast.success('Successfully booked ' + self.state.unitSelected.unitType + ' from ' + self.state.startDate.format('YYYY MM DD') + ' to ' + self.state.endDate.format('YYYY MM DD'));
       } catch(e) {
-        console.log("Error booking aroom", e);
+        console.log("Error booking a room", e);
         self.setState({loading: false});
+        toast.error(e);
       }
     }
 
@@ -253,14 +256,14 @@ export default class App extends React.Component {
               })}
               </div>
             </div>
-            <div class={self.state.loadingHotel ? 'col-6 loading' : 'col-6'}>
+            <div class={self.state.loading ? 'col-6 loading' : 'col-6'}>
               <ul>
                 {self.state.hotel.name.length > 0 ?
                   <li>Name: {self.state.hotel.name}</li>
                   : <div></div>
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loadingHotel) ?
+                  && !self.state.loading) ?
                   <li>Manager: {self.state.hotel.manager}</li>
                   : <div></div>
                 }
@@ -277,12 +280,12 @@ export default class App extends React.Component {
                   : <div></div>
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loadingHotel) ?
+                  && !self.state.loading) ?
                   <li>Instant Booking: {self.state.hotel.waitConfirmation ? 'Yes' : 'No'}</li>
                   : <div></div>
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loadingHotel) ?
+                  && !self.state.loading) ?
                   <li>Total Units: {self.state.hotel.totalUnits}</li>
                   : <div></div>
                 }
@@ -423,16 +426,17 @@ export default class App extends React.Component {
 
       return(
         <div class='row justify-content-md-center'>
+          <ToastContainer style={{zIndex: 2000}}/>
           <div class='col-md-10'>
             <div class='jumbotron'>
               {hotelsSection}
               {self.state.hotel.address != '0x0000000000000000000000000000000000000000' &&
-                !self.state.loadingHotel ?
+                !self.state.loading ?
                   unitTypesSection
                 : <div></div>
               }
               {self.state.unitType.address != '0x0000000000000000000000000000000000000000' &&
-                !self.state.loadingHotel ?
+                !self.state.loading ?
                   unitsSection
                 : <div></div>
               }
