@@ -23,7 +23,6 @@ export default class App extends React.Component {
     }
 
     render() {
-      console.log();
       return(
         <nav class='navbar navbar-expand-md navbar-dark fixed-top bg-dark'>
           <Link class='navbar-brand' to='/'>WT</Link>

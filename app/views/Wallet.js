@@ -26,28 +26,32 @@ export default class App extends React.Component {
         gasAmount: 21000,
         txData: '0x',
         currency: 'ETH',
-        lifContract: {}
+        lifContract: {},
+        networkId: 'kovan'
       }
 
     }
 
-    componentWillMount() {
+    async componentWillMount() {
       let lifContract = new web3.eth.Contract(LifABI, this.state.lifTokenAddress);
       if(web3.eth.accounts.wallet[0]) {
         this.setState({
           walletSection: 'show',
           walletKeystore: web3.eth.accounts.wallet[0],
           loading: false,
+          networkId: await web3.eth.net.getNetworkType(),
           lifContract: lifContract
         }, () => { this.updateBalances()});
       } else if(window.localStorage.wallet) {
         this.setState({
           walletKeystore: JSON.parse(window.localStorage.wallet),
+          networkId: await web3.eth.net.getNetworkType(),
           lifContract: lifContract
         });
       } else {
         this.setState({
           walletSection: 'create',
+          networkId: await web3.eth.net.getNetworkType(),
           lifContract: lifContract
         });
       }
@@ -80,14 +84,15 @@ export default class App extends React.Component {
     // Update the ETH and Lif balances
     async updateBalances() {
       var self = this;
-      self.setState({ethBalance: '...', lifBalance: '...'});
+      self.setState({ethBalance: '...', lifBalance: '...', loading: true});
 
       self.setState({
         ethBalance: web3.utils.fromWei(
           await web3.eth.getBalance(self.state.walletKeystore.address),
           'ether'
         ),
-        lifBalance: await this.getLifBalance(self.state.walletKeystore.address)
+        lifBalance: await this.getLifBalance(self.state.walletKeystore.address),
+        loading: false
       })
     }
 
@@ -99,11 +104,12 @@ export default class App extends React.Component {
           data: self.state.lifContract.methods.balanceOf(self.state.walletKeystore.address).encodeABI()
         })
       ));
-      return parseFloat(balanceBN.toString())/1e+18;
+      return web3.utils.fromWei(balanceBN, 'ether').toString();
     }
 
     async sendTx() {
       var self = this;
+      self.setState({loading: true});
       if(this.state.currency === 'ETH') {
         let txObject = {
           to: this.state.receiverAddress,
@@ -113,12 +119,14 @@ export default class App extends React.Component {
         };
         let signedTx = await web3.eth.accounts.signTransaction(txObject, this.state.walletKeystore.privateKey);
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', (receipt) => {
-          console.log(receipt);
+          console.log('Send ETH tx receipt:', receipt);
+          self.setState({loading: false});
           self.updateBalances();
         });
       } else if (this.state.currency === 'LIF') {
         let LifToken = new web3.eth.Contract(LifABI, this.state.lifTokenAddress);
-        let method = LifToken.methods.transfer(this.state.receiverAddress, this.state.sendAmount);
+        const lifWei = web3.utils.toWei(this.state.sendAmount, 'ether');
+        let method = LifToken.methods.transfer(this.state.receiverAddress, lifWei);
         let callData = method.encodeABI();
 
         let txObject = {
@@ -128,7 +136,8 @@ export default class App extends React.Component {
         }
         let signedTx = await web3.eth.accounts.signTransaction(txObject, this.state.walletKeystore.privateKey);
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', (receipt) => {
-          console.log(receipt);
+          console.log('Send LIF tx receipt:', receipt);
+          self.setState({loading: false});
           self.updateBalances();
         });
       }
@@ -240,7 +249,7 @@ export default class App extends React.Component {
           :
           <div>
             <div class="row justify-content-around">
-              <h2>Wallet <small>{self.state.walletKeystore.address}</small></h2>
+              <h2>Wallet <small><a href={"https://"+self.state.networkId+".etherscan.io/address/"+self.state.walletKeystore.address}>{self.state.walletKeystore.address}</a></small></h2>
             </div>
             <hr></hr>
             <div class="row justify-content-around">
@@ -279,6 +288,7 @@ export default class App extends React.Component {
                     <div class="input-group">
                       <input
                         type="number"
+                        step="any"
                         class="form-control"
                         autoFocus="true"
                         defaultValue={self.state.sendAmount}
