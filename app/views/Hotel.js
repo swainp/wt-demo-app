@@ -65,13 +65,6 @@ export default class App extends React.Component {
         window.location.replace(window.location.origin+'/#/');
     }
 
-    // logout(){
-    //   wtHotelLib.wallet.closeWallet();
-    //   window.localStorage.userType = "";
-    //   window.location.replace(window.location.origin+'/#/');
-    //   window.location.reload();
-    // }
-
     async createHotel(){
       var self = this;
       self.setState({loading: true, createHotelError: false});
@@ -361,8 +354,6 @@ export default class App extends React.Component {
             <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotels' ? " btn-success" : "")} onClick={() => self.setState({section: 'hotels'})}>Hotels</button> </li>
             <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotelBookings' ? " btn-success" : "")} onClick={() => self.loadBookings()}>Hotel Bookings</button> </li>
             <li><button class={"btn btn-default btn-action" + (self.state.section == 'blockchain' ? " btn-success" : "")} onClick={() => self.loadTxs()}>Blockchain Txs</button> </li>
-            <li><a href="/wallet" class="btn btn-default btn-action">My Wallet</a> </li>
-            <li><button class="btn btn-default btn-link" onClick={() => self.logout()}>Logout</button> </li>
           </ul>
         </div>
 
