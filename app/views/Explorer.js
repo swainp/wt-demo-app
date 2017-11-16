@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router';
+import { Link } from 'react-router-dom';
 import ReactModal from 'react-modal';
 import { Component } from 'react';
 import ReactDOM from 'react-dom';
@@ -22,6 +22,10 @@ export default class App extends React.Component {
 
     constructor() {
       super();
+      let keyStore;
+      if(window.localStorage.wallet) {
+        keyStore = JSON.parse(window.localStorage.wallet);
+      }
       this.state = {
         indexAddress: '0x0000000000000000000000000000000000000000',
         hotels: [],
@@ -50,7 +54,7 @@ export default class App extends React.Component {
         },
         txs: [],
         transaction: {},
-        importKeystore: JSON.parse(window.localStorage.wallet) || '',
+        importKeystore: keyStore,
         loading: true,
         section: 'hotels',
         hotelSection: 'list',
@@ -65,16 +69,17 @@ export default class App extends React.Component {
         && window.localStorage.wtIndexAddress.length > 0
         && web3.eth.getCode(window.localStorage.wtIndexAddress) != '0x0'
       ) {
+        let address = (this.state.importKeystore ? this.state.importKeystore.address : '0x0000000000000000000000000000000000000000');
         let hotelManager = new HotelManager({
           indexAddress: window.localStorage.wtIndexAddress,
-          owner: JSON.parse(window.localStorage.wallet).address,
+          owner: address,
           web3: web3,
           gasMargin: 1.5
         });
         hotelManager.setWeb3(web3);
         let bookingData = new BookingData(web3);
         let user = new User({
-          account: JSON.parse(window.localStorage.wallet).address,       // Client's account address
+          account: address,       // Client's account address
           gasMargin: 2,               // Multiple to increase gasEstimate by to ensure tx success.
           tokenAddress: window.localStorage.lifTokenAddress,  // LifToken contract address
           web3: web3                     // Web3 object instantiated with a provider
@@ -393,6 +398,7 @@ export default class App extends React.Component {
             <hr></hr>
             <div class='row'>
               <div class='col-8'>
+                {self.state.user.account != '0x0000000000000000000000000000000000000000' ?
                   <BookUnit
                     startDate={self.state.startDate}
                     endDate={self.state.endDate}
@@ -405,6 +411,8 @@ export default class App extends React.Component {
                     onCurrencyChange={(val) => self.setState({currency: val})}
                     onSubmit={self.bookRoom.bind(self)}
                   />
+                :
+                <Link to='/wallet'>Please create a wallet</Link>}
               </div>
             </div>
           </div>
