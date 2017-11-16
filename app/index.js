@@ -18,6 +18,8 @@ import '../node_modules/bootstrap/dist/css/bootstrap.css';
 import '../node_modules/react-select/dist/react-select.css';
 import './styles/main.css';
 import '../node_modules/react-dates/lib/css/_datepicker.css';
+import '../node_modules/react-responsive-carousel/lib/styles/main.css';
+import '../node_modules/react-responsive-carousel/lib/styles/carousel.css';
 
 //Set history
 const app = document.getElementById('app');
