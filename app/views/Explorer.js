@@ -1,5 +1,5 @@
 import React from 'react';
-import {Link} from 'react-router';
+import { Link } from 'react-router-dom';
 import ReactModal from 'react-modal';
 import { Component } from 'react';
 import ReactDOM from 'react-dom';
@@ -7,6 +7,9 @@ import { Carousel } from 'react-responsive-carousel';
 
 import moment from 'moment';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
+import BookUnit from '../components/BookUnit';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));
@@ -21,6 +24,10 @@ export default class App extends React.Component {
 
     constructor() {
       super();
+      let keyStore;
+      if(window.localStorage.wallet) {
+        keyStore = JSON.parse(window.localStorage.wallet);
+      }
       this.state = {
         indexAddress: '0x0000000000000000000000000000000000000000',
         hotels: [],
@@ -49,12 +56,11 @@ export default class App extends React.Component {
         },
         txs: [],
         transaction: {},
-        importKeystore: JSON.parse(window.localStorage.wallet) || '',
-        loading: true,
+        importKeystore: keyStore,
         section: 'hotels',
         hotelSection: 'list',
         hotelManager: {},
-        loadingHotel: false
+        loading: false
       }
     }
 
@@ -64,14 +70,22 @@ export default class App extends React.Component {
         && window.localStorage.wtIndexAddress.length > 0
         && web3.eth.getCode(window.localStorage.wtIndexAddress) != '0x0'
       ) {
+        let address = (this.state.importKeystore ? this.state.importKeystore.address : '0x0000000000000000000000000000000000000000');
         let hotelManager = new HotelManager({
           indexAddress: window.localStorage.wtIndexAddress,
-          owner: JSON.parse(window.localStorage.wallet).address,
+          owner: address,
           web3: web3,
           gasMargin: 1.5
         });
         hotelManager.setWeb3(web3);
-        await this.setState({hotelManager: hotelManager});
+        let bookingData = new BookingData(web3);
+        let user = new User({
+          account: address,       // Client's account address
+          gasMargin: 2,               // Multiple to increase gasEstimate by to ensure tx success.
+          tokenAddress: window.localStorage.lifTokenAddress,  // LifToken contract address
+          web3: web3                     // Web3 object instantiated with a provider
+        })
+        await this.setState({hotelManager: hotelManager, bookingData: bookingData, user: user});
         await this.loadHotels();
         console.log('HM:', hotelManager);
         console.log('Web3:', web3);
@@ -82,7 +96,7 @@ export default class App extends React.Component {
 
     async loadHotels() {
       var self = this;
-      self.setState({loadingHotel: true});
+      self.setState({loading: true});
       var hotelsAddrs = await self.state.hotelManager.WTIndex.methods.getHotels().call();
       var hotels = [];
       let totalHotels = hotelsAddrs.length-1;
@@ -91,7 +105,7 @@ export default class App extends React.Component {
       self.setState({
         hotels: hotels,
         totalHotels: totalHotels,
-        loadingHotel: false
+        loading: false
       });
     }
 
@@ -107,7 +121,7 @@ export default class App extends React.Component {
     async loadHotelInfo(hotelAddr) {
       var self = this;
       self.setState({
-        loadingHotel: true,
+        loading: true,
         hotel: {
           address: hotelAddr,
           name: '',
@@ -166,8 +180,49 @@ export default class App extends React.Component {
       console.log('Hotel information:',hotelInfo);
       self.setState({
         hotel: hotelInfo,
-        loadingHotel: false
+        loading: false
       });
+    }
+
+    async updateBookingPrice(startDate, endDate) {
+      let self = this;
+      self.setState({startDate: startDate, endDate: endDate, bookPrice: '...', bookLifPrice: '...'});
+      if(startDate && endDate && endDate.isSameOrAfter(startDate)) {
+        let available = await self.state.bookingData.unitIsAvailable(self.state.unitSelected.address, startDate.toDate(), endDate.diff(startDate, 'days'));
+        let cost = await self.state.bookingData.getCost(self.state.unitSelected.address, startDate.toDate(), endDate.diff(startDate, 'days'));
+        let lifCost = await self.state.bookingData.getLifCost(self.state.unitSelected.address, startDate.toDate(), endDate.diff(startDate, 'days'));
+        self.setState({ bookPrice: cost, bookLifPrice: lifCost, unitAvailable: available});
+      }
+    }
+
+    async bookRoom(password) {
+      var self = this;
+      self.setState({loading: true});
+
+      //async book(hotelAddress: Address, unitAddress: Address, fromDate: Date, daysAmount: Number, guestData: String): Promievent
+      //async bookWithLif(hotelAddress: Address, unitAddress: Address, fromDate: Date, daysAmount: Number, guestData: String): Promievent
+      let args = [
+        self.state.hotel.address,
+        self.state.unitSelected.address,
+        self.state.startDate,
+        self.state.endDate.diff(self.state.startDate, 'days'),
+        'guestData'
+      ]
+
+      try {
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+        if(self.state.currency === 'lif') {
+          await self.state.user.bookWithLif(...args);
+        } else {
+          await self.state.user.book(...args);
+        }
+        self.setState({loading: false });
+        toast.success('Successfully booked ' + self.state.unitSelected.unitType + ' from ' + self.state.startDate.format('YYYY MM DD') + ' to ' + self.state.endDate.format('YYYY MM DD'));
+      } catch(e) {
+        console.log("Error booking a room", e);
+        self.setState({loading: false});
+        toast.error(e);
+      }
     }
 
     render() {
@@ -201,14 +256,14 @@ export default class App extends React.Component {
               })}
               </div>
             </div>
-            <div class={self.state.loadingHotel ? 'col-6 loading' : 'col-6'}>
+            <div class={self.state.loading ? 'col-6 loading' : 'col-6'}>
               <ul>
                 {self.state.hotel.name.length > 0 ?
                   <li>Name: {self.state.hotel.name}</li>
                   : <div></div>
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loadingHotel) ?
+                  && !self.state.loading) ?
                   <li>Manager: {self.state.hotel.manager}</li>
                   : <div></div>
                 }
@@ -225,12 +280,12 @@ export default class App extends React.Component {
                   : <div></div>
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loadingHotel) ?
+                  && !self.state.loading) ?
                   <li>Instant Booking: {self.state.hotel.waitConfirmation ? 'Yes' : 'No'}</li>
                   : <div></div>
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loadingHotel) ?
+                  && !self.state.loading) ?
                   <li>Total Units: {self.state.hotel.totalUnits}</li>
                   : <div></div>
                 }
@@ -314,6 +369,8 @@ export default class App extends React.Component {
           }
         </div>;
 
+      let currencyOptions = [{value: 'lif', label: 'Lif'}, {value: 'fiat', label: 'Fiat'}];
+
       var unitsSection =
         <div>
           <hr></hr>
@@ -338,32 +395,48 @@ export default class App extends React.Component {
               })}
               </div>
             </div>
-            {self.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
-              <div class='col-4'>
-                <ul>
-                  <li>Price per day: {self.state.unitSelected.defaultPrice} {self.state.unitSelected.currencyCode}</li>
-                  <li>Lif Price per day: {self.state.unitSelected.defaultLifPrice}</li>
-                </ul>
-                <button type="button" class="btn btn-success">Book</button>
-              </div>
-            :
-              <div></div>
-            }
           </div>
+          {self.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
+          <div>
+            <hr></hr>
+            <div class='row'>
+              <div class='col-8'>
+                {self.state.user.account != '0x0000000000000000000000000000000000000000' ?
+                  <BookUnit
+                    startDate={self.state.startDate}
+                    endDate={self.state.endDate}
+                    bookLifPrice={self.state.bookLifPrice}
+                    bookPrice={self.state.bookPrice}
+                    available={self.state.unitAvailable}
+                    currency={self.state.currency}
+                    currencyOptions={currencyOptions}
+                    onDatesChange={self.updateBookingPrice.bind(self)}
+                    onCurrencyChange={(val) => self.setState({currency: val})}
+                    onSubmit={self.bookRoom.bind(self)}
+                  />
+                :
+                <Link to='/wallet'>Please create a wallet</Link>}
+              </div>
+            </div>
+          </div>
+          :
+            <div></div>
+          }
         </div>;
 
       return(
         <div class='row justify-content-md-center'>
+          <ToastContainer style={{zIndex: 2000}}/>
           <div class='col-md-10'>
             <div class='jumbotron'>
               {hotelsSection}
               {self.state.hotel.address != '0x0000000000000000000000000000000000000000' &&
-                !self.state.loadingHotel ?
+                !self.state.loading ?
                   unitTypesSection
                 : <div></div>
               }
               {self.state.unitType.address != '0x0000000000000000000000000000000000000000' &&
-                !self.state.loadingHotel ?
+                !self.state.loading ?
                   unitsSection
                 : <div></div>
               }

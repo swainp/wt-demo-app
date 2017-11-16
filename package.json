@@ -37,6 +37,7 @@
     "react-router": "^4.2.0",
     "react-router-dom": "^4.2.2",
     "react-select": "^1.0.0-rc.10",
+    "react-toastify": "^2.2.0",
     "style-loader": "^0.19.0",
     "web3": "^1.0.0-beta.24",
     "webpack": "^3.8.1",
