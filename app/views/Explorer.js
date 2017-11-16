@@ -7,6 +7,7 @@ import { Carousel } from 'react-responsive-carousel';
 
 import moment from 'moment';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
+import BookUnit from '../components/BookUnit';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));
@@ -71,7 +72,14 @@ export default class App extends React.Component {
           gasMargin: 1.5
         });
         hotelManager.setWeb3(web3);
-        await this.setState({hotelManager: hotelManager});
+        let bookingData = new BookingData(web3);
+        let user = new User({
+          account: JSON.parse(window.localStorage.wallet).address,       // Client's account address
+          gasMargin: 2,               // Multiple to increase gasEstimate by to ensure tx success.
+          tokenAddress: window.localStorage.lifTokenAddress,  // LifToken contract address
+          web3: web3                     // Web3 object instantiated with a provider
+        })
+        await this.setState({hotelManager: hotelManager, bookingData: bookingData, user: user});
         await this.loadHotels();
         console.log('HM:', hotelManager);
         console.log('Web3:', web3);
@@ -168,6 +176,45 @@ export default class App extends React.Component {
         hotel: hotelInfo,
         loadingHotel: false
       });
+    }
+
+    async updateBookingPrice(startDate, endDate) {
+      let self = this;
+      self.setState({startDate: startDate, endDate: endDate, bookPrice: '...', bookLifPrice: '...'});
+      if(startDate && endDate && endDate.isSameOrAfter(startDate)) {
+        let available = await self.state.bookingData.unitIsAvailable(self.state.unitSelected.address, startDate.toDate(), endDate.diff(startDate, 'days'));
+        let cost = await self.state.bookingData.getCost(self.state.unitSelected.address, startDate.toDate(), endDate.diff(startDate, 'days'));
+        let lifCost = await self.state.bookingData.getLifCost(self.state.unitSelected.address, startDate.toDate(), endDate.diff(startDate, 'days'));
+        self.setState({ bookPrice: cost, bookLifPrice: lifCost, unitAvailable: available});
+      }
+    }
+
+    async bookRoom(password) {
+      var self = this;
+      self.setState({loading: true});
+
+      //async book(hotelAddress: Address, unitAddress: Address, fromDate: Date, daysAmount: Number, guestData: String): Promievent
+      //async bookWithLif(hotelAddress: Address, unitAddress: Address, fromDate: Date, daysAmount: Number, guestData: String): Promievent
+      let args = [
+        self.state.hotel.address,
+        self.state.unitSelected.address,
+        self.state.startDate,
+        self.state.endDate.diff(self.state.startDate, 'days'),
+        'guestData'
+      ]
+
+      try {
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+        if(self.state.currency === 'lif') {
+          await self.state.user.bookWithLif(...args);
+        } else {
+          await self.state.user.book(...args);
+        }
+        self.setState({loading: false })
+      } catch(e) {
+        console.log("Error booking aroom", e);
+        self.setState({loading: false});
+      }
     }
 
     render() {
@@ -314,6 +361,8 @@ export default class App extends React.Component {
           }
         </div>;
 
+      let currencyOptions = [{value: 'lif', label: 'Lif'}, {value: 'fiat', label: 'Fiat'}];
+
       var unitsSection =
         <div>
           <hr></hr>
@@ -338,18 +387,30 @@ export default class App extends React.Component {
               })}
               </div>
             </div>
-            {self.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
-              <div class='col-4'>
-                <ul>
-                  <li>Price per day: {self.state.unitSelected.defaultPrice} {self.state.unitSelected.currencyCode}</li>
-                  <li>Lif Price per day: {self.state.unitSelected.defaultLifPrice}</li>
-                </ul>
-                <button type="button" class="btn btn-success">Book</button>
-              </div>
-            :
-              <div></div>
-            }
           </div>
+          {self.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
+          <div>
+            <hr></hr>
+            <div class='row'>
+              <div class='col-8'>
+                  <BookUnit
+                    startDate={self.state.startDate}
+                    endDate={self.state.endDate}
+                    bookLifPrice={self.state.bookLifPrice}
+                    bookPrice={self.state.bookPrice}
+                    available={self.state.unitAvailable}
+                    currency={self.state.currency}
+                    currencyOptions={currencyOptions}
+                    onDatesChange={self.updateBookingPrice.bind(self)}
+                    onCurrencyChange={(val) => self.setState({currency: val})}
+                    onSubmit={self.bookRoom.bind(self)}
+                  />
+              </div>
+            </div>
+          </div>
+          :
+            <div></div>
+          }
         </div>;
 
       return(
