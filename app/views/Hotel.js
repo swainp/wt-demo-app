@@ -129,6 +129,8 @@ export default class App extends React.Component {
       //async addAmenity(hotelAddress: Address, unitType: String, amenity: Number): Promievent
       //async removeAmenity(hotelAddress: Address, unitType: String, amenity: Number): Promievent
       //async editUnitType(hotelAddress: Address, unitType: String, description: String, minGuests: Number, maxGuests: Number, price: String): Promievent
+      //async addImageUnitType(hotelAddress: Address, unitType: String, url: String): Promievent
+      //async removeImageUnitType(hotelAddress: Address, unitType: String, imageIndex: Number): Promievent
       //async removeUnitType(hotelAddress: Address, unitType: String): Promievent
       switch(self.state.editHotelUnitTypeFunction) {
         case 'addAmenity':
@@ -140,6 +142,12 @@ export default class App extends React.Component {
           args.push((self.state.newUnitType.minGuests || self.state.unitTypeInfo.minGuests));
           args.push((self.state.newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests));
           args.push((self.state.newUnitType.price || self.state.unitTypeInfo.price));
+          break;
+        case 'addImageUnitType':
+          args.push(self.state.imageUrl);
+          break;
+        case 'removeImageUnitType':
+          args.push(self.state.imageIndex);
           break;
         case 'removeUnitType':
           break;
@@ -169,6 +177,8 @@ export default class App extends React.Component {
       //async changeHotelInfo(hotelAddress: Address, name: String, description: String)
       //async changeHotelLocation(hotelAddress: Address, timezone: Number, latitude: Number, longitude: Number)
       //async setRequireConfirmation(hotelAddress: Address, value: Boolean)
+      //async addImageHotel(hotelAddress: Address, url: String): Promievent
+      //async removeImageHotel(hotelAddress: Address, imageIndex: Number): Promievent
       //async removeHotel(address: Address): Promievent
       switch(self.state.editHotelFunction) {
         case 'changeHotelAddress':
@@ -189,6 +199,10 @@ export default class App extends React.Component {
         case 'setRequireConfirmation':
           args.push(self.state.hotel.waitConfirmation);
           break;
+        case 'addImageHotel':
+          args.push(self.state.imageUrl);
+        case 'removeImageHotel':
+          args.push(self.state.imageIndex);
         case 'removeHotel':
           break;
       }
@@ -419,6 +433,8 @@ export default class App extends React.Component {
         {value: 'changeHotelInfo', label: 'Main Info'},
         {value: 'changeHotelLocation', label: 'Location'},
         {value: 'setRequireConfirmation', label: 'Confirmation Required'},
+        {value: 'addImageHotel', label: 'Add Image'},
+        {value: 'removeImageHotel', label: 'Remove Image'},
         {value: 'removeHotel', label: 'Remove this hotel'}
       ]
 
@@ -588,6 +604,46 @@ export default class App extends React.Component {
                   />
                 </div>
               ),
+              addImageHotel: (
+                <div>
+                  <div class="form-group">
+                    <label>Image URL</label>
+                    <input
+                      type="url"
+                      class="form-control"
+                      value={self.state.imageUrl}
+                      onChange={(e) => {
+                        self.setState({ imageUrl: e.target.value });
+                      }}
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Preview</label>
+                    <img src={self.state.imageUrl} />
+                  </div>
+                </div>
+              ),
+              removeImageHotel: (
+                <div>
+                  <div class="form-group">
+                    <label>Image to Remove</label>
+                    <Select
+                      name="Image"
+                      clearable={false}
+                      value={self.state.imageUrl}
+                      autoFocus="true"
+                      options={self.state.hotel.images.map((url, i)=>{return {value: i, label: url}})}
+                      onChange={(e) => {
+                        self.setState({ imageIndex: e.value, imageUrl: e.label });
+                      }}
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Preview</label>
+                    <img src={self.state.imageUrl} />
+                  </div>
+                </div>
+              ),
               removeHotel: (
                 <div class="form-group">
                   <label>Enter your password below to remove this hotel</label>
@@ -686,6 +742,8 @@ export default class App extends React.Component {
         {value: 'editUnitType', label: 'Main Info'},
         {value: 'addAmenity', label: 'Add Amenity'},
         {value: 'removeAmenity', label: 'Remove Amenity'},
+        {value: 'addImageUnitType', label: 'Add Image'},
+        {value: 'removeImageUnitType', label: 'Remove Image'},
         {value: 'removeUnitType', label: 'Remove this room type'}
       ]
 
@@ -890,6 +948,46 @@ export default class App extends React.Component {
                         self.setState({ amenityCode: e.value });
                       }}
                     />
+                  </div>
+                ),
+                addImageUnitType: (
+                  <div>
+                    <div class="form-group">
+                      <label>Image URL</label>
+                      <input
+                        type="url"
+                        class="form-control"
+                        value={self.state.imageUrl}
+                        onChange={(e) => {
+                          self.setState({ imageUrl: e.target.value });
+                        }}
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Preview</label>
+                      <img src={self.state.imageUrl} />
+                    </div>
+                  </div>
+                ),
+                removeImageUnitType: (
+                  <div>
+                    <div class="form-group">
+                      <label>Image to Remove</label>
+                      <Select
+                        name="Image"
+                        clearable={false}
+                        value={self.state.imageUrl}
+                        autoFocus="true"
+                        options={self.state.hotel.unitTypes[self.state.unitType].images.map((url, i)=>{return {value: i, label: url}})}
+                        onChange={(e) => {
+                          self.setState({ imageIndex: e.value, imageUrl: e.label });
+                        }}
+                      />
+                    </div>
+                    <div class="form-group">
+                      <label>Preview</label>
+                      <img src={self.state.imageUrl} />
+                    </div>
                   </div>
                 ),
                 removeUnitType: (
