@@ -162,11 +162,6 @@ export default class App extends React.Component {
       }
       for (var unitType in hotelInfo.unitTypes){
         hotelInfo.unitTypes[unitType].name = unitType;
-        hotelInfo.unitTypes[unitType].images = [
-          'https://github.com/windingtree/media/blob/master/640x360.png?raw=true',
-          'https://github.com/windingtree/media/blob/master/640x360.png?raw=true',
-          'https://github.com/windingtree/media/blob/master/640x360.png?raw=true'
-        ];
         if (!hotelInfo.unitTypes[unitType])
           hotelInfo.unitTypes[hotelInfo.units[unit].unitType].totalUnits = 0;
         unitTypesArray.push(hotelInfo.unitTypes[unitType]);
@@ -174,9 +169,6 @@ export default class App extends React.Component {
       hotelInfo.unitTypes = unitTypesArray;
       hotelInfo.units = unitArray;
       hotelInfo.address = hotelAddr;
-      hotelInfo.images.push('https://github.com/windingtree/media/blob/master/820x312.png?raw=true');
-      hotelInfo.images.push('https://github.com/windingtree/media/blob/master/820x312.png?raw=true');
-      hotelInfo.images.push('https://github.com/windingtree/media/blob/master/820x312.png?raw=true');
       console.log('Hotel information:',hotelInfo);
       self.setState({
         hotel: hotelInfo,
