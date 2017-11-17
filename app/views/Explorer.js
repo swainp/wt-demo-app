@@ -142,7 +142,8 @@ export default class App extends React.Component {
         },
         unitSelected: {
           address: '0x0000000000000000000000000000000000000000'
-        }
+        },
+        section: 'hotels'
       });
       const hotelInfo = await WTUtils.getHotelInfo(
         WTUtils.getInstance('Hotel', hotelAddr, self.state.hotelManager.context),
@@ -289,6 +290,13 @@ export default class App extends React.Component {
                   <li>Total Units: {self.state.hotel.totalUnits}</li>
                   : <div></div>
                 }
+                {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
+                  && !self.state.loading) ?
+                  <div type="button" class="btn btn-primary" onClick={() => self.setState({section: 'unitTypes'})} >
+                    View Unit unitTypes
+                  </div>
+                  : <div></div>
+                }
               </ul>
               {self.state.hotel.description.length > 0 ?
                 <div>
@@ -314,7 +322,11 @@ export default class App extends React.Component {
 
       var unitTypesSection =
         <div>
-          <hr></hr>
+          <div class="pull-right">
+            <div type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels'})} >
+              Back to Hotels
+            </div>
+          </div>
           <div class='row'>
             <div class='col-6'>
               <div class='list-group'>
@@ -327,7 +339,7 @@ export default class App extends React.Component {
                     'list-group-item list-group-item-action'
                   }
                   onClick={() => {
-                    self.setState({unitType: unitType })}
+                    self.setState({unitType: unitType, section: 'unitTypes'})}
                   }
                 >
                   {unitType.name} - <small>{unitType.address}</small>
@@ -344,6 +356,9 @@ export default class App extends React.Component {
                   <li>Instant Booking: {self.state.hotel.waitConfirmation ? 'Yes' : 'No'}</li>
                   <li>Total Units: {self.state.unitType.totalUnits}</li>
                 </ul>
+                <div type="button" class="btn btn-primary" onClick={() => self.setState({section: 'units'})} >
+                  View Units
+                </div>
                 {self.state.unitType.info.description ?
                   <div>
                     <hr></hr>
@@ -373,7 +388,11 @@ export default class App extends React.Component {
 
       var unitsSection =
         <div>
-          <hr></hr>
+          <div class="pull-right">
+            <div type="button" class="btn btn-link" onClick={() => self.setState({section: 'unitTypes'})} >
+              Back to Unit Types
+            </div>
+          </div>
           <div class='row'>
             <div class='col-8'>
               <div class='list-group'>
@@ -395,12 +414,8 @@ export default class App extends React.Component {
               })}
               </div>
             </div>
-          </div>
-          {self.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
-          <div>
-            <hr></hr>
-            <div class='row'>
-              <div class='col-8'>
+            {self.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
+              <div class='col-4'>
                 {self.state.user.account != '0x0000000000000000000000000000000000000000' ?
                   <BookUnit
                     startDate={self.state.startDate}
@@ -413,32 +428,26 @@ export default class App extends React.Component {
                     onDatesChange={self.updateBookingPrice.bind(self)}
                     onCurrencyChange={(val) => self.setState({currency: val})}
                     onSubmit={self.bookRoom.bind(self)}
-                  />
+                  ></BookUnit>
                 :
                 <Link to='/wallet'>Please create a wallet</Link>}
               </div>
-            </div>
+            :
+              <div></div>
+            }
           </div>
-          :
-            <div></div>
-          }
         </div>;
 
       return(
         <div class='row justify-content-md-center'>
           <ToastContainer style={{zIndex: 2000}}/>
           <div class='col-md-10'>
-            <div class='jumbotron'>
-              {hotelsSection}
-              {self.state.hotel.address != '0x0000000000000000000000000000000000000000' &&
-                !self.state.loading ?
-                  unitTypesSection
-                : <div></div>
-              }
-              {self.state.unitType.address != '0x0000000000000000000000000000000000000000' &&
-                !self.state.loading ?
-                  unitsSection
-                : <div></div>
+            <div class={self.state.loading ? 'jumbotron loading' : 'jumbotron'}>
+              { self.state.section == 'unitTypes' ?
+                unitTypesSection
+              : self.state.section == 'units' ?
+                unitsSection
+              : hotelsSection
               }
             </div>
           </div>
