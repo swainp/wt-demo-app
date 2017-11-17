@@ -15,7 +15,7 @@ export default class BookUnit extends React.Component {
       return(
         <form onSubmit={(e) => {e.preventDefault(); this.props.onSubmit(this.state.password)}}>
           <div class="form-group">
-            <label>Date Range</label>
+            <label>Dates to book:</label>
             <DateRangePicker
               startDate={this.props.startDate} // momentPropTypes.momentObj or null,
               endDate={this.props.endDate} // momentPropTypes.momentObj or null,
