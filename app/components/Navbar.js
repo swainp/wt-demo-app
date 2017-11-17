@@ -22,6 +22,12 @@ export default class App extends React.Component {
       });
     }
 
+    logout(){
+      delete window.localStorage.walet;
+      window.location.replace(window.location.origin+'/');
+      window.location.reload();
+    }
+
     render() {
       return(
         <nav class='navbar navbar-expand-md navbar-dark fixed-top bg-dark'>
@@ -52,6 +58,9 @@ export default class App extends React.Component {
             <form class='form-inline mt-2 mt-md-0'>
               <input class='form-control mr-sm-2' placeholder='Hotel or Unit address' aria-label='Search' type='text'/>
               <button class='btn btn-outline-success my-2 my-sm-0' type='submit'>Search</button>
+              <button class='btn btn-link my-2 my-sm-0' type='button'
+                onClick={() => this.logout()}
+              >Logout</button>
             </form>
           </div>
         </nav>
