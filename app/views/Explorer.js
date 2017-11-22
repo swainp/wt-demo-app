@@ -98,6 +98,7 @@ export default class App extends React.Component {
       var self = this;
       self.setState({loading: true});
       var hotelsAddrs = await self.state.hotelManager.WTIndex.methods.getHotels().call();
+      hotelsAddrs = hotelsAddrs.filter(addr => addr !== "0x0000000000000000000000000000000000000000");
       var hotels = [];
       let totalHotels = hotelsAddrs.length-1;
       for (var i = 1; i <= totalHotels; i++)
