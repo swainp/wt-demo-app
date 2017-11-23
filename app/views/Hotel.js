@@ -4,6 +4,15 @@ import ReactModal from "react-modal";
 
 import moment from 'moment';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.min.css';
+
+import CreateHotel from '../components/CreateHotel';
+import EditHotel from '../components/EditHotel';
+import AddUnit from '../components/AddUnit';
+import EditUnit from '../components/EditUnit';
+import AddUnitType from '../components/AddUnitType';
+import EditUnitType from '../components/EditUnitType';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));
@@ -65,61 +74,63 @@ export default class App extends React.Component {
         window.location.replace(window.location.origin+'/#/');
     }
 
-    async createHotel(){
+    async createHotel(hotel, password){
       var self = this;
-      self.setState({loading: true, createHotelError: false});
+      self.setState({loading: true});
       try {
-        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
-        let newHotel = await self.state.hotelManager.createHotel(self.state.newHotelName, self.state.newHotelDescription);
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+        await self.state.hotelManager.createHotel(hotel.name, hotel.description);
         await self.getHotels();
         self.setState({loading: false, hotelSection: "list"});
+        toast.success('Added new hotel!');
       }
       catch(e) {
         console.log("Error creating the hotel", e);
-        self.setState({loading: false, createHotelError: true});
+        self.setState({loading: false });
+        toast.error(e.toString());
       }
     }
 
-    async addUnit(){
+    async addUnit(password){
       var self = this;
-      self.setState({loading: true, addHotelUnitTypeError: false});
+      self.setState({loading: true});
       try {
-        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
         await self.state.hotelManager.addUnit(self.state.hotel.address, self.state.unitType);
-        await self.getHotels();
         // select hotel again, so it uses the fresh version (that includes the just created room)
-        self.selectHotel(self.state.hotel.address);
+        await self.selectHotel(self.state.hotel.address);
         self.setState({section: 'hotels', hotelSection: 'list', loading: false});
+        toast.success('Added new room!');
       }
       catch(e) {
         console.log("Error adding hotel room", e);
-        self.setState({loading: false, addHotelUnitTypeError: true});
+        self.setState({loading: false});
+        toast.error(e.toString());
       }
     }
 
-    async addUnitType(){
+    async addUnitType(newUnitType, password){
       var self = this;
-      self.setState({loading: true, addHotelUnitTypeError: false});
+      self.setState({loading: true});
 
       try {
-        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
-        let tx = await self.state.hotelManager.addUnitType(self.state.hotel.address, self.state.newUnitType.type);
-        console.log(tx);
-
-        await self.getHotels();
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+        await self.state.hotelManager.addUnitType(self.state.hotel.address, newUnitType);
         // select hotel again, so it uses the fresh version (that includes the just created room)
-        self.selectHotel(self.state.hotel.address);
+        await self.selectHotel(self.state.hotel.address);
         self.setState({section: 'hotels', hotelSection: 'list', loading: false});
+        toast.success('Added new room type!');
       }
       catch(e) {
-        console.log("Error adding hotel room", e);
-        self.setState({loading: false, addHotelUnitTypeError: true});
+        console.log("Error adding room type", e);
+        self.setState({loading: false});
+        toast.error(e.toString());
       }
     }
 
-    async editUnitType() {
+    async editUnitType(newUnitType, image, password) {
       var self = this;
-      self.setState({loading: true, addHotelUnitTypeError: false});
+      self.setState({loading: true});
 
       let args = [
         self.state.hotel.address,
@@ -138,37 +149,39 @@ export default class App extends React.Component {
           args.push(self.state.amenityCode);
           break;
         case 'editUnitType':
-          args.push((self.state.newUnitType.description || self.state.unitTypeInfo.description));
-          args.push((self.state.newUnitType.minGuests || self.state.unitTypeInfo.minGuests));
-          args.push((self.state.newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests));
-          args.push((self.state.newUnitType.price || self.state.unitTypeInfo.price));
+          args.push((newUnitType.description || self.state.unitTypeInfo.description));
+          args.push((newUnitType.minGuests || self.state.unitTypeInfo.minGuests));
+          args.push((newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests));
+          args.push((newUnitType.price || self.state.unitTypeInfo.price));
           break;
         case 'addImageUnitType':
-          args.push(self.state.imageUrl);
+          args.push(image.imageUrl);
           break;
         case 'removeImageUnitType':
-          args.push(self.state.imageIndex);
+          args.push(image.imageIndex);
           break;
         case 'removeUnitType':
           break;
       }
 
       try {
-        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
         await self.state.hotelManager[self.state.editHotelUnitTypeFunction](...args);
         await self.getHotels();
         // select hotel again, so it uses the fresh version (that includes the just created room)
-        self.selectHotel(self.state.hotel.address);
+        await self.selectHotel(self.state.hotel.address);
         self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
+        toast.success('Edited room type details!');
       } catch(e) {
         console.log("Error editing unit type", e);
-        self.setState({loading: false, addHotelUnitError: true});
+        self.setState({loading: false});
+        toast.error(e.toString());
       }
     }
 
-    async editHotel() {
+    async editHotel(hotel, image, password) {
       var self = this;
-      self.setState({loading: true, editHotelError: false});
+      self.setState({loading: true});
 
       let args = [
         self.state.hotel.address
@@ -182,48 +195,51 @@ export default class App extends React.Component {
       //async removeHotel(address: Address): Promievent
       switch(self.state.editHotelFunction) {
         case 'changeHotelAddress':
-          args.push(self.state.hotel.lineOne);
-          args.push(self.state.hotel.lineTwo);
-          args.push(self.state.hotel.zip);
-          args.push(self.state.hotel.country);
+          args.push(hotel.lineOne);
+          args.push(hotel.lineTwo);
+          args.push(hotel.zip);
+          args.push(hotel.country);
           break;
         case 'changeHotelInfo':
-          args.push(self.state.hotel.name);
-          args.push(self.state.hotel.description);
+          args.push(hotel.name);
+          args.push(hotel.description);
           break;
         case 'changeHotelLocation':
-          args.push(self.state.hotel.timezone);
-          args.push(self.state.hotel.latitude);
-          args.push(self.state.hotel.longitude);
+          args.push(hotel.timezone);
+          args.push(hotel.latitude);
+          args.push(hotel.longitude);
           break;
         case 'setRequireConfirmation':
-          args.push(self.state.hotel.waitConfirmation);
+          args.push(hotel.waitConfirmation);
           break;
         case 'addImageHotel':
-          args.push(self.state.imageUrl);
+          args.push(image.imageUrl);
         case 'removeImageHotel':
-          args.push(self.state.imageIndex);
+          args.push(image.imageIndex);
         case 'removeHotel':
           break;
       }
 
       try {
-        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
 
         await self.state.hotelManager[self.state.editHotelFunction](...args);
 
-        await self.getHotels();
         // select hotel again, so it uses the fresh version (that includes the just created room)
         if(self.state.editHotelFunction !== 'removeHotel')
-          self.selectHotel(self.state.hotel.address);
+          await self.selectHotel(self.state.hotel.address);
+        else
+          await self.getHotels();
         self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
+        toast.success('Updated hotel!')
       } catch(e) {
         console.log("Error editing hotel room", e);
-        self.setState({loading: false, editHotelError: true});
+        self.setState({loading: false });
+        toast.error(e.toString());
       }
     }
 
-    async editHotelUnit() {
+    async editHotelUnit(newUnit, password) {
       var self = this;
       self.setState({loading: true, addHotelUnitError: false});
 
@@ -241,41 +257,42 @@ export default class App extends React.Component {
       //async removeUnit(hotelAddress: Address, unitAddress: Address): Promievent
       switch(self.state.editHotelUnitFunction) {
         case 'setUnitActive':
-          args.push(self.state.unitInfo.active);
+          args.push(newUnit.active);
           break;
         case 'setDefaultPrice':
-          args.push(self.state.unitInfo.defaultPrice);
+          args.push(newUnit.defaultPrice);
           break;
         case 'setDefaultLifPrice':
-          args.push(self.state.unitInfo.defaultLifPrice);
+          args.push(newUnit.defaultLifPrice);
           break;
         case 'setCurrencyCode':
-          args.push(self.state.unitInfo.currencyCode);
+          args.push(newUnit.currencyCode);
           break;
         case 'setUnitSpecialLifPrice':
-          args.push(Number(self.state.specialLifPrice));
-          args.push(self.state.startDate.toDate());
-          args.push(self.state.endDate.diff(self.state.startDate, 'days'));
+          args.push(newUnit.specialLifPrice);
+          args.push(newUnit.startDate.toDate());
+          args.push(newUnit.endDate.diff(newUnit.startDate, 'days'));
           break;
         case 'setUnitSpecialPrice':
-          args.push(Number(self.state.specialPrice));
-          args.push(self.state.startDate.toDate());
-          args.push(self.state.endDate.diff(self.state.startDate, 'days'));
+          args.push(newUnit.specialPrice);
+          args.push(newUnit.startDate.toDate());
+          args.push(newUnit.endDate.diff(newUnit.startDate, 'days'));
           break;
         case 'removeUnit':
           break;
       }
 
       try {
-        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], self.state.password);
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
         await self.state.hotelManager[self.state.editHotelUnitFunction](...args);
-        await self.getHotels();
         // select hotel again, so it uses the fresh version (that includes the just created room)
-        self.selectHotel(self.state.hotel.address);
+        await self.selectHotel(self.state.hotel.address);
         self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
+        toast.success('Updated room details!');
       } catch(e) {
         console.log("Error adding hotel room", e);
         self.setState({loading: false, addHotelUnitError: true});
+        toast.error(e.toString());
       }
     }
 
@@ -288,15 +305,18 @@ export default class App extends React.Component {
     //   });
     // }
 
-    selectHotel(address) {
-      var selectedHotel = this.state.hotels[address];
+    async selectHotel(address) {
+      var self = this;
+      var selectedHotel = await self.state.hotelManager.getHotel(address);
+      console.log('loaded hotel');
+      console.log(selectedHotel);
       selectedHotel.address = address;
       let unitTypeOptions = [];
       Object.entries(selectedHotel.unitTypes).forEach(([key, value]) => {
         unitTypeOptions.push({ value: key, label: key})
       });
 
-      this.setState({
+      self.setState({
         hotel: selectedHotel,
         createNewUnitType: selectedHotel.unitTypeNames.length == 0,
         unitType: unitTypeOptions[0] ? unitTypeOptions[0].value: '',
@@ -307,9 +327,10 @@ export default class App extends React.Component {
     }
 
     async loadHotel(address){
-      await this.setState({loading: true});
-      this.selectHotel(address);
-      await this.setState({loading: false});
+      let self = this;
+      self.setState({loading: true});
+      await self.selectHotel(address);
+      self.setState({loading: false});
     }
 
     // loadTxs(){
@@ -348,15 +369,33 @@ export default class App extends React.Component {
     // }
 
     async getHotels() {
-      this.setState({loading: true});
-      let hotels = await this.state.hotelManager.getHotels();
+      var self = this;
+      self.setState({loading: true});
+      let hotelsAddrs = await self.state.hotelManager.WTIndex.methods.getHotelsByManager('0x'+self.state.hotelManager.owner).call();
+      hotelsAddrs = hotelsAddrs.filter(addr => addr !== "0x0000000000000000000000000000000000000000");
+
+      let hotels = [];
+      let totalHotels = hotelsAddrs.length-1;
+      for (let hotelAddr of hotelsAddrs)
+        hotels.push(await self.getHotelInfo(hotelAddr));
+
+      // let hotels = await this.state.hotelManager.getHotels();
       let hotelOptions = [];
       if(hotels) {
         Object.entries(hotels).forEach(([key, value]) => {
-          hotelOptions.push({ value: key, label: value.name})
+          hotelOptions.push({ value: value.instance._address, label: value.name})
         });
       }
       this.setState({hotels: hotels, hotelOptions: hotelOptions, loading: false});
+    }
+
+    async getHotelInfo(hotelAddr) {
+      var self = this;
+      var hotelInstance = Utils.getInstance('Hotel', hotelAddr, self.state.hotelManager.context);
+      return {
+        instance: hotelInstance,
+        name: await hotelInstance.methods.name().call(),
+      };
     }
 
     render() {
@@ -372,61 +411,10 @@ export default class App extends React.Component {
         </div>
 
       var createHotel =
-        <form class="box" onSubmit={(e) => {e.preventDefault(); self.createHotel()}}>
-          <h3>
-            New Hotel
-            <div class="pull-right">
-              <input type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list'})} value="Back to hotels" />
-            </div>
-          </h3>
-          <div class="form-group">
-            <label>Hotel Name</label>
-            <input
-              type="text"
-              autoFocus="true"
-              class="form-control"
-              value={self.state.newHotelName}
-              onChange={(event) => {
-                self.setState({ newHotelName: event.target.value, createHotelError: false });
-              }}
-            />
-          </div>
-          <div class="form-group">
-            <label>Hotel Description</label>
-            <input
-              type="text"
-              class="form-control"
-              value={self.state.newHotelDescription}
-              onChange={(event) => {
-                self.setState({ newHotelDescription: event.target.value, createHotelError: false });
-              }}
-            />
-          </div>
-          <div class="form-group">
-            <label>Your Wallet Password</label>
-            <div class="input-group">
-              <input
-                type={self.state.showPassword ? "text" : "password"}
-                class="form-control"
-                defaultValue={self.state.password}
-                onChange={(event) => {
-                  self.setState({ password: event.target.value, createHotelError: false });
-                }}
-              />
-              <span class="input-group-addon">
-                {self.state.showPassword ?
-                  <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
-                :
-                  <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
-                }
-              </span>
-            </div>
-          </div>
-          <input type="submit" class="btn btn-primary btn-block" value="Create hotel" />
-          {self.state.createHotelError
-            ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>There was an error creating the hotel, is that the correct wallet password?</p>
-            : null}
-        </form>
+        <CreateHotel
+          createHotel={self.createHotel.bind(self)}
+          onBack={() => self.setState({section: 'hotels', hotelSection: 'list'})}
+        />
 
       let editHotelFunctions = [
         {value: 'changeHotelAddress', label: 'Address'},
@@ -439,303 +427,30 @@ export default class App extends React.Component {
       ]
 
       var editHotel =
-        <form class="box" onSubmit={(e) => {e.preventDefault(); self.editHotel()}}>
-          <h3>
-            Edit Hotel
-            <div class="pull-right">
-              <button type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list'})}>Back to hotels</button>
-            </div>
-          </h3>
-          <div class="form-group">
-            <label>Choose a hotel</label>
-            <Select
-              name="Hotels"
-              clearable={false}
-              options={self.state.hotelOptions}
-              value={self.state.hotel.address}
-              onChange={ (val) => self.loadHotel(val.value)}
-            />
-          </div>
-          <hr></hr>
-          {(self.state.hotel.address != "") ?
-          <div>
-            <div class="form-group">
-              <Select
-                name="Edit Parameter"
-                clearable={false}
-                value={self.state.editHotelFunction}
-                autoFocus="true"
-                options={editHotelFunctions}
-                onChange={(e) => {
-                  self.setState({ editHotelFunction: e.value });
-                }}
-              />
-            </div>
-            <hr></hr>
-            {self.state.editHotelError
-              ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>There was an error editing the hotel, is that the correct wallet password?</p>
-              : null}
-            {{
-              changeHotelAddress: (
-                <div>
-                  <div class="form-group">
-                    <label>Address One</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      value={self.state.hotel.lineOne || ''}
-                      onChange={(e) => {
-                        self.setState({ hotel: Object.assign(self.state.hotel, {lineOne: e.target.value}) });
-                      }}
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Address Two</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      value={self.state.hotel.lineTwo || ''}
-                      onChange={(e) => {
-                        self.setState({ hotel: Object.assign(self.state.hotel, {lineTwo: e.target.value}) });
-                      }}
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Zip Code</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      value={self.state.hotel.zip}
-                      onChange={(e) => {
-                        self.setState({ hotel: Object.assign(self.state.hotel, {zip: e.target.value}) });
-                      }}
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Country</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      value={self.state.hotel.country}
-                      onChange={(e) => {
-                        self.setState({ hotel: Object.assign(self.state.hotel, {country: e.target.value}) });
-                      }}
-                    />
-                  </div>
-                </div>
-              ),
-              changeHotelInfo: (
-                <div>
-                  <div class="form-group">
-                    <label>Name</label>
-                    <input
-                      type="text"
-                      autoFocus="true"
-                      class="form-control"
-                      value={self.state.hotel.name}
-                      onChange={(e) => {
-                        self.setState({ hotel: Object.assign(self.state.hotel, {name: e.target.value}) });
-                      }}
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Description</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      value={self.state.hotel.description}
-                      onChange={(e) => {
-                        self.setState({ hotel: Object.assign(self.state.hotel, {description: e.target.value}) });
-                      }}
-                    />
-                  </div>
-                </div>
-              ),
-              changeHotelLocation: (
-                <div>
-                  <div class="form-group">
-                    <label>Timezone</label>
-                    <input
-                      type="number"
-                      min="0"
-                      max="24"
-                      step="1"
-                      class="form-control"
-                      value={self.state.hotel.timezone}
-                      onChange={(e) => {
-                        self.setState({ hotel: Object.assign(self.state.hotel, {timezone: Number(e.target.value)}) });
-                      }}
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Latitude</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      value={self.state.hotel.latitude}
-                      onChange={(e) => {
-                        self.setState({ hotel: Object.assign(self.state.hotel, {latitude: Number(e.target.value)}) });
-                      }}
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Longitude</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      value={self.state.hotel.longitude}
-                      onChange={(e) => {
-                        self.setState({ hotel: Object.assign(self.state.hotel, {longitude: Number(e.target.value)}) });
-                      }}
-                    />
-                  </div>
-                </div>
-              ),
-              setRequireConfirmation: (
-                <div class="form-group">
-                  <label>Confirmation Required</label>
-                  <input
-                    type="checkbox"
-                    class="form-control"
-                    checked={self.state.hotel.waitConfirmation}
-                    onChange={(e) => {
-                      self.setState({ hotel: Object.assign(self.state.hotel, {waitConfirmation: e.target.checked}) });
-                    }}
-                  />
-                </div>
-              ),
-              addImageHotel: (
-                <div>
-                  <div class="form-group">
-                    <label>Image URL</label>
-                    <input
-                      type="url"
-                      class="form-control"
-                      value={self.state.imageUrl}
-                      onChange={(e) => {
-                        self.setState({ imageUrl: e.target.value });
-                      }}
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Preview</label>
-                    <img src={self.state.imageUrl} />
-                  </div>
-                </div>
-              ),
-              removeImageHotel: (
-                <div>
-                  <div class="form-group">
-                    <label>Image to Remove</label>
-                    <Select
-                      name="Image"
-                      clearable={false}
-                      value={self.state.imageUrl}
-                      autoFocus="true"
-                      options={self.state.hotel.images.map((url, i)=>{return {value: i, label: url}})}
-                      onChange={(e) => {
-                        self.setState({ imageIndex: e.value, imageUrl: e.label });
-                      }}
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Preview</label>
-                    <img src={self.state.imageUrl} />
-                  </div>
-                </div>
-              ),
-              removeHotel: (
-                <div class="form-group">
-                  <label>Enter your password below to remove this hotel</label>
-                </div>
-              )
-            }[self.state.editHotelFunction]}
-            <div class="form-group">
-              <label>Your Wallet Password</label>
-              <div class="input-group">
-                <input
-                  type={self.state.showPassword ? "text" : "password"}
-                  class="form-control"
-                  defaultValue={self.state.password}
-                  onChange={(event) => {
-                    self.setState({ password: event.target.value, editHotelError: false });
-                  }}
-                />
-                <span class="input-group-addon">
-                  {self.state.showPassword ?
-                    <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
-                  :
-                    <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
-                  }
-                </span>
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">Update hotel details</button>
-            {self.state.editHotelError
-              ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>There was an error editing the hotel, is that the correct wallet password?</p>
-              : null}
-          </div>
-          : null}
-        </form>
+        <EditHotel
+          editHotel={self.editHotel.bind(self)}
+          onBack={() => self.setState({section: 'hotels', hotelSection: 'list'})}
+          hotel={self.state.hotel}
+          hotelOptions={self.state.hotelOptions}
+          onHotelChange={self.loadHotel.bind(self)}
+          editHotelFunction={self.state.editHotelFunction}
+          editHotelFunctions={editHotelFunctions}
+          onFunctionChange={(func) => { self.setState({ editHotelFunction: func }); }}
+          editHotelInfo={(info) => { self.setState({ hotel: Object.assign(self.state.hotel, info) }); }}
+        />
 
       var addHotelUnit =
-      <div>
-          <h3>
-            Add Room
-            <div class="pull-right">
-              <button type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list'})}>Back to hotel details</button>
-            </div>
-          </h3>
-          <h4>{self.state.hotel.name}</h4>
-          <hr></hr>
-          {(self.state.addHotelUnitError)
-            ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
-            : null}
-            <form class="box" onSubmit={(e) => {e.preventDefault(); self.addUnit()}}>
-              <div class="form-group">
-                <label>Room Type</label>
-                <Select
-                  name="Room Types"
-                  clearable={false}
-                  value={self.state.unitType}
-                  autoFocus="true"
-                  placeholder="Double Room"
-                  options={self.state.unitTypeOptions}
-                  onChange={(e) => {
-                    self.setState({ unitType: e.value, unitTypeInfo: self.state.hotel.unitTypes[e.value].info });
-                  }}
-                />
-                <button type="button" class="btn btn-link" onClick={() => self.setState({createNewUnitType: true})}>
-                  Or create a new room type
-                </button>
-              </div>
-              <div class="form-group">
-                <label>Your Wallet Password</label>
-                <div class="input-group">
-                  <input
-                    type={self.state.showPassword ? "text" : "password"}
-                    class="form-control"
-                    defaultValue={self.state.password}
-                    required
-                    onChange={(event) => {
-                      self.setState({ password: event.target.value, addHotelUnitError: false });
-                    }}
-                  />
-                  <span class="input-group-addon">
-                    {self.state.showPassword ?
-                      <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
-                    :
-                      <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
-                    }
-                  </span>
-                </div>
-              </div>
-              <button type="submit" class="btn btn-primary btn-block">Add Room</button>
-              {(self.state.addHotelUnitError)
-                ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
-                : null}
-            </form>
-          </div>
+        <AddUnit
+          addUnit={self.addUnit.bind(self)}
+          onBack={() => self.setState({section: 'hotels', hotelSection: 'list'})}
+          hotel={self.state.hotel}
+          unitType={self.state.unitType}
+          unitTypeOptions={self.state.unitTypeOptions}
+          onUnitTypeChange={(unitType) => {
+            self.setState({ unitType: unitType, unitTypeInfo: self.state.hotel.unitTypes[unitType].info });
+          }}
+          onNewRoomType={() => self.setState({createNewUnitType: true})}
+        />
 
 
       let editHotelUnitTypeFunctions = [
@@ -748,283 +463,31 @@ export default class App extends React.Component {
       ]
 
       var addHotelUnitType =
-      <div>
-          <h3>
-            Add/Edit Room Type
-            <div class="pull-right">
-              <button type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list'})}>Back to hotel details</button>
-            </div>
-          </h3>
-          <h4>{self.state.hotel.name}</h4>
-          <hr></hr>
-          {(self.state.addHotelUnitTypeError)
-            ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
-            : null}
-          {self.state.createNewUnitType ?
-            <form class="box" onSubmit={(e) => {e.preventDefault(); self.addUnitType()}}>
-              <div class="form-group">
-                <label>New Room Type</label>
-                <input
-                  type="text"
-                  autoFocus="true"
-                  class="form-control"
-                  value={self.state.newUnitType.type}
-                  onChange={(event) => {
-                    var newUnitType = self.state.newUnitType;
-                    newUnitType.type = event.target.value
-                    self.setState({ newUnitType: newUnitType });
-                  }}
-                />
-                {self.state.unitTypeOptions[0] &&
-                <button type="button" class="btn btn-link" onClick={() => self.setState({createNewUnitType: false})}>
-                  Or edit an existing room type
-                </button>}
-              </div>
-              <div class="form-group">
-                <label>Your Wallet Password</label>
-                <div class="input-group">
-                  <input
-                    type={self.state.showPassword ? "text" : "password"}
-                    class="form-control"
-                    defaultValue={self.state.password}
-                    required
-                    onChange={(event) => {
-                      self.setState({ password: event.target.value, addHotelUnitTypeError: false });
-                    }}
-                  />
-                  <span class="input-group-addon">
-                    {self.state.showPassword ?
-                      <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
-                    :
-                      <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
-                    }
-                  </span>
-                </div>
-              </div>
-              <button type="submit" class="btn btn-primary btn-block">Add Room Type</button>
-              {(self.state.addHotelUnitTypeError)
-                ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
-                : null}
-            </form>
-          :
-            <form class="box" onSubmit={(e) => {e.preventDefault(); self.editUnitType()}}>
-              <div class="form-group">
-                <label>Room Type</label>
-                <Select
-                  name="Room Types"
-                  clearable={false}
-                  value={self.state.unitType}
-                  autoFocus="true"
-                  placeholder="Double Room"
-                  options={self.state.unitTypeOptions}
-                  onChange={(e) => {
-                    self.setState({ unitType: e.value, unitTypeInfo: self.state.hotel.unitTypes[e.value].info, newUnitType: {} });
-                  }}
-                />
-                <button type="button" class="btn btn-link" onClick={() => self.setState({createNewUnitType: true})}>
-                  Or create a new room type
-                </button>
-              </div>
-              <hr></hr>
-              <div class="form-group">
-                <Select
-                  name="Edit Parameter"
-                  clearable={false}
-                  value={self.state.editHotelUnitTypeFunction}
-                  autoFocus="true"
-                  options={editHotelUnitTypeFunctions}
-                  onChange={(e) => {
-                    self.setState({ editHotelUnitTypeFunction: e.value });
-                  }}
-                />
-              </div>
-              <hr></hr>
-              {self.state.unitTypeInfo && {
-                editUnitType: (
-                  <div>
-                    <div class="form-group">
-                      <label>Room description</label>
-                      <input
-                        type="text"
-                        class="form-control"
-                        placeholder="A fancy and spacious room with the best amenities"
-                        value={self.state.newUnitType.description || self.state.unitTypeInfo.description || ''}
-                        onChange={(event) => {
-                          var newUnitType = self.state.newUnitType;
-                          newUnitType.description = event.target.value
-                          self.setState({ newUnitType: newUnitType });
-                        }}
-                        required
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label>Minimum Guests</label>
-                      <input
-                        type="number"
-                        class="form-control"
-                        required
-                        value={self.state.newUnitType.minGuests || self.state.unitTypeInfo.minGuests || ''}
-                        onChange={(event) => {
-                          var newUnitType = self.state.newUnitType;
-                          newUnitType.minGuests = event.target.value
-                          self.setState({ newUnitType: newUnitType });
-                        }}
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label>Maximum Guests</label>
-                      <input
-                        type="number"
-                        class="form-control"
-                        required
-                        value={self.state.newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests || ''}
-                        onChange={(event) => {
-                          var newUnitType = self.state.newUnitType;
-                          newUnitType.maxGuests = event.target.value
-                          self.setState({ newUnitType: newUnitType });
-                        }}
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label>Price</label>
-                      <div class="input-group">
-                        <input
-                          type="text"
-                          class="form-control"
-                          placeholder="Price per night, including taxes"
-                          required
-                          value={self.state.newUnitType.price || self.state.unitTypeInfo.price || ''}
-                          onChange={(event) => {
-                            var newUnitType = self.state.newUnitType;
-                            newUnitType.price = event.target.value
-                            self.setState({ newUnitType: newUnitType });
-                          }}
-                        />
-                        <div class="input-group-btn">
-                          <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            {self.state.newUnitType.currency || 'USD'} <span class="caret"></span>
-                          </button>
-                          <ul class="dropdown-menu dropdown-menu-right">
-                            <li onClick={() => {
-                              var newUnitType = self.state.newUnitType;
-                              newUnitType.currency = 'USD'
-                              self.setState({ newUnitType: newUnitType });
-                            }}><a>USD</a></li>
-                            <li onClick={() => {
-                              var newUnitType = self.state.newUnitType;
-                              newUnitType.currency = 'Lif'
-                              self.setState({ newUnitType: newUnitType });
-                            }}><a>Lif</a></li>
-                          </ul>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                ),
-                addAmenity: (
-                  <div class="form-group">
-                    <label>Amenity Code</label>
-                    <input
-                      type="number"
-                      class="form-control"
-                      required
-                      value={self.state.amenityCode}
-                      onChange={(e) => {
-                        self.setState({ amenityCode: e.target.value });
-                      }}
-                    />
-                  </div>
-                ),
-                removeAmenity: (
-                  <div class="form-group">
-                    <label>Amenity to Remove</label>
-                    <Select
-                      name="Amenity"
-                      clearable={false}
-                      value={self.state.amenityCode || self.state.amenities[0]}
-                      autoFocus="true"
-                      options={self.state.amenities.map((a)=>{return {value: a, label: a}})}
-                      onChange={(e) => {
-                        self.setState({ amenityCode: e.value });
-                      }}
-                    />
-                  </div>
-                ),
-                addImageUnitType: (
-                  <div>
-                    <div class="form-group">
-                      <label>Image URL</label>
-                      <input
-                        type="url"
-                        class="form-control"
-                        value={self.state.imageUrl}
-                        onChange={(e) => {
-                          self.setState({ imageUrl: e.target.value });
-                        }}
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label>Preview</label>
-                      <img src={self.state.imageUrl} />
-                    </div>
-                  </div>
-                ),
-                removeImageUnitType: (
-                  <div>
-                    <div class="form-group">
-                      <label>Image to Remove</label>
-                      <Select
-                        name="Image"
-                        clearable={false}
-                        value={self.state.imageUrl}
-                        autoFocus="true"
-                        options={self.state.hotel.unitTypes[self.state.unitType].images.map((url, i)=>{return {value: i, label: url}})}
-                        onChange={(e) => {
-                          self.setState({ imageIndex: e.value, imageUrl: e.label });
-                        }}
-                      />
-                    </div>
-                    <div class="form-group">
-                      <label>Preview</label>
-                      <img src={self.state.imageUrl} />
-                    </div>
-                  </div>
-                ),
-                removeUnitType: (
-                  <div class="form-group">
-                    <label>Enter your password below to remove this room type</label>
-                  </div>
-                )
-              }[self.state.editHotelUnitTypeFunction]}
+        <AddUnitType
+          addUnitType={self.addUnitType.bind(self)}
+          onBack={() => self.setState({section: 'hotels', hotelSection: 'list'})}
+          hotel={self.state.hotel}
+          unitTypeOptions={self.state.unitTypeOptions}
+          onEditUnitType={() => self.setState({section: 'editHotelUnitType'})} //switch to setting section
+        />
 
-            <div class="form-group">
-              <label>Your Wallet Password</label>
-              <div class="input-group">
-                <input
-                  type={self.state.showPassword ? "text" : "password"}
-                  class="form-control"
-                  defaultValue={self.state.password}
-                  required
-                  onChange={(event) => {
-                    self.setState({ password: event.target.value, addHotelUnitTypeError: false });
-                  }}
-                />
-                <span class="input-group-addon">
-                  {self.state.showPassword ?
-                    <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
-                  :
-                    <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
-                  }
-                </span>
-              </div>
-            </div>
-            <button type="submit" class="btn btn-primary btn-block">Update Room Type</button>
-            {(self.state.addHotelUnitTypeError)
-              ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred adding the hotel room, is that the correct password?</p>
-              : null}
-                      </form>
-          }
-          </div>
+      var editHotelUnitType =
+        <EditUnitType
+          unitTypeInfo={self.state.unitTypeInfo}
+          editUnitType={self.editUnitType.bind(self)}
+          onBack={() => self.setState({section: 'hotels', hotelSection: 'list'})}
+          onAddUnitType={() => self.setState({section: 'addHotelUnitType'})}
+          hotel={self.state.hotel}
+          unitType={self.state.unitType}
+          unitTypeOptions={self.state.unitTypeOptions}
+          onUnitTypeChange={unitType => self.setState({ unitType: unitType, unitTypeInfo: self.state.hotel.unitTypes[unitType].info })}
+          editHotelUnitTypeFunction={self.state.editHotelUnitTypeFunction}
+          editHotelUnitTypeFunctions={editHotelUnitTypeFunctions}
+          onFunctionChange={func => self.setState({ editHotelUnitTypeFunction: func })}
+          amenityCode={self.state.amenityCode}
+          amenities={self.state.amenities}
+          onAmenityCodeChange={amenityCode => self.setState({ amenityCode: amenityCode })}
+        />
 
       let editHotelUnitFunctions = [
         {value: 'setUnitActive', label: 'Active'},
@@ -1037,175 +500,15 @@ export default class App extends React.Component {
       ]
 
       var editHotelUnit =
-      <div>
-      {self.state.unit &&
-      <form class="box" onSubmit={(e) => {e.preventDefault(); self.editHotelUnit()}}>
-        <h3>
-          Edit Hotel Room
-          <div class="pull-right">
-            <button type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list'})}>Back to hotels</button>
-          </div>
-        </h3>
-        <h4>{self.state.hotel.name} {self.state.unit.substring(2,6)}</h4>
-        <div class="form-group">
-          <Select
-            name="Edit Parameter"
-            clearable={false}
-            value={self.state.editHotelUnitFunction}
-            autoFocus="true"
-            options={editHotelUnitFunctions}
-            onChange={(e) => {
-              self.setState({ editHotelUnitFunction: e.value });
-            }}
-          />
-        </div>
-        <hr></hr>
-        {(self.state.editHotelUnitTypeError)
-          ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred updating the hotel room, is that the correct password?</p>
-          : null}
-        {{
-          setUnitActive: (
-            <div class="form-group">
-              <label>Active</label>
-              <input
-                type="checkbox"
-                class="form-control"
-                autoFocus="true"
-                checked={self.state.unitInfo.active}
-                onChange={(event) => {
-                  self.setState({unitInfo: Object.assign(self.state.unitInfo, {active: event.target.checked}) });
-                }}
-              />
-            </div>
-          ),
-          setCurrencyCode: (
-            <div class="form-group">
-              <label>Currency Code</label>
-              <input
-                type="number"
-                class="form-control"
-                autoFocus="true"
-                value={self.state.unitInfo.currencyCode}
-                onChange={(event) => {
-                  self.setState({unitInfo: Object.assign(self.state.unitInfo, {currencyCode: Number(event.target.value)}) });
-                }}
-              />
-            </div>
-          ),
-          setDefaultLifPrice: (
-            <div class="form-group">
-              <label>Default Lif Price</label>
-              <input
-                type="number"
-                class="form-control"
-                autoFocus="true"
-                value={self.state.unitInfo.defaultLifPrice}
-                onChange={(event) => {
-                  self.setState({unitInfo: Object.assign(self.state.unitInfo, {defaultLifPrice: Number(event.target.value)}) });
-                }}
-              />
-            </div>
-          ),
-          setDefaultPrice: (
-            <div class="form-group">
-              <label>Default Price</label>
-              <input
-                type="number"
-                class="form-control"
-                autoFocus="true"
-                value={self.state.unitInfo.defaultPrice}
-                onChange={(event) => {
-                  self.setState({unitInfo: Object.assign(self.state.unitInfo, {defaultPrice: Number(event.target.value)}) });
-                }}
-              />
-            </div>
-          ),
-          setUnitSpecialLifPrice: (
-            <div>
-              <div class="form-group">
-                <label>Date Range</label>
-                <DateRangePicker
-                  startDate={self.state.startDate} // momentPropTypes.momentObj or null,
-                  endDate={self.state.endDate} // momentPropTypes.momentObj or null,
-                  onDatesChange={({ startDate, endDate }) => self.setState({ startDate, endDate })} // PropTypes.func.isRequired,
-                  focusedInput={self.state.focusedInput} // PropTypes.oneOf([START_DATE, END_DATE]) or null,
-                  onFocusChange={focusedInput => self.setState({ focusedInput: focusedInput })} // PropTypes.func.isRequired,
-                />
-              </div>
-              <div class="form-group">
-                <label>Lif Price</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  autoFocus="true"
-                  value={self.state.specialLifPrice}
-                  onChange={(e) => {
-                    self.setState({ specialLifPrice: e.target.value});
-                  }}
-                />
-              </div>
-            </div>
-          ),
-          setUnitSpecialPrice: (
-            <div>
-              <div class="form-group">
-                <label>Date Range</label>
-                <DateRangePicker
-                  startDate={self.state.startDate} // momentPropTypes.momentObj or null,
-                  endDate={self.state.endDate} // momentPropTypes.momentObj or null,
-                  onDatesChange={({ startDate, endDate }) => self.setState({ startDate, endDate })} // PropTypes.func.isRequired,
-                  focusedInput={self.state.focusedInput} // PropTypes.oneOf([START_DATE, END_DATE]) or null,
-                  onFocusChange={focusedInput => self.setState({ focusedInput: focusedInput })} // PropTypes.func.isRequired,
-                />
-              </div>
-              <div class="form-group">
-                <label>Price</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  autoFocus="true"
-                  value={self.state.specialPrice}
-                  onChange={(e) => {
-                    self.setState({ specialPrice: e.target.value});
-                  }}
-                />
-              </div>
-            </div>
-          ),
-          removeUnit: (
-            <div class="from-group">
-              <label>Enter your password below to remove this room.</label>
-            </div>
-          )
-        }[self.state.editHotelUnitFunction]}
-        <div class="form-group">
-          <label>Your Wallet Password</label>
-          <div class="input-group">
-            <input
-              type={self.state.showPassword ? "text" : "password"}
-              class="form-control"
-              required
-              defaultValue={self.state.password}
-              onChange={(event) => {
-                self.setState({ password: event.target.value, editHotelUnitTypeError: false });
-              }}
-            />
-            <span class="input-group-addon">
-              {self.state.showPassword ?
-                <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
-              :
-                <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
-              }
-            </span>
-          </div>
-        </div>
-        <button type="submit" class="btn btn-primary btn-block">Update Hotel Room</button>
-        {(self.state.editHotelUnitTypeError)
-          ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>An error occurred updating the hotel room, is that the correct password?</p>
-          : null}
-      </form>}
-      </div>
-
+      <EditUnit
+        editHotelUnit={self.editHotelUnit.bind(self)}
+        onBack={() => self.setState({section: 'hotels', hotelSection: 'list'})}
+        hotel={self.state.hotel}
+        unit={self.state.unit}
+        editHotelUnitFunction={self.state.editHotelUnitFunction}
+        editHotelUnitFunctions={editHotelUnitFunctions}
+        onFunctionChange={func => self.setState({ editHotelUnitFunction: func })}
+      />
 
       var hotels =
         <div class="box">
@@ -1426,6 +729,7 @@ export default class App extends React.Component {
 
       return(
         <div class={self.state.loading ? "loading" : ""}>
+          <ToastContainer style={{zIndex: 2000}}/>
           <div class="row">
             {modalTransaction}
             <div class="col-md-2 text-center">
@@ -1440,8 +744,10 @@ export default class App extends React.Component {
                 <div>{createHotel}</div>
               : self.state.section == 'hotels' && self.state.hotelSection == 'list' ?
                 <div>{hotels}</div>
-              : (self.state.section == 'addHotelUnitType' || self.state.createNewUnitType) ?
+              : (self.state.section == 'addHotelUnitType') ?
                 <div>{addHotelUnitType}</div>
+              : (self.state.section == 'editHotelUnitType') ?
+                  <div>{editHotelUnitType}</div>
               : self.state.section == 'addHotelUnit' ?
                 <div>{addHotelUnit}</div>
               : self.state.section == 'editHotelUnit' ?
