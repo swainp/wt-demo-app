@@ -9,7 +9,6 @@ import moment from 'moment';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
 import BookUnit from '../components/BookUnit';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.min.css';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));

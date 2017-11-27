@@ -5,7 +5,6 @@ import ReactModal from "react-modal";
 import moment from 'moment';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.min.css';
 
 import CreateHotel from '../components/CreateHotel';
 import EditHotel from '../components/EditHotel';
