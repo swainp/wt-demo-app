@@ -13,6 +13,7 @@ import AddUnit from '../components/AddUnit';
 import EditUnit from '../components/EditUnit';
 import AddUnitType from '../components/AddUnitType';
 import EditUnitType from '../components/EditUnitType';
+import ViewBookings from '../components/ViewBookings';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));
@@ -68,8 +69,9 @@ export default class App extends React.Component {
           owner: JSON.parse(window.localStorage.wallet).address,
           web3: web3,
           gasMargin: 1.5
-        })
-        this.setState({hotelManager: hotelManager}, () => { this.getHotels() });
+        });
+        const bookingData = new BookingData(web3);
+        this.setState({hotelManager: hotelManager, bookingData: bookingData}, () => { this.getHotels() });
       } else
         window.location.replace(window.location.origin+'/#/');
     }
@@ -398,6 +400,20 @@ export default class App extends React.Component {
       };
     }
 
+    async loadBookings(hotel){
+      var self = this;
+      self.setState({loading: true});
+      await self.selectHotel(hotel);
+      let bookings = await self.state.bookingData.getBookings(self.state.hotel.address);
+      let bookingRequests = await self.state.bookingData.getBookingRequests(self.state.hotel.address);
+      self.setState({
+        bookings: bookings,
+        bookingRequests: bookingRequests,
+        loading: false,
+        section: 'hotelBookings'
+      });
+    }
+
     render() {
       var self = this;
 
@@ -405,7 +421,7 @@ export default class App extends React.Component {
         <div>
           <ul class="list-unstyled" id="actions">
             <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotels' ? " btn-success" : "")} onClick={() => self.setState({section: 'hotels'})}>Hotels</button> </li>
-            <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotelBookings' ? " btn-success" : "")} onClick={() => self.loadBookings()}>Hotel Bookings</button> </li>
+            <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotelBookings' ? " btn-success" : "")} onClick={() => self.setState({section: 'hotelBookings'})}>Hotel Bookings</button> </li>
             <li><button class={"btn btn-default btn-action" + (self.state.section == 'blockchain' ? " btn-success" : "")} onClick={() => self.loadTxs()}>Blockchain Txs</button> </li>
           </ul>
         </div>
@@ -608,35 +624,58 @@ export default class App extends React.Component {
         </div>
 
         var hotelBookings =
-          <div class="box">
-            <h2>Hotel Bookings</h2>
-            <table class="table table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>Hotel Name</th>
-                  <th>Room Type</th>
-                  <th>Room Name</th>
-                  <th>From Day</th>
-                  <th>To Day</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {self.state.bookings.map(function(booking, i){
-                  return (
-                    <tr key={'booking'+i} class="pointer" onClick={() => self.setState({transaction: booking})}>
-                      <td>{booking.hotelName}</td>
-                      <td>{booking.unitType}</td>
-                      <td>{booking.unitName}</td>
-                        <td>{wtUserLib.utils.formatDate(parseInt(booking.publicCall.params[2].value))}</td>
-                        <td>{wtUserLib.utils.formatDate(parseInt(booking.publicCall.params[2].value)+parseInt(booking.publicCall.params[3].value))}</td>
-                      <td>Accepted</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+        <ViewBookings
+          hotel={self.state.hotel}
+          hotelOptions={self.state.hotelOptions}
+          onHotelChange={hotel => { self.loadBookings(hotel);} }
+          bookings={self.state.bookings}
+          bookingRequests={self.state.bookingRequests}
+        />
+        {/* <div class="box">
+          <h2>Hotel Bookings</h2>
+          <div class="form-group">
+            <label>Choose a hotel</label>
+            {self.state.hotels ?
+              <Select
+                name="Hotels"
+                clearable={false}
+                options={self.state.hotelOptions}
+                onChange={ (val) => self.loadHotel(val.value)}
+                value={self.state.hotel.address}
+              />
+            :
+              <div>No hotels, click the button on the right to add one.</div>
+            }
           </div>
+          <hr></hr>
+          <table class="table table-striped table-hover">
+            <thead>
+              <tr>
+                <th>Hotel Name</th>
+                <th>Room Type</th>
+                <th>Room Name</th>
+                <th>From Day</th>
+                <th>To Day</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {self.state.bookings.map(function(booking, i){
+                let unitBooked = self.state.hotel.units[booking.unit]
+                return (
+                  <tr key={'booking'+i} class="pointer" onClick={() => self.setState({transaction: booking.transactionHash})}>
+                    <td>{self.state.hotel.name}</td>
+                    <td>{unitBooked.unitType}</td>
+                    <td>{booking.unit.substring(2,6)}</td>
+                      <td>{moment(booking.fromDate).format('YYYY MM DD')}</td>
+                      <td>{moment(booking.fromDate).add(booking.daysAmount, 'days').format('YYYY MM DD')}</td>
+                    <td>Accepted</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div> */}
 
       var blockchain =
         <div class="box">
