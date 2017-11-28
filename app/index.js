@@ -2,8 +2,7 @@ import '../node_modules/react-dates/initialize';
 //React ,router and history
 import React from "react";
 import ReactDOM from "react-dom";
-import { Router, Route, Switch } from 'react-router-dom';
-import createMemoryHistory from 'history/createMemoryHistory'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
 //Views
 import Layout from "./Layout";
@@ -24,13 +23,12 @@ import '../node_modules/react-responsive-carousel/lib/styles/carousel.css';
 
 //Set history
 const app = document.getElementById('app');
-const customHistory = createMemoryHistory()
 
 console.ignoredYellowBox = true;
 
 //Set router
 ReactDOM.render(
-  <Router history={customHistory}>
+  <Router basename="/wt-demo-app">
     <Layout>
       <Switch>
         <Route exact path="/" component={Home}></Route>
