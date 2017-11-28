@@ -1,7 +1,7 @@
 var webpack = require('webpack');
 var path = require('path');
 
-var web3Provider = process.env.WEB3_PROVIDER || 'http://localhost:8545';
+var web3Provider = process.env.WEB3_PROVIDER || 'https://kovan.infura.io/WKNyJ0kClh8Ao5LdmO7z';
 
 module.exports = {
   context: path.join(__dirname, "app"),
@@ -50,7 +50,9 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      'WEB3PROVIDER': JSON.stringify(web3Provider)
+      'WEB3PROVIDER': JSON.stringify(web3Provider),
+      'LIFTOKENADDRESS': JSON.stringify('0x7B7aFbd70662aAbc56382AC174261255627524ef'),
+      'WTINDEXADDRESS': JSON.stringify('0xe4c4dd9aa1c0108db70315146035cd77e02a4476')
     })
   ]
 };

@@ -10,9 +10,9 @@ export default class App extends React.Component {
     constructor() {
       super();
       this.state = {
-        web3Provider: window.localStorage.web3Provider || 'http://localhost:8545',
-        wtIndexAddress: window.localStorage.wtIndexAddress || '0x0000000000000000000000000000000000000000',
-        lifTokenAddress: window.localStorage.lifTokenAddress || '0x0000000000000000000000000000000000000000',
+        web3Provider: window.localStorage.web3Provider || WEB3PROVIDER,
+        wtIndexAddress: window.localStorage.wtIndexAddress || WTINDEXADDRESS,
+        lifTokenAddress: window.localStorage.lifTokenAddress || LIFTOKENADDRESS,
       }
     }
 

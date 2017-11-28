@@ -15,7 +15,7 @@ import EditUnitType from '../components/EditUnitType';
 import ViewBookings from '../components/ViewBookings';
 
 import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));
+var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3PROVIDER));
 
 import Select from 'react-select';
 var _ = require('lodash');
@@ -24,6 +24,9 @@ export default class App extends React.Component {
 
     constructor() {
       super();
+      let wallet = '';
+      if(window.localStorage.wallet)
+        wallet = JSON.parse(window.localStorage.wallet);
       this.state = {
         indexAddress: '0x0000000000000000000000000000000000000000',
         hotels: [],
@@ -45,7 +48,7 @@ export default class App extends React.Component {
         txs: [],
         bookings: [],
         transaction: {},
-        importKeystore: JSON.parse(window.localStorage.wallet) || '',
+        importKeystore: wallet,
         loading: false,
         section: 'hotels',
         userType: 'unknown',
@@ -58,21 +61,22 @@ export default class App extends React.Component {
 
     componentWillMount(){
       if (
-        window.localStorage.wtIndexAddress
-        && window.localStorage.wtIndexAddress.length > 0
-        && web3.eth.getCode(window.localStorage.wtIndexAddress) != '0x0'
+        // window.localStorage.wtIndexAddress
+        // && window.localStorage.wtIndexAddress.length > 0
+        // && web3.eth.getCode(window.localStorage.wtIndexAddress) != '0x0'
+        this.state.importKeystore
       )
         {
         let hotelManager = new HotelManager({
-          indexAddress: window.localStorage.wtIndexAddress,
-          owner: JSON.parse(window.localStorage.wallet).address,
+          indexAddress: window.localStorage.wtIndexAddress || WTINDEXADDRESS,
+          owner: this.state.importKeystore.address,
           web3: web3,
           gasMargin: 1.5
         });
         const bookingData = new BookingData(web3);
         this.setState({hotelManager: hotelManager, bookingData: bookingData}, () => { this.getHotels() });
       } else
-        window.location.replace(window.location.origin+'/#/');
+        this.props.history.push('/wallet');
     }
 
     async createHotel(hotel, password){

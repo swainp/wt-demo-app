@@ -3,6 +3,7 @@ import '../node_modules/react-dates/initialize';
 import React from "react";
 import ReactDOM from "react-dom";
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
+import { createBrowserHistory } from 'history'
 
 //Views
 import Layout from "./Layout";
@@ -23,12 +24,13 @@ import '../node_modules/react-responsive-carousel/lib/styles/carousel.css';
 
 //Set history
 const app = document.getElementById('app');
+let history = createBrowserHistory();
 
 console.ignoredYellowBox = true;
 
 //Set router
 ReactDOM.render(
-  <Router basename="/wt-demo-app">
+  <Router basename="/wt-demo-app" history={history}>
     <Layout>
       <Switch>
         <Route exact path="/" component={Home}></Route>
