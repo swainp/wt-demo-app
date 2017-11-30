@@ -301,15 +301,6 @@ export default class App extends React.Component {
       }
     }
 
-    // loadBookings(){
-    //   var self = this;
-    //   self.setState({
-    //     bookings: wtHotelLib.getBookings(),
-    //     loading: false,
-    //     section: 'hotelBookings'
-    //   });
-    // }
-
     async selectHotel(address) {
       var self = this;
       var selectedHotel = await self.state.hotelManager.getHotel(address);
@@ -407,14 +398,30 @@ export default class App extends React.Component {
       var self = this;
       self.setState({loading: true});
       await self.selectHotel(hotel);
-      let bookings = await self.state.bookingData.getBookings(self.state.hotel.address);
-      let bookingRequests = await self.state.bookingData.getBookingRequests(self.state.hotel.address);
+      let bookings = await self.state.bookingData.getBookings(hotel);
+      let bookingRequests = await self.state.bookingData.getBookingRequests(hotel);
       self.setState({
         bookings: bookings,
         bookingRequests: bookingRequests,
         loading: false,
         section: 'hotelBookings'
       });
+    }
+
+    async confirmBooking(request, password) {
+      var self = this;
+      self.setState({loading: true});
+
+      try {
+        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+        await self.state.hotelManager.confirmBooking(self.state.hotel.address, request.dataHash);
+        await self.loadBookings(self.state.hotel.address);
+        toast.success('Successfully confirmed booking ' + request.id);
+      } catch(e) {
+        console.log("Error confirming booking", e);
+        self.setState({loading: false});
+        toast.error(e.toString());
+      }
     }
 
     render() {
@@ -633,6 +640,7 @@ export default class App extends React.Component {
           onHotelChange={hotel => { self.loadBookings(hotel);} }
           bookings={self.state.bookings}
           bookingRequests={self.state.bookingRequests}
+          confirmBooking={self.confirmBooking.bind(self)}
         />
         {/* <div class="box">
           <h2>Hotel Bookings</h2>

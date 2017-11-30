@@ -203,7 +203,11 @@ export default class App extends React.Component {
           await self.state.user.book(...args);
         }
         self.setState({loading: false });
-        toast.success('Successfully booked ' + self.state.unitSelected.unitType + ' from ' + self.state.startDate.format('YYYY MM DD') + ' to ' + self.state.endDate.format('YYYY MM DD'));
+        if(self.state.hotel.waitConfirmation) {
+          toast.success('Successfully requested to book ' + self.state.unitSelected.unitType + ' from ' + self.state.startDate.format('YYYY MM DD') + ' to ' + self.state.endDate.format('YYYY MM DD'));
+        } else {
+          toast.success('Successfully booked ' + self.state.unitSelected.unitType + ' from ' + self.state.startDate.format('YYYY MM DD') + ' to ' + self.state.endDate.format('YYYY MM DD'));
+        }
       } catch(e) {
         console.log("Error booking a room", e);
         self.setState({loading: false});
@@ -403,6 +407,7 @@ export default class App extends React.Component {
               <div class='col-4'>
                 {self.state.user.account != '0x0000000000000000000000000000000000000000' ?
                   <BookUnit
+                    waitConfirmation={self.state.hotel.waitConfirmation}
                     startDate={self.state.startDate}
                     endDate={self.state.endDate}
                     bookLifPrice={self.state.bookLifPrice}
@@ -413,7 +418,7 @@ export default class App extends React.Component {
                     onDatesChange={self.updateBookingPrice.bind(self)}
                     onCurrencyChange={(val) => self.setState({currency: val})}
                     onSubmit={self.bookRoom.bind(self)}
-                  ></BookUnit>
+                  />
                 :
                 <Link to='/wallet'>Please create a wallet</Link>}
               </div>

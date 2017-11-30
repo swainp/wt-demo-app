@@ -68,7 +68,7 @@ export default class BookUnit extends React.Component {
                       </span>
                     </div>
                   </div>
-                  <button type="submit" class="btn btn-primary btn-block">Book Room</button>
+                  <button type="submit" class="btn btn-primary btn-block">{this.props.waitConfirmation ? 'Request Room' : 'Book Room'}</button>
                 </div>
               }
             </div>
