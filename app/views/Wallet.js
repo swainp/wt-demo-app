@@ -7,7 +7,7 @@ var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Prov
 
 var BN = web3.utils.BN;
 
-const LifABI = Utils.abis.LifToken;
+var LifABI = Utils.abis.LifToken;
 
 export default class App extends React.Component {
 
@@ -33,6 +33,25 @@ export default class App extends React.Component {
     }
 
     async componentWillMount() {
+
+      // Add faucet methods
+      LifABI.push({
+        "constant": false,
+        "inputs": [],
+        "name": "faucetLif",
+        "outputs": [],
+        "payable": false,
+        "type": "function"
+      });
+      LifABI.push({
+        "constant": false,
+        "inputs": [],
+        "name": "faucetETH",
+        "outputs": [],
+        "payable": false,
+        "type": "function"
+      });
+
       let lifContract = new web3.eth.Contract(LifABI, this.state.lifTokenAddress);
       if(web3.eth.accounts.wallet[0]) {
         this.setState({
@@ -115,7 +134,8 @@ export default class App extends React.Component {
           to: this.state.receiverAddress,
           value: web3.utils.toWei(this.state.sendAmount, 'ether'),
           gas: this.state.gasAmount,
-          data: this.state.txData
+          data: this.state.txData,
+          nonce: await web3.eth.getTransactionCount(self.state.walletKeystore.address)
         };
         let signedTx = await web3.eth.accounts.signTransaction(txObject, this.state.walletKeystore.privateKey);
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', (receipt) => {
@@ -132,7 +152,8 @@ export default class App extends React.Component {
         let txObject = {
           to: this.state.lifTokenAddress,
           gas: 52000,
-          data: callData
+          data: callData,
+          nonce: await web3.eth.getTransactionCount(self.state.walletKeystore.address)
         }
         let signedTx = await web3.eth.accounts.signTransaction(txObject, this.state.walletKeystore.privateKey);
         web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', (receipt) => {
@@ -141,7 +162,26 @@ export default class App extends React.Component {
           self.updateBalances();
         });
       }
+    }
 
+    async claimFaucet(isLif) {
+      var self = this;
+      self.setState({loading: true});
+      let LifToken = new web3.eth.Contract(LifABI, self.state.lifTokenAddress);
+      let method = (isLif) ? LifToken.methods.faucetLif() : LifToken.methods.faucetETH();
+      let callData = method.encodeABI();
+      let txObject = {
+        to: self.state.lifTokenAddress,
+        gas: 100000,
+        data: callData,
+        nonce: await web3.eth.getTransactionCount(self.state.walletKeystore.address)
+      }
+      let signedTx = await web3.eth.accounts.signTransaction(txObject, this.state.walletKeystore.privateKey);
+      web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', (receipt) => {
+        console.log('Claim '+(isLif ? 'Lif':'ETH')+' tx receipt:', receipt);
+        self.setState({loading: false});
+        self.updateBalances();
+      });
     }
 
     render() {
@@ -255,8 +295,24 @@ export default class App extends React.Component {
             <div class="row justify-content-around">
               <h4>ETH Balance: {self.state.ethBalance}</h4>
               <h4>Lif Balance: {self.state.lifBalance}</h4>
-              <button class="btn btn-primary" onClick={() => self.updateBalances()}>Update Balances <span class="fa fa-refresh"></span></button>
+              <button class="btn btn-info" onClick={() => self.updateBalances()}>Update Balances <span class="fa fa-refresh"></span></button>
             </div>
+            <br></br>
+            { self.state.ethBalance == 0 ?
+              <a class="btn btn-link" href={"mailto:faucet@windingtree.com?subject=Request%20ETH&body=My%20address:%20"+self.state.walletKeystore.address}>Request 0.1 Kovan ETH to faucet@windingtree.com</a>
+              :
+              <div class="row justify-content-around">
+                <button class="btn btn-primary" onClick={() => self.claimFaucet(false)}>Claim ETH from Faucet</button>
+                <button class="btn btn-primary" onClick={() => self.claimFaucet(true)}>Claim Lif from Faucet</button>
+              </div>
+            }
+            <br></br>
+            <span class="help-block">
+              Once you have ETH we reccomend you to request tokens first, you can have up to 50 tokens and 0.1 ETH, if you have less
+              than that you can request more to the token contract.
+              In case you have 0 ETH you will need to request more to faucet@windingtree.com.
+              <strong>The ETH and Lif tokens are for testing, they are issued over a testnet ethereum network.</strong>
+            </span>
             <hr></hr>
             <div class="row justify-content-around">
               <div class="col-md-6">
@@ -325,7 +381,9 @@ export default class App extends React.Component {
                       </div>
                     </div>
                   </div>}
-                  <input type="submit" class="btn btn-primary" value="Send" />
+                  <div class="row justify-content-around">
+                    <input type="submit" class="btn btn-primary" value="Send" />
+                  </div>
                 </form>
               </div>
             </div>

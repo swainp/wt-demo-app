@@ -51,7 +51,7 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'WEB3PROVIDER': JSON.stringify(web3Provider),
-      'LIFTOKENADDRESS': JSON.stringify('0x7B7aFbd70662aAbc56382AC174261255627524ef'),
+      'LIFTOKENADDRESS': JSON.stringify('0x1F341011a94d21465aE14a5D7Ee92C1d691089A0'),
       'WTINDEXADDRESS': JSON.stringify('0xe4c4dd9aa1c0108db70315146035cd77e02a4476')
     })
   ]
