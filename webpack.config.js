@@ -52,8 +52,8 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       'WEB3_PROVIDER': JSON.stringify(WEB3_PROVIDER),
-      'LIFTOKEN_ADDRESS': JSON.stringify('LIFTOKEN_ADDRESS'),
-      'WTINDEX_ADDRESS': JSON.stringify('WTINDEX_ADDRESS')
+      'LIFTOKEN_ADDRESS': JSON.stringify(LIFTOKEN_ADDRESS),
+      'WTINDEX_ADDRESS': JSON.stringify(WTINDEX_ADDRESS)
     })
   ]
 };
