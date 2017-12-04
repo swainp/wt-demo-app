@@ -3,7 +3,7 @@ import {Link} from "react-router";
 import ReactModal from "react-modal";
 
 import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3PROVIDER));
+var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
 
 var BN = web3.utils.BN;
 
@@ -14,7 +14,7 @@ export default class App extends React.Component {
     constructor() {
       super();
       this.state = {
-        lifTokenAddress: window.localStorage.lifTokenAddress || LIFTOKENADDRESS,
+        lifTokenAddress: window.localStorage.lifTokenAddress || LIFTOKEN_ADDRESS,
         showPassword: false,
         walletKeystore: {},
         loading: false,
