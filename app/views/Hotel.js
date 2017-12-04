@@ -15,7 +15,7 @@ import EditUnitType from '../components/EditUnitType';
 import ViewBookings from '../components/ViewBookings';
 
 import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3PROVIDER));
+var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
 
 import Select from 'react-select';
 var _ = require('lodash');
@@ -68,7 +68,7 @@ export default class App extends React.Component {
       )
         {
         let hotelManager = new HotelManager({
-          indexAddress: window.localStorage.wtIndexAddress || WTINDEXADDRESS,
+          indexAddress: window.localStorage.wtIndexAddress || WTINDEX_ADDRESS,
           owner: this.state.importKeystore.address,
           web3: web3,
           gasMargin: 1.5

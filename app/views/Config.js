@@ -3,16 +3,16 @@ import {Link} from "react-router";
 import ReactModal from "react-modal";
 
 import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(WEB3PROVIDER));
+var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_PROVIDER));
 
 export default class App extends React.Component {
 
     constructor() {
       super();
       this.state = {
-        web3Provider: window.localStorage.web3Provider || WEB3PROVIDER,
-        wtIndexAddress: window.localStorage.wtIndexAddress || WTINDEXADDRESS,
-        lifTokenAddress: window.localStorage.lifTokenAddress || LIFTOKENADDRESS,
+        web3Provider: window.localStorage.web3Provider || WEB3_PROVIDER,
+        wtIndexAddress: window.localStorage.wtIndexAddress || WTINDEX_ADDRESS,
+        lifTokenAddress: window.localStorage.lifTokenAddress || LIFTOKEN_ADDRESS,
       }
     }
 

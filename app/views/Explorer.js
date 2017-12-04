@@ -11,7 +11,7 @@ import BookUnit from '../components/BookUnit';
 import { ToastContainer, toast } from 'react-toastify';
 
 import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3PROVIDER));
+var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
 
 import Select from 'react-select';
 var _ = require('lodash');
@@ -66,7 +66,7 @@ export default class App extends React.Component {
     async componentWillMount() {
         let address = (this.state.importKeystore ? this.state.importKeystore.address : '0x0000000000000000000000000000000000000000');
         let hotelManager = new HotelManager({
-          indexAddress: window.localStorage.wtIndexAddress || WTINDEXADDRESS,
+          indexAddress: window.localStorage.wtIndexAddress || WTINDEX_ADDRESS,
           owner: address,
           web3: web3,
           gasMargin: 1.5
@@ -76,7 +76,7 @@ export default class App extends React.Component {
         let user = new User({
           account: address,       // Client's account address
           gasMargin: 2,               // Multiple to increase gasEstimate by to ensure tx success.
-          tokenAddress: window.localStorage.lifTokenAddress || LIFTOKENADDRESS,  // LifToken contract address
+          tokenAddress: window.localStorage.lifTokenAddress || LIFTOKEN_ADDRESS,  // LifToken contract address
           web3: web3                     // Web3 object instantiated with a provider
         })
         await this.setState({hotelManager: hotelManager, bookingData: bookingData, user: user});

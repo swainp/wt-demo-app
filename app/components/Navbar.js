@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3PROVIDER));
+var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
 
 export default class App extends React.Component {
 

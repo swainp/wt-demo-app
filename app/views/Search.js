@@ -3,7 +3,7 @@ import {Link} from "react-router";
 import ReactModal from "react-modal";
 
 import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(WEB3PROVIDER));
+var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_PROVIDER));
 
 export default class App extends React.Component {
 
