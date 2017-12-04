@@ -8,6 +8,7 @@
   },
   "scripts": {
     "testrpc": "scripts/test.sh",
+    "compile": "scripts/build.sh",
     "start": "webpack-dev-server --config webpack.config.js"
   },
   "keywords": [

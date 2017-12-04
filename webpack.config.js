@@ -1,13 +1,14 @@
 var webpack = require('webpack');
 var path = require('path');
 
-var web3Provider = process.env.WEB3_PROVIDER || 'https://kovan.infura.io/WKNyJ0kClh8Ao5LdmO7z';
+var WEB3_PROVIDER = process.env.WEB3_PROVIDER || 'https://kovan.infura.io/WKNyJ0kClh8Ao5LdmO7z';
+var LIFTOKEN_ADDRESS = "0x7B7aFbd70662aAbc56382AC174261255627524ef";
+var WTINDEX_ADDRESS = "0xe4c4dd9aa1c0108db70315146035cd77e02a4476";
 
 module.exports = {
   context: path.join(__dirname, "app"),
   devtool: "cheap-module-source-map",
   entry: "./index.js",
-  watch: true,
   devServer: {
     historyApiFallback: true,
     contentBase: path.join(__dirname, "app"),
@@ -45,14 +46,14 @@ module.exports = {
     ]
   },
   output: {
-    path: __dirname + "/app/",
+    path: __dirname + "/build/",
     filename: "index.min.js"
   },
   plugins: [
     new webpack.DefinePlugin({
-      'WEB3PROVIDER': JSON.stringify(web3Provider),
-      'LIFTOKENADDRESS': JSON.stringify('0x1F341011a94d21465aE14a5D7Ee92C1d691089A0'),
-      'WTINDEXADDRESS': JSON.stringify('0xe4c4dd9aa1c0108db70315146035cd77e02a4476')
+      'WEB3_PROVIDER': JSON.stringify(WEB3_PROVIDER),
+      'LIFTOKEN_ADDRESS': JSON.stringify('LIFTOKEN_ADDRESS'),
+      'WTINDEX_ADDRESS': JSON.stringify('WTINDEX_ADDRESS')
     })
   ]
 };
