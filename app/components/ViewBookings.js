@@ -21,8 +21,8 @@ export default class ViewBookings extends React.Component {
     }
 
     render() {
-      let hotel = this.state.hotel;
       let self = this;
+      let hotel = self.state.hotel;
       return(
         <div class="box">
           <h2>Hotel Bookings</h2>
@@ -75,26 +75,48 @@ export default class ViewBookings extends React.Component {
               </tbody>
             </table>
           </div>}
-          {this.props.bookingRequests &&
+          {this.props.bookingRequests && this.props.bookingRequests.length > 0 &&
             <div>
               <h3>Booking Requests</h3>
-              <div class='list-group'>
-              {this.props.bookingRequests.map(function(request, i){
-                return <p
-                  key={'request'+i}
-                  class={request.transactionHash == self.state.selectedRequest.transactionHash ?
-                    'list-group-item list-group-item-action active' :
-                    'list-group-item list-group-item-action'
-                  }
-                  onClick={() => {
-                    self.setState({selectedRequest: request})
-                  }}
-                >
-                  {request.id}
-                </p>
-              })}
-              </div>
-              {self.state.selectedRequest &&
+              <table class="table table-striped table-hover">
+                <thead>
+                  <tr>
+                    <th>Hotel Name</th>
+                    <th>Room Type</th>
+                    <th>Room ID</th>
+                    <th>From Day</th>
+                    <th>To Day</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {this.props.bookingRequests.map(function(booking, i){
+                    let unitBooked = hotel.units[booking.unit]
+                    if(unitBooked) {
+                      return (
+                        <tr
+                          key={'request'+i}
+                          class={booking.transactionHash == self.state.selectedRequest.transactionHash ?
+                          'pointer table-info' :
+                          'pointer'
+                          }
+                          onClick={() => { self.setState({selectedRequest: booking}) }}>
+                          <td>{hotel.name}</td>
+                          <td>{unitBooked.unitType}</td>
+                          <td>{booking.unit.substring(2,6)}</td>
+                            <td>{moment(booking.fromDate).format('YYYY MM DD')}</td>
+                            <td>{moment(booking.fromDate).add(booking.daysAmount, 'days').format('YYYY MM DD')}</td>
+                          <td>Awaiting Confirmation</td>
+                        </tr>
+                      );
+                    } else {
+                      return (<tr></tr>);
+                    }
+
+                  })}
+                </tbody>
+              </table>
+              {self.state.selectedRequest && self.state.selectedRequest.id &&
               <form onSubmit={(e) => {e.preventDefault(); self.props.confirmBooking(self.state.selectedRequest, self.state.password)}}>
               <div class="form-group">
                 <label>Your Wallet Password</label>

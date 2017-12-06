@@ -17,7 +17,6 @@ import Select from 'react-select';
 var _ = require('lodash');
 
 let WTUtils = Utils;
-console.log(WTUtils);
 
 export default class App extends React.Component {
 
@@ -92,8 +91,8 @@ export default class App extends React.Component {
       var hotelsAddrs = await self.state.hotelManager.WTIndex.methods.getHotels().call();
       hotelsAddrs = hotelsAddrs.filter(addr => addr !== "0x0000000000000000000000000000000000000000");
       var hotels = [];
-      let totalHotels = hotelsAddrs.length-1;
-      for (var i = 1; i <= totalHotels; i++)
+      let totalHotels = hotelsAddrs.length;
+      for (var i = 0; i <= totalHotels - 1; i++)
         hotels.push(await self.getHotelInfo(hotelsAddrs[i]));
       self.setState({
         hotels: hotels,

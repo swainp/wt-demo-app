@@ -304,8 +304,6 @@ export default class App extends React.Component {
     async selectHotel(address) {
       var self = this;
       var selectedHotel = await self.state.hotelManager.getHotel(address);
-      console.log('loaded hotel');
-      console.log(selectedHotel);
       selectedHotel.address = address;
       let unitTypeOptions = [];
       Object.entries(selectedHotel.unitTypes).forEach(([key, value]) => {
