@@ -8,7 +8,7 @@
   padding: 20px 30px;
 }
 
-.shortCell{
+.shortCell {
   max-width: 80px;
 	overflow: hidden;
 	white-space: nowrap;
@@ -26,13 +26,13 @@
   display: none !important;
 }
 
-.box{
+.box {
   padding: 10px 15px;
   background-color: #DDD;
   border-radius: 5px;
 }
 
-.footer{
+.footer {
   position: fixed;
   bottom: 0;
   width: 100%;
@@ -42,8 +42,12 @@
   text-align: center;
 }
 
-.btn-action{
+.btn-action {
   width: 100%;
+}
+
+.top-margin {
+  margin-top:20px;
 }
 
 .loading:before {

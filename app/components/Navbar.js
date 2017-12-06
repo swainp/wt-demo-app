@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import Modal from 'react-modal';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
@@ -10,7 +11,8 @@ export default class App extends React.Component {
       super();
       this.state = {
         blockNumber: 0,
-        networkType: ''
+        networkType: '',
+        logoutModal: false
       }
     }
 
@@ -23,12 +25,13 @@ export default class App extends React.Component {
     }
 
     logout(){
-      delete window.localStorage.walet;
+      window.localStorage.wallet = "";
       window.location.replace(window.location.origin+'/');
       window.location.reload();
     }
 
     render() {
+      var self = this;
       return(
         <nav class='navbar navbar-expand-md navbar-dark fixed-top bg-dark'>
           <Link class='navbar-brand' to='/'>WT</Link>
@@ -49,7 +52,7 @@ export default class App extends React.Component {
             </ul>
             <ul class="navbar-nav ml-auto">
               <li class='nav-item pull-right'>
-                <a class="nav-link">Block #{this.state.blockNumber} - {this.state.networkType}</a>
+                <a class="nav-link">Block #{self.state.blockNumber} - {self.state.networkType}</a>
               </li>
               <li class={window.location.pathname == '/config' ? 'nav-item pull-right active' : 'nav-item pull-right'}>
                 <Link class='nav-link config-icon' to='/config'><span class="fa fa-cog"></span></Link>
@@ -57,10 +60,44 @@ export default class App extends React.Component {
             </ul>
             <form class='form-inline mt-2 mt-md-0'>
               <button class='btn btn-link my-2 my-sm-0' type='button'
-                onClick={() => this.logout()}
+                onClick={() => self.setState({logoutModal:true})}
               >Logout</button>
             </form>
           </div>
+          <Modal
+            isOpen={self.state.logoutModal}
+            onRequestClose={() => self.setState({logoutModal:false})}
+            contentLabel='Modal'
+            style={{
+              overlay : {
+                position          : 'fixed',
+                top               : 50,
+                left              : 0,
+                right             : 0,
+                bottom            : 0,
+                backgroundColor   : 'rgba(255, 255, 255, 0.75)'
+              },
+              content : {
+                maxWidth                   : '350px',
+                maxHeight                  : '300px',
+                margin                     : 'auto',
+                textAlign                  : 'center',
+                border                     : '1px solid #ccc',
+                background                 : '#fff',
+                overflow                   : 'auto',
+                WebkitOverflowScrolling    : 'touch',
+                borderRadius               : '4px',
+                outline                    : 'none',
+                padding                    : '20px'
+              }
+            }}
+          >
+            <h3>Are you sure?</h3>
+            <small>Your account will be removed from the browser, be sure to have it in your device.</small>
+            <button class='btn btn-danger top-margin' onClick={() => self.logout()}>Close Wallet</button>
+            <br></br>
+            <button class='btn btn-info top-margin' onClick={() => self.setState({logoutModal:false})}>Cancel</button>
+          </Modal>
         </nav>
       );
     }
