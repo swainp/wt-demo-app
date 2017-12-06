@@ -2,7 +2,7 @@ import '../node_modules/react-dates/initialize';
 //React ,router and history
 import React from "react";
 import ReactDOM from "react-dom";
-import { BrowserRouter, Route, Switch } from 'react-router-dom';
+import { HashRouter, Route, Switch } from 'react-router-dom';
 import { createBrowserHistory } from 'history'
 
 //Views
@@ -29,7 +29,7 @@ console.ignoredYellowBox = true;
 
 //Set router
 ReactDOM.render(
-  <BrowserRouter basename="/wt-demo-app">
+  <HashRouter>
     <Layout>
       <Switch>
         <Route exact path="/" component={Home}></Route>
@@ -40,5 +40,5 @@ ReactDOM.render(
         <Route path="/search" component={Search}></Route>
       </Switch>
     </Layout>
-  </BrowserRouter>,
+  </HashRouter>,
 app);
