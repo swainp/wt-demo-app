@@ -8,6 +8,7 @@ import { Carousel } from 'react-responsive-carousel';
 import moment from 'moment';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
 import BookUnit from '../components/BookUnit';
+import Address from '../components/Address';
 import { ToastContainer, toast } from 'react-toastify';
 
 import Web3 from 'web3';
@@ -231,7 +232,6 @@ export default class App extends React.Component {
               {self.state.hotels.map((hotel, i) => {
                 return <a
                   key={hotel.instance._address}
-                  href='#'
                   class={hotel.instance._address == self.state.hotel.address ?
                     'list-group-item list-group-item-action active' :
                     'list-group-item list-group-item-action'
@@ -240,7 +240,7 @@ export default class App extends React.Component {
                     self.loadHotelInfo(hotel.instance._address)
                   }}
                 >
-                  [{(i+1)}] {hotel.name} - <small>{hotel.instance._address}</small>
+                  [{(i+1)}] {hotel.name} - <small><Address address={hotel.instance._address} web3={web3}/></small>
                 </a>
               })}
               </div>
@@ -253,7 +253,7 @@ export default class App extends React.Component {
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
                   && !self.state.loading) ?
-                  <li>Manager: {self.state.hotel.manager}</li>
+                  <li>Manager: <Address address={self.state.hotel.manager} web3={web3}/></li>
                   : <div></div>
                 }
                 {self.state.hotel.country ?
@@ -321,7 +321,6 @@ export default class App extends React.Component {
               {self.state.hotel.unitTypes.map((unitType, i) => {
                 return <a
                   key={unitType.name}
-                  href='#'
                   class={unitType.address == self.state.unitType.address ?
                     'list-group-item list-group-item-action active' :
                     'list-group-item list-group-item-action'
@@ -330,7 +329,7 @@ export default class App extends React.Component {
                     self.setState({unitType: unitType, section: 'unitTypes'})}
                   }
                 >
-                  {unitType.name} - <small>{unitType.address}</small>
+                  {unitType.name} - <small><Address address={unitType.address} web3={web3}/></small>
                 </a>
               })}
               </div>
@@ -388,7 +387,6 @@ export default class App extends React.Component {
                 if (self.state.unitType.name == unit.unitType)
                   return <a
                     key={unit.address}
-                    href='#'
                     class={unit.address == self.state.unitSelected.address ?
                       'list-group-item list-group-item-action active' :
                       'list-group-item list-group-item-action'
@@ -397,7 +395,7 @@ export default class App extends React.Component {
                       self.setState({unitSelected: unit })}
                     }
                   >
-                    [{i}] {unit.unitType} - <small>{unit.address}</small>
+                    [{i}] {unit.unitType} - <small><Address address={unit.address} web3={web3}/></small>
                   </a>
               })}
               </div>
@@ -417,7 +415,7 @@ export default class App extends React.Component {
                     onDatesChange={self.updateBookingPrice.bind(self)}
                     onCurrencyChange={(val) => self.setState({currency: val})}
                     onSubmit={self.bookRoom.bind(self)}
-                  />
+                  ></BookUnit>
                 :
                 <Link to='/wallet'>Please create a wallet</Link>}
               </div>
