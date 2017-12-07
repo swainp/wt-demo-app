@@ -1,6 +1,7 @@
 import React from 'react';
-import {Link} from "react-router";
-import ReactModal from "react-modal";
+import {Link} from 'react-router';
+import ReactModal from 'react-modal';
+import Address from '../components/Address';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
@@ -289,7 +290,7 @@ export default class App extends React.Component {
           :
           <div>
             <div class="row justify-content-around">
-              <h2>Wallet <small><a href={"https://"+self.state.networkId+".etherscan.io/address/"+self.state.walletKeystore.address}>{self.state.walletKeystore.address}</a></small></h2>
+              <h2>Wallet <small><Address address={self.state.walletKeystore.address} web3={web3}/></small></h2>
             </div>
             <hr></hr>
             <div class="row justify-content-around">
