@@ -1,6 +1,6 @@
 import React from 'react';
-import {Link} from "react-router";
-import ReactModal from "react-modal";
+import { Link } from 'react-router-dom';
+import Modal from 'react-modal';
 
 import moment from 'moment';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
@@ -55,7 +55,7 @@ export default class App extends React.Component {
         hotelSection: 'list',
         hotelManager: {},
         specialLifPrice: '',
-        specialPrice: ''
+        specialPrice: '',
       }
     }
 
@@ -75,8 +75,7 @@ export default class App extends React.Component {
         });
         const bookingData = new BookingData(web3);
         this.setState({hotelManager: hotelManager, bookingData: bookingData}, () => { this.getHotels() });
-      } else
-        this.props.history.push('/wallet');
+      }
     }
 
     async createHotel(hotel, password){
@@ -752,7 +751,7 @@ export default class App extends React.Component {
       }
 
       const modalTransaction =
-        <ReactModal
+        <Modal
           isOpen={this.state.transaction.hash}
           style={{
             content : {
@@ -773,7 +772,7 @@ export default class App extends React.Component {
           <h4>Value: {parseInt(self.state.transaction.value)}</h4>
           <h4>Gas: {self.state.transaction.gas}</h4>
           {decodeData(self.state.transaction.decoded)}
-        </ReactModal>
+        </Modal>
 
       return(
         <div class={self.state.loading ? "loading" : ""}>
@@ -803,6 +802,36 @@ export default class App extends React.Component {
               : <div>{hotelBookings}</div>}
             </div>
           </div>
+          <Modal
+            isOpen={(self.state.importKeystore == '')}
+            contentLabel='Modal'
+            style={{
+              overlay : {
+                position          : 'fixed',
+                top               : 50,
+                left              : 0,
+                right             : 0,
+                bottom            : 0,
+                backgroundColor   : 'rgba(255, 255, 255, 0.75)'
+              },
+              content : {
+                maxWidth                   : '350px',
+                maxHeight                  : '200px',
+                margin                     : 'auto',
+                textAlign                  : 'center',
+                border                     : '1px solid #ccc',
+                background                 : '#fff',
+                overflow                   : 'auto',
+                WebkitOverflowScrolling    : 'touch',
+                borderRadius               : '4px',
+                outline                    : 'none',
+                padding                    : '20px'
+              }
+            }}
+          >
+            <h3>You need to open a wallet to use the Hotel Manager</h3>
+            <Link class='top-margin' to='/wallet'><h4>Go to Wallet</h4></Link>
+          </Modal>
         </div>
       )
     }
