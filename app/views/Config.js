@@ -1,6 +1,7 @@
 import React from 'react';
 import {Link} from "react-router";
 import ReactModal from "react-modal";
+import { ToastContainer, toast } from 'react-toastify';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_PROVIDER));
@@ -20,6 +21,7 @@ export default class App extends React.Component {
       window.localStorage.web3Provider = this.state.web3Provider;
       window.localStorage.wtIndexAddress = this.state.wtIndexAddress;
       window.localStorage.lifTokenAddress = this.state.lifTokenAddress;
+      toast.success('Configuration updated');
     }
 
     render() {
@@ -27,6 +29,7 @@ export default class App extends React.Component {
 
       return(
         <div class={self.state.loading ? "loading" : ""}>
+          <ToastContainer style={{zIndex: 2000}}/>
           <div class="row justify-content-md-center">
             <div class="col-md-5">
                <div class="jumbotron text-center">
