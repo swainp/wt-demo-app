@@ -18,7 +18,7 @@ export default class App extends React.Component {
         showPassword: false,
         walletKeystore: {},
         loading: false,
-        walletSection: 'open',
+        walletSection: (window.localStorage.wallet && window.localStorage.wallet == '') ? 'create' : 'open',
         ethBalance: 0,
         lifBalance: 0,
         receiverAddress: '',
@@ -61,7 +61,7 @@ export default class App extends React.Component {
           networkId: await web3.eth.net.getNetworkType(),
           lifContract: lifContract
         }, () => { this.updateBalances()});
-      } else if(window.localStorage.wallet) {
+      } else if (window.localStorage.wallet && window.localStorage.wallet != '') {
         this.setState({
           walletKeystore: JSON.parse(window.localStorage.wallet),
           networkId: await web3.eth.net.getNetworkType(),
@@ -69,7 +69,6 @@ export default class App extends React.Component {
         });
       } else {
         this.setState({
-          walletSection: 'create',
           networkId: await web3.eth.net.getNetworkType(),
           lifContract: lifContract
         });

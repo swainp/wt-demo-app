@@ -114,6 +114,10 @@
   z-index: 3;
 }
 
+.input-group .form-control {
+  z-index: 0;
+}
+
 @media (max-width: 991px) {
   #actions {
     margin-left: -5px;
