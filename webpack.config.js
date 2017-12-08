@@ -1,9 +1,9 @@
 var webpack = require('webpack');
 var path = require('path');
 
-var WEB3_PROVIDER = process.env.WEB3_PROVIDER || 'https://kovan.infura.io/WKNyJ0kClh8Ao5LdmO7z';
-var LIFTOKEN_ADDRESS = "0x7B7aFbd70662aAbc56382AC174261255627524ef";
-var WTINDEX_ADDRESS = "0xe4c4dd9aa1c0108db70315146035cd77e02a4476";
+var WEB3_PROVIDER = process.env.WEB3_PROVIDER || 'https://ropsten.infura.io/WKNyJ0kClh8Ao5LdmO7z';
+var LIFTOKEN_ADDRESS = "0xB6e225194a1C892770c43D4B529841C99b3DA1d7";
+var WTINDEX_ADDRESS = "0x6aCAa7ce7E7bBa3deb32EE984Df1fb5AD3Bc5734";
 
 module.exports = {
   context: path.join(__dirname, "app"),

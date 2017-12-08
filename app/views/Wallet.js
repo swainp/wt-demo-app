@@ -28,7 +28,7 @@ export default class App extends React.Component {
         txData: '0x',
         currency: 'ETH',
         lifContract: {},
-        networkId: 'kovan'
+        networkId: 'ropsten'
       }
 
     }
