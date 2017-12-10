@@ -22,6 +22,11 @@
   cursor: pointer;
 }
 
+.address-row h2 {
+  padding: 0;
+  border-top: 0;
+}
+
 .file-upload {
   display: none !important;
 }

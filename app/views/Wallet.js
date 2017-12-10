@@ -35,19 +35,11 @@ export default class App extends React.Component {
 
     async componentWillMount() {
 
-      // Add faucet methods
+      // Add Lif Faucet method
       LifABI.push({
         "constant": false,
         "inputs": [],
         "name": "faucetLif",
-        "outputs": [],
-        "payable": false,
-        "type": "function"
-      });
-      LifABI.push({
-        "constant": false,
-        "inputs": [],
-        "name": "faucetETH",
         "outputs": [],
         "payable": false,
         "type": "function"
@@ -164,11 +156,11 @@ export default class App extends React.Component {
       }
     }
 
-    async claimFaucet(isLif) {
+    async claimFaucet() {
       var self = this;
       self.setState({loading: true});
       let LifToken = new web3.eth.Contract(LifABI, self.state.lifTokenAddress);
-      let method = (isLif) ? LifToken.methods.faucetLif() : LifToken.methods.faucetETH();
+      let method = LifToken.methods.faucetLif();
       let callData = method.encodeABI();
       let txObject = {
         to: self.state.lifTokenAddress,
@@ -178,7 +170,7 @@ export default class App extends React.Component {
       }
       let signedTx = await web3.eth.accounts.signTransaction(txObject, this.state.walletKeystore.privateKey);
       web3.eth.sendSignedTransaction(signedTx.rawTransaction).on('receipt', (receipt) => {
-        console.log('Claim '+(isLif ? 'Lif':'ETH')+' tx receipt:', receipt);
+        console.log('Claim Lif tx receipt:', receipt);
         self.setState({loading: false});
         self.updateBalances();
       });
@@ -286,9 +278,9 @@ export default class App extends React.Component {
               ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>There was an error trying to open the wallet, is that the correct password?</p>
               : <div></div>}
           </form>
-          :
+          : (self.state.walletSection == 'show') ?
           <div>
-            <div class="row justify-content-around">
+            <div class="row justify-content-around address-row">
               <h2>Wallet <small><Address address={self.state.walletKeystore.address} web3={web3}/></small></h2>
             </div>
             <hr></hr>
@@ -296,27 +288,38 @@ export default class App extends React.Component {
               <h4>ETH Balance: {self.state.ethBalance}</h4>
               <h4>Lif Balance: {self.state.lifBalance}</h4>
               <button class="btn btn-info" onClick={() => self.updateBalances()}>Update Balances <span class="fa fa-refresh"></span></button>
+              <button class="btn btn-primary" onClick={() => self.setState({walletSection: 'send'})}> Send <span class="fa fa-send"></span></button>
             </div>
             <br></br>
-            { self.state.ethBalance == 0 ?
-              <a class="btn btn-link" href={"mailto:faucet@windingtree.com?subject=Request%20ETH&body=My%20address:%20"+self.state.walletKeystore.address}>Request 0.1 Kovan ETH to faucet@windingtree.com</a>
-              :
-              <div class="row justify-content-around">
-                <button class="btn btn-primary" onClick={() => self.claimFaucet(false)}>Claim ETH from Faucet</button>
-                <button class="btn btn-primary" onClick={() => self.claimFaucet(true)}>Claim Lif from Faucet</button>
-              </div>
-            }
+            <div class="row justify-content-around">
+              <a class="btn btn-link" href={"mailto:faucet@windingtree.com?subject=Request%20ETH&body=My%20address:%20"+self.state.walletKeystore.address}>Request 0.1 ETH to faucet@windingtree.com</a>
+              <button class="btn btn-primary" onClick={() => self.claimFaucet(true)}>Claim Lif from Faucet</button>
+            </div>
             <br></br>
             <span class="help-block">
               Once you have ETH we reccomend you to request tokens first, you can have up to 50 tokens and 0.1 ETH, if you have less
               than that you can request more to the token contract.
               In case you have 0 ETH you will need to request more to faucet@windingtree.com.
+            </span>
+            <br></br>
+            <span class="help-block">
               <strong>The ETH and Lif tokens are for testing, they are issued over a testnet ethereum network.</strong>
             </span>
+            <br></br>
+            <span class="help-block">
+              Make sure to always have ETH in your wallet because you will need it for everything, to transfer tokens, create hotels, edit them, make bookings, etc.
+              This is because for every transaction that you want to execute you need to pay a small fee to the network that cant be charged in tokens, only in ETH, for now ;).
+            </span>
+          </div>
+          :
+          <div>
+            <div class="row justify-content-around address-row">
+              <h2>Wallet <small><Address address={self.state.walletKeystore.address} web3={web3}/></small></h2>
+            </div>
             <hr></hr>
             <div class="row justify-content-around">
               <div class="col-md-6">
-                <h3>Send ETH or LIF</h3>
+                <h3>Send ETH or LIF <button class="btn btn-primary pull-right" onClick={() => self.setState({walletSection: 'show'})}><span class="fa fa-arrow-left"></span> Back</button></h3>
                 <form key="sendForm" onSubmit={(e) => {e.preventDefault(); self.sendTx()}}>
                   <div class="form-group">
                     <label>Currency:</label>
