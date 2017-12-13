@@ -24,6 +24,18 @@ export default class App extends React.Component {
       toast.success('Configuration updated');
     }
 
+    restoreDefault(){
+      window.localStorage.web3Provider = WEB3_PROVIDER;
+      window.localStorage.wtIndexAddress = WTINDEX_ADDRESS;
+      window.localStorage.lifTokenAddress = LIFTOKEN_ADDRESS;
+      this.setState({
+        web3Provider: WEB3_PROVIDER,
+        wtIndexAddress: WTINDEX_ADDRESS,
+        lifTokenAddress: LIFTOKEN_ADDRESS,
+      });
+      toast.success('Configuration restored to default');
+    }
+
     render() {
       var self = this;
 
@@ -33,7 +45,7 @@ export default class App extends React.Component {
           <div class="row justify-content-md-center">
             <div class="col-md-5">
                <div class="jumbotron text-center">
-                <form key="editConfig" onSubmit={(e) => {e.preventDefault(); self.changeConfig()}}>
+                <form key="editConfig" onSubmit={(e) => {e.preventDefault()}}>
                   <div class="form-group">
                     <label>Web3 Provider</label>
                     <div class="input-group">
@@ -74,7 +86,13 @@ export default class App extends React.Component {
                         onChange={(event) => self.setState({ lifTokenAddress: event.target.value })}/>
                     </div>
                   </div>
-                  <input type="submit" class="btn btn-primary" value="Change Config" />
+                  <button class="btn btn-primary" onClick={() => self.changeConfig()}>
+                    Change Config
+                  </button>
+                  <br></br><br></br>
+                  <button class="btn btn-info" onClick={() => self.restoreDefault()}>
+                    Restore Default
+                  </button>
                 </form>
               </div>
             </div>
