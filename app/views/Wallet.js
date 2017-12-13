@@ -45,15 +45,7 @@ export default class App extends React.Component {
       });
 
       let lifContract = new web3.eth.Contract(LifABI, this.state.lifTokenAddress);
-      if(web3.eth.accounts.wallet[0]) {
-        this.setState({
-          walletSection: 'show',
-          walletKeystore: web3.eth.accounts.wallet[0],
-          loading: false,
-          networkId: await web3.eth.net.getNetworkType(),
-          lifContract: lifContract
-        }, () => { this.updateBalances()});
-      } else if (window.localStorage.wallet && window.localStorage.wallet != '') {
+      if (window.localStorage.wallet && window.localStorage.wallet != '') {
         this.setState({
           walletKeystore: JSON.parse(window.localStorage.wallet),
           networkId: await web3.eth.net.getNetworkType(),
@@ -205,7 +197,7 @@ export default class App extends React.Component {
             </div>
             {self.state.walletKeystore.address ?
               <a class="btn btn-primary pointer"
-                href={"data:application/json;base64,"+window.btoa(JSON.stringify(self.state.walletKeystore))}
+                href={"data:application/json;base64,"+window.btoa(window.localStorage.wallet)}
                 download={self.state.walletKeystore.address+".json"}
               >
                 Download Wallet <span class="fa fa-download"></span>
