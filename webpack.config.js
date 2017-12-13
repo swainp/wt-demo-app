@@ -3,7 +3,7 @@ var path = require('path');
 
 var WEB3_PROVIDER = process.env.WEB3_PROVIDER || 'https://ropsten.infura.io/WKNyJ0kClh8Ao5LdmO7z';
 var LIFTOKEN_ADDRESS = "0xB6e225194a1C892770c43D4B529841C99b3DA1d7";
-var WTINDEX_ADDRESS = "0x6aCAa7ce7E7bBa3deb32EE984Df1fb5AD3Bc5734";
+var WTINDEX_ADDRESS = "0x787593b0A1020FD796312B5D284Ee64a0947cc52";
 
 module.exports = {
   context: path.join(__dirname, "app"),
