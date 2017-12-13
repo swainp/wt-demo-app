@@ -30,7 +30,6 @@ export default class App extends React.Component {
         lifContract: {},
         networkId: 'ropsten'
       }
-
     }
 
     async componentWillMount() {
@@ -76,7 +75,7 @@ export default class App extends React.Component {
       let wallet = web3.eth.accounts.wallet.encrypt(self.state.password)[0];
       window.localStorage.wallet = JSON.stringify(wallet);
       wallet = web3.eth.accounts.wallet.decrypt([wallet], self.state.password);
-      self.setState({walletSection: 'show', walletKeystore: wallet[0], loading: false});
+      self.setState({walletKeystore: wallet[0], loading: false});
     }
 
     // Open an encrypted wallet and saved the encrypted wallet in state
@@ -203,9 +202,16 @@ export default class App extends React.Component {
                   }
                 </span>
               </div>
-
             </div>
-            <input type="submit" class="btn btn-primary" value="Create my wallet" />
+            {self.state.walletKeystore.address ?
+              <a class="btn btn-primary pointer"
+                href={"data:application/json;base64,"+window.btoa(JSON.stringify(self.state.walletKeystore))}
+                download={self.state.walletKeystore.address+".json"}
+              >
+                Download Wallet <span class="fa fa-download"></span>
+              </a>
+            : <button type="submit" class="btn btn-primary pointer">Create my wallet</button>
+            }
             <button class="btn btn-link" onClick={() => self.setState({walletSection: 'open'})}>Or open an existing wallet</button>
           </form>
           : (self.state.walletSection == 'open') ?
@@ -223,13 +229,9 @@ export default class App extends React.Component {
                   onChange={(event) => {
                     self.setState({ walletKeystore: event.target.value, walletError: false });
                   }}/>
-                <span class="input-group-addon">
-                  <a class="fa fa-download" style={{color:'#555'}} href={"data:application/json;base64,"+window.btoa(JSON.stringify(self.state.walletKeystore))} download="WT Keystore.json"></a>
-                </span>
-                <span class="input-group-addon" onClick={() => {
+                <span class="input-group-addon pointer" onClick={() => {
                   document.getElementById('inputFile').click();
-                }}>
-                  <span class="fa fa-upload"></span>
+                }}> Select File <span class="fa fa-upload"> </span>
                   <input id="inputFile" class="file-upload" accept=".json" type="file" onChange={(event) => {
                     var reader = new FileReader();
                     reader.onload = (function(theFile) {
