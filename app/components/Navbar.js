@@ -12,7 +12,8 @@ export default class App extends React.Component {
       this.state = {
         blockNumber: 0,
         networkType: '',
-        logoutModal: false
+        logoutModal: false,
+        wallet: window.localStorage.wallet ? JSON.parse(window.localStorage.wallet) : null
       }
     }
 
@@ -58,46 +59,57 @@ export default class App extends React.Component {
                 <Link class='nav-link config-icon' to='/config'><span class="fa fa-cog"></span></Link>
               </li>
             </ul>
-            <form class='form-inline mt-2 mt-md-0'>
-              <button class='btn btn-link my-2 my-sm-0' type='button'
-                onClick={() => self.setState({logoutModal:true})}
-              >Logout</button>
-            </form>
+            {self.state.wallet &&
+              <form class='form-inline mt-2 mt-md-0'>
+                <button class='btn btn-link my-2 my-sm-0' type='button'
+                  onClick={() => self.setState({logoutModal:true})}
+                >Logout</button>
+              </form>
+            }
           </div>
-          <Modal
-            isOpen={self.state.logoutModal}
-            onRequestClose={() => self.setState({logoutModal:false})}
-            contentLabel='Modal'
-            style={{
-              overlay : {
-                position          : 'fixed',
-                top               : 50,
-                left              : 0,
-                right             : 0,
-                bottom            : 0,
-                backgroundColor   : 'rgba(255, 255, 255, 0.75)'
-              },
-              content : {
-                maxWidth                   : '350px',
-                maxHeight                  : '300px',
-                margin                     : 'auto',
-                textAlign                  : 'center',
-                border                     : '1px solid #ccc',
-                background                 : '#fff',
-                overflow                   : 'auto',
-                WebkitOverflowScrolling    : 'touch',
-                borderRadius               : '4px',
-                outline                    : 'none',
-                padding                    : '20px'
-              }
-            }}
-          >
-            <h3>Are you sure?</h3>
-            <small>Your account will be removed from the browser, be sure to have it in your device.</small>
-            <button class='btn btn-danger top-margin' onClick={() => self.logout()}>Close Wallet</button>
-            <br></br>
-            <button class='btn btn-info top-margin' onClick={() => self.setState({logoutModal:false})}>Cancel</button>
-          </Modal>
+          {self.state.wallet &&
+            <Modal
+              isOpen={self.state.logoutModal}
+              onRequestClose={() => self.setState({logoutModal:false})}
+              contentLabel='Modal'
+              style={{
+                overlay : {
+                  position          : 'fixed',
+                  top               : 50,
+                  left              : 0,
+                  right             : 0,
+                  bottom            : 0,
+                  backgroundColor   : 'rgba(255, 255, 255, 0.75)'
+                },
+                content : {
+                  maxWidth                   : '350px',
+                  maxHeight                  : '300px',
+                  margin                     : 'auto',
+                  textAlign                  : 'center',
+                  border                     : '1px solid #ccc',
+                  background                 : '#fff',
+                  overflow                   : 'auto',
+                  WebkitOverflowScrolling    : 'touch',
+                  borderRadius               : '4px',
+                  outline                    : 'none',
+                  padding                    : '20px'
+                }
+              }}
+            >
+              <h3>Are you sure?</h3>
+              <small>Your account will be removed from the browser, be sure to have it in your device.</small>
+              <a class="btn btn-primary pointer"
+                href={"data:application/json;base64,"+window.btoa(self.state.wallet)}
+                download={self.state.wallet.address+".json"}
+              >
+                Download Wallet <span class="fa fa-download"></span>
+              </a>
+              <br></br>
+              <button class='btn btn-danger top-margin' onClick={() => self.logout()}>Close Wallet</button>
+              <br></br>
+              <button class='btn btn-info top-margin' onClick={() => self.setState({logoutModal:false})}>Cancel</button>
+            </Modal>
+          }
         </nav>
       );
     }
