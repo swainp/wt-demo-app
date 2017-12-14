@@ -99,7 +99,7 @@ export default class App extends React.Component {
               <h3>Are you sure?</h3>
               <small>Your account will be removed from the browser, be sure to have it in your device.</small>
               <a class="btn btn-primary pointer"
-                href={"data:application/json;base64,"+window.btoa(self.state.wallet)}
+                href={"data:application/json;base64,"+window.btoa(JSON.stringify(self.state.wallet))}
                 download={self.state.wallet.address+".json"}
               >
                 Download Wallet <span class="fa fa-download"></span>
