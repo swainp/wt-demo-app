@@ -13,6 +13,7 @@ import EditUnit from '../components/EditUnit';
 import AddUnitType from '../components/AddUnitType';
 import EditUnitType from '../components/EditUnitType';
 import ViewBookings from '../components/ViewBookings';
+import ViewHotelTx from '../components/ViewHotelTx';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
@@ -229,13 +230,6 @@ export default class App extends React.Component {
 
         await self.state.hotelManager[self.state.editHotelFunction](...args);
 
-        //Change address and location in one TX
-        //TODO: remove once libs and contracts refactored
-        if(self.state.editHotelFunction == 'changeHotelAddress') {
-          args = [self.state.hotel.address, 1, hotel.latitude, hotel.longitude];
-          await self.state.hotelManager['changeHotelLocation'](...args);
-        }
-
         // select hotel again, so it uses the fresh version (that includes the just created room)
         if(self.state.editHotelFunction !== 'removeHotel')
           await self.selectHotel(self.state.hotel.address);
@@ -333,41 +327,6 @@ export default class App extends React.Component {
       self.setState({loading: false});
     }
 
-    // loadTxs(){
-    //   var self = this;
-    //   this.setState({loading: true});
-    //   var txs = wtHotelLib.wallet.getTxs();
-    //   function decodeData(params){
-    //     for (var i = 0; i < params.length; i++) {
-    //       if (params[i].name == 'data' && params[i].type == 'bytes'){
-    //         params[i].decoded = wtHotelLib.abiDecoder.decodeMethod(params[i].value);
-    //         decodeData(params[i].decoded.params);
-    //       }
-    //     }
-    //     return params;
-    //   }
-    //   for (var i = 0; i < txs.length; i++) {
-    //     txs[i].decoded = wtHotelLib.abiDecoder.decodeMethod(txs[i].input);
-    //     if (txs[i].decoded)
-    //       txs[i].decoded.params = decodeData(txs[i].decoded.params);
-    //   }
-    //   self.setState({
-    //     txs: txs,
-    //     loading: false,
-    //     section: 'blockchain'
-    //   });
-    // }
-
-    // async updateData(){
-    //   this.setState({loading: true});
-    //   wtHotelLib.updateHotels();
-    //   var hotels = [];
-    //   for (var addr in wtHotelLib.hotels) {
-    //     hotels.push({value: addr, label: wtHotelLib.hotels[addr].name});
-    //   }
-    //   this.setState({hotels: hotels, loading: false});
-    // }
-
     async getHotels() {
       var self = this;
       self.setState({loading: true});
@@ -412,6 +371,19 @@ export default class App extends React.Component {
       });
     }
 
+    async loadTxs() {
+      var self = this;
+      let network = await web3.eth.net.getNetworkType();
+      self.setState({loading: true});
+      let txs = await Utils.getDecodedTransactions(
+        '0x' + self.state.importKeystore.address,
+        (window.localStorage.wtIndexAddress || WTINDEX_ADDRESS),
+        WTINDEX_BLOCK,
+        web3,
+        network);
+      self.setState({hotelTxs: txs, loading: false});
+    }
+
     async confirmBooking(request, password) {
       var self = this;
       self.setState({loading: true});
@@ -436,7 +408,7 @@ export default class App extends React.Component {
           <ul class="list-unstyled" id="actions">
             <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotels' ? " btn-success" : "")} onClick={() => self.setState({section: 'hotels'})}>Hotels</button> </li>
             <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotelBookings' ? " btn-success" : "")} onClick={() => self.setState({section: 'hotelBookings'})}>Hotel Bookings</button> </li>
-            <li><button class={"btn btn-default btn-action" + (self.state.section == 'blockchain' ? " btn-success" : "")} onClick={() => self.loadTxs()}>Blockchain Txs</button> </li>
+            <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotelTxs' ? " btn-success" : "")} onClick={() => self.setState({section: 'hotelTxs'})}>Blockchain Txs</button> </li>
           </ul>
         </div>
 
@@ -447,8 +419,9 @@ export default class App extends React.Component {
         />
 
       let editHotelFunctions = [
-        {value: 'changeHotelInfo', label: 'Main Info'},
         {value: 'changeHotelAddress', label: 'Address'},
+        {value: 'changeHotelInfo', label: 'Main Info'},
+        {value: 'changeHotelLocation', label: 'Location'},
         {value: 'setRequireConfirmation', label: 'Confirmation Required'},
         {value: 'addImageHotel', label: 'Add Image'},
         {value: 'removeImageHotel', label: 'Remove Image'},
@@ -645,152 +618,25 @@ export default class App extends React.Component {
           bookingRequests={self.state.bookingRequests}
           confirmBooking={self.confirmBooking.bind(self)}
         />
-        {/* <div class="box">
-          <h2>Hotel Bookings</h2>
-          <div class="form-group">
-            <label>Choose a hotel</label>
-            {self.state.hotels ?
-              <Select
-                name="Hotels"
-                clearable={false}
-                options={self.state.hotelOptions}
-                onChange={ (val) => self.loadHotel(val.value)}
-                value={self.state.hotel.address}
-              />
-            :
-              <div>No hotels, click the button on the right to add one.</div>
-            }
-          </div>
-          <hr></hr>
-          <table class="table table-striped table-hover">
-            <thead>
-              <tr>
-                <th>Hotel Name</th>
-                <th>Room Type</th>
-                <th>Room Name</th>
-                <th>From Day</th>
-                <th>To Day</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {self.state.bookings.map(function(booking, i){
-                let unitBooked = self.state.hotel.units[booking.unit]
-                return (
-                  <tr key={'booking'+i} class="pointer" onClick={() => self.setState({transaction: booking.transactionHash})}>
-                    <td>{self.state.hotel.name}</td>
-                    <td>{unitBooked.unitType}</td>
-                    <td>{booking.unit.substring(2,6)}</td>
-                      <td>{moment(booking.fromDate).format('YYYY MM DD')}</td>
-                      <td>{moment(booking.fromDate).add(booking.daysAmount, 'days').format('YYYY MM DD')}</td>
-                    <td>Accepted</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div> */}
 
-      var blockchain =
-        <div class="box">
-          <h2>Transactions</h2>
-          <table class="table table-striped table-hover">
-            <thead>
-              <tr>
-                <th style={{width: '30px'}}>Block</th>
-                <th>Hash</th>
-                <th>From</th>
-                <th>To</th>
-                <th style={{width: '30px'}}>Value</th>
-                <th style={{width: '40px'}}>Gas</th>
-                <th style={{width: '50px'}}>Function</th>
-              </tr>
-            </thead>
-            <tbody>
-              {self.state.txs.map(function(tx, i){
-                return (
-                  <tr key={'tx'+i} class="pointer" onClick={() => self.setState({transaction: tx})}>
-                    <td style={{width: '30px'}}>{tx.blockNumber}</td>
-                    <td class="shortCell">{tx.hash}</td>
-                    <td class="shortCell">{tx.from}</td>
-                    <td class="shortCell">{tx.to}</td>
-                    <td style={{width: '30px'}}>{parseInt(tx.value)}</td>
-                    <td style={{width: '40px'}}>{tx.gas}</td>
-                    <td style={{width: '50px'}}>{tx.decoded ? tx.decoded.name : 'Common TX'}</td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-          <hr />
-          <div>
-            <small>
-              <div class="pull-left">
-                Winding Tree index address: {self.state.indexAddress}
-              </div>
-              <div class="pull-right">
-                <a onClick={() => self.deployIndex()}>Re-deploy Index</a>
-              </div>
-            </small>
-            <div class="clearfix" />
-          </div>
-        </div>
-
-      function decodeData(data){
-        if (data)
-          return(
-            <div>
-              <h4>Function: {data.name}</h4>
-              {data.params.map(function(param, i){
-                if (param.decoded){
-                  return <h4 key={param.name+i}>{param.name}: <br></br>
-                    <div style={{marginLeft: i*10}}>
-                      {decodeData(param.decoded)}
-                    </div>
-                  </h4>;
-                } else {
-                  return <h4 key={param.name+i}>{param.name}: {param.value}</h4>;
-                }
-              })}
-            </div>
-          )
-      }
-
-      const modalTransaction =
-        <Modal
-          isOpen={this.state.transaction.hash}
-          style={{
-            content : {
-              top                   : '40%',
-              left                  : '50%',
-              right                 : 'auto',
-              bottom                : 'auto',
-              marginRight           : '-50%',
-              maxHeight             : '80%',
-              transform             : 'translate(-50%, -50%)'
-            }
-          }}
-        >
-          <span class="fa fa-2x fa-times pull-right" onClick={() => this.setState({transaction: {}})}></span>
-          <h3>Transaction <br></br> <small>{self.state.transaction.hash}</small></h3>
-          <h4>From: {self.state.transaction.from}</h4>
-          <h4>To: {self.state.transaction.to}</h4>
-          <h4>Value: {parseInt(self.state.transaction.value)}</h4>
-          <h4>Gas: {self.state.transaction.gas}</h4>
-          {decodeData(self.state.transaction.decoded)}
-        </Modal>
+        var hotelTxs =
+        <ViewHotelTx
+          loadTxs={self.loadTxs.bind(self)}
+          hotelOptions={self.state.hotelOptions}
+          hotelTxs={self.state.hotelTxs}
+          web3={web3}
+        />
 
       return(
         <div class={self.state.loading ? "loading" : ""}>
           <ToastContainer style={{zIndex: 2000}}/>
           <div class="row">
-            {modalTransaction}
             <div class="col-md-2 text-center">
               {actions}
             </div>
             <div class="col-md-10">
-              {self.state.section == 'blockchain' ?
-                <div>{blockchain}</div>
+              {self.state.section == 'hotelTxs' ?
+                <div>{hotelTxs}</div>
               : self.state.section == 'hotels' && self.state.hotelSection == 'edit' ?
                 <div>{editHotel}</div>
               : self.state.section == 'hotels' && self.state.hotelSection == 'new' ?
