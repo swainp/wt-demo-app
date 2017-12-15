@@ -2,6 +2,9 @@ import React from 'react';
 import {Link} from 'react-router';
 import ReactModal from 'react-modal';
 import Address from '../components/Address';
+import Tx from '../components/Tx';
+import { ToastContainer, toast } from 'react-toastify';
+import superagent from 'superagent';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
@@ -167,6 +170,22 @@ export default class App extends React.Component {
       });
     }
 
+    requestEth(){
+      var data = this.state.walletKeystore.address
+      superagent.post('https://faucet.metamask.io/')
+      .type('application/rawdata')
+      .send(data)
+      .end((err, resp) => {
+        if (err) {
+          toast.error(err);
+        } else {
+          let responseWrapper =
+          <div>Requested ETH! TX: <Tx hash={resp.text} web3={web3}/></div>
+          toast.success(responseWrapper);
+        }
+      })
+    }
+
     render() {
       var self = this;
 
@@ -286,6 +305,10 @@ export default class App extends React.Component {
             </div>
             <br></br>
             <div class="row justify-content-around">
+              <button class="btn btn-primary" onClick={() => self.requestEth()}>Claim ETH from Faucet</button>
+            </div>
+            <br></br>
+            <div class="row justify-content-around">
               <a class="btn btn-link" href={"mailto:faucet@windingtree.com?subject=Request%20ETH&body=My%20address:%20"+self.state.walletKeystore.address}>Request 0.1 ETH to faucet@windingtree.com</a>
               <button class="btn btn-primary" onClick={() => self.claimFaucet(true)}>Claim Lif from Faucet</button>
             </div>
@@ -390,6 +413,7 @@ export default class App extends React.Component {
 
       return(
         <div class={self.state.loading ? "loading" : ""}>
+          <ToastContainer style={{zIndex: 2000}}/>
           <div class="row justify-content-center">
             <div class="col-md-8">
               <div>{wallet}</div>
