@@ -229,6 +229,13 @@ export default class App extends React.Component {
 
         await self.state.hotelManager[self.state.editHotelFunction](...args);
 
+        //Change address and location in one TX
+        //TODO: remove once libs and contracts refactored
+        if(self.state.editHotelFunction == 'changeHotelAddress') {
+          args = [self.state.hotel.address, 1, hotel.latitude, hotel.longitude];
+          await self.state.hotelManager['changeHotelLocation'](...args);
+        }
+
         // select hotel again, so it uses the fresh version (that includes the just created room)
         if(self.state.editHotelFunction !== 'removeHotel')
           await self.selectHotel(self.state.hotel.address);
@@ -440,9 +447,8 @@ export default class App extends React.Component {
         />
 
       let editHotelFunctions = [
-        {value: 'changeHotelAddress', label: 'Address'},
         {value: 'changeHotelInfo', label: 'Main Info'},
-        {value: 'changeHotelLocation', label: 'Location'},
+        {value: 'changeHotelAddress', label: 'Address'},
         {value: 'setRequireConfirmation', label: 'Confirmation Required'},
         {value: 'addImageHotel', label: 'Add Image'},
         {value: 'removeImageHotel', label: 'Remove Image'},

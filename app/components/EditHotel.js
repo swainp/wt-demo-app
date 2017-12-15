@@ -1,20 +1,29 @@
 import React from 'react';
 
 import Select from 'react-select';
+import PlacesAutocomplete from 'react-places-autocomplete'
+import {formatResult} from '../helpers/geocodeFormatter'
+import googleMaps from '@google/maps'
 
 export default class EditHotel extends React.Component {
 
     constructor(props) {
       super(props);
+      let googleMapsClient = googleMaps.createClient({
+        key: MAPS_API,
+        Promise: Promise
+      });
       this.state = {
         hotel: Object.assign({}, props.hotel),
-        image: {}
+        image: {},
+        googleMapsClient: googleMapsClient
       }
     }
 
     componentWillReceiveProps(nextProps) {
       if(this.props.hotel !== nextProps.hotel) {
-        this.setState({ hotel: Object.assign({}, nextProps.hotel), image: {} });
+        let address;
+        this.setState({ hotel: Object.assign({}, nextProps.hotel), image: {}, address: address });
       }
     }
 
@@ -22,7 +31,43 @@ export default class EditHotel extends React.Component {
       this.setState({ hotel: Object.assign(this.state.hotel, info) });
     }
 
+    onPlacesChange(address) {
+      this.setState({address: address});
+    }
+
+    onlyDefined(val, append='') { return (val ? val + append : ''); }
+
+    async handlePlacesSelect(address, placeId) {
+      this.setState({address: address});
+      //Get the geocode and format it
+      let geoCode = await this.state.googleMapsClient.geocode({address: address}).asPromise();
+      geoCode = formatResult(geoCode.json.results[0]);
+      //Get the timezone from coordinates
+      let location = {latitude: geoCode.latitude, longitude: geoCode.longitude};
+      let timezone = await this.state.googleMapsClient.timezone({location: location}).asPromise();
+      //Filter out undefined values
+      let hotelLocation = {
+        lineOne: this.onlyDefined(geoCode.streetNumber, ', ') + this.onlyDefined(geoCode.streetName),
+        lineTwo: this.onlyDefined(geoCode.streetNumber, ', ') + this.onlyDefined(geoCode.streetName, ', ') + geoCode.administrativeLevels.join(', '),
+        zip: this.onlyDefined(geoCode.zipcode),
+        country: this.onlyDefined(geoCode.countryCode),
+        latitude: geoCode.latitude,
+        longitude: geoCode.longitude,
+        timezone: timezone.json.timeZoneId
+      }
+      this.setState({
+        hotel: Object.assign(this.state.hotel, hotelLocation)
+      })
+    }
+
     render() {
+      const placesInputProps = {
+        value: this.state.address,
+        onChange: (address) => { this.onPlacesChange(address)}
+      }
+      const cssClasses = {
+        input: 'form-control'
+      }
       return(
         <form class="box" onSubmit={(e) => {e.preventDefault(); this.props.editHotel(this.state.hotel, this.state.image, this.state.password)}}>
           <h3>
@@ -59,6 +104,14 @@ export default class EditHotel extends React.Component {
               changeHotelAddress: (
                 <div>
                   <div class="form-group">
+                    <label>Search for Address</label>
+                    <PlacesAutocomplete
+                      inputProps={placesInputProps}
+                      classNames={cssClasses}
+                      onSelect={(address, placeId) => this.handlePlacesSelect(address, placeId)}
+                    />
+                  </div>
+                  <div class="form-group">
                     <label>Address One</label>
                     <input
                       type="text"
@@ -94,40 +147,10 @@ export default class EditHotel extends React.Component {
                       onChange={e => this.editHotelInfo({country: e.target.value})}
                     />
                   </div>
-                </div>
-              ),
-              changeHotelInfo: (
-                <div>
-                  <div class="form-group">
-                    <label>Name</label>
-                    <input
-                      type="text"
-                      autoFocus="true"
-                      class="form-control"
-                      value={this.state.hotel.name || ''}
-                      onChange={e => this.editHotelInfo({name: e.target.value})}
-                    />
-                  </div>
-                  <div class="form-group">
-                    <label>Description</label>
-                    <input
-                      type="text"
-                      class="form-control"
-                      value={this.state.hotel.description || ''}
-                      onChange={e => this.editHotelInfo({description: e.target.value})}
-                    />
-                  </div>
-                </div>
-              ),
-              changeHotelLocation: (
-                <div>
                   <div class="form-group">
                     <label>Timezone</label>
                     <input
-                      type="number"
-                      min="0"
-                      max="24"
-                      step="1"
+                      type="text"
                       class="form-control"
                       value={this.state.hotel.timezone || ''}
                       onChange={e => this.editHotelInfo({timezone: e.target.value})}
@@ -149,6 +172,29 @@ export default class EditHotel extends React.Component {
                       class="form-control"
                       value={this.state.hotel.longitude || ''}
                       onChange={e => this.editHotelInfo({longitude: e.target.value})}
+                    />
+                  </div>
+                </div>
+              ),
+              changeHotelInfo: (
+                <div>
+                  <div class="form-group">
+                    <label>Name</label>
+                    <input
+                      type="text"
+                      autoFocus="true"
+                      class="form-control"
+                      value={this.state.hotel.name || ''}
+                      onChange={e => this.editHotelInfo({name: e.target.value})}
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Description</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      value={this.state.hotel.description || ''}
+                      onChange={e => this.editHotelInfo({description: e.target.value})}
                     />
                   </div>
                 </div>
