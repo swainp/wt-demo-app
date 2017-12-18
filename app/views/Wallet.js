@@ -178,11 +178,10 @@ export default class App extends React.Component {
       .type('application/rawdata')
       .send(data)
       .end((err, resp) => {
+        self.setState({loading: false});
         if (err) {
-          self.setState({loading: false});
           toast.error(err);
         } else {
-          self.setState({loading: false});
           let responseWrapper =
           <div>Requested ETH! TX: <Tx hash={resp.text} web3={web3}/></div>
           toast.success(responseWrapper);
