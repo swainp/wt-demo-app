@@ -5,6 +5,7 @@ import Modal from 'react-modal';
 import moment from 'moment';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
 import { ToastContainer, toast } from 'react-toastify';
+import currencyCodes from 'currency-codes';
 
 import CreateHotel from '../components/CreateHotel';
 import EditHotel from '../components/EditHotel';
@@ -271,7 +272,7 @@ export default class App extends React.Component {
           args.push(newUnit.defaultLifPrice);
           break;
         case 'setCurrencyCode':
-          args.push(newUnit.currencyCode);
+          args.push(Number(currencyCodes.code(newUnit.currencyCode).number));
           break;
         case 'setUnitSpecialLifPrice':
           args.push(newUnit.specialLifPrice);
@@ -592,7 +593,7 @@ export default class App extends React.Component {
                         <td class="text-center">{unit[0].substring(2,6)}</td>
                         <td class="shortCell">{entryTypeInfo.description}</td>
                         <td class="text-center">{entryTypeInfo.maxGuests}</td>
-                        <td class="text-center">{unit[1].defaultPrice}{unit[1].currencyCode}</td>
+                        <td class="text-center">{unit[1].defaultPrice || 0} {unit[1].currencyCode || ''}</td>
                         <td class="text-center">{unit[1].active ? 'Active' : 'Inactive'}</td>
                         <td class="text-center">
                           <button class="btn btn-primary btn-sm"

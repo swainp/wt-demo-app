@@ -3,6 +3,8 @@ import React from 'react';
 import moment from 'moment';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
 import Select from 'react-select';
+import currencyCodeData from 'currency-codes/data';
+import currencyCodes from 'currency-codes';
 
 export default class EditUnit extends React.Component {
 
@@ -24,6 +26,10 @@ export default class EditUnit extends React.Component {
     }
 
     render() {
+      let currencyCodeOptions = currencyCodeData.map(e => {return {value: e.code, label: e.code + ' (' + e.number + ')'}});
+      let selectedCurrency = currencyCodeOptions.find(e => e.value == this.state.newUnit.currencyCode);
+      if(selectedCurrency == undefined || selectedCurrency.value == undefined) selectedCurrency = null;
+
       return(
         <form class="box" onSubmit={(e) => {e.preventDefault(); this.props.editHotelUnit(this.state.newUnit, this.state.password)}}>
           <h3>
@@ -60,13 +66,13 @@ export default class EditUnit extends React.Component {
             setCurrencyCode: (
               <div class="form-group">
                 <label>Currency Code</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  autoFocus="true"
-                  value={this.state.newUnit.currencyCode || ''}
-                  onChange={e => this.editUnitInfo({currencyCode: e.target.value})}
-                />
+                <Select
+        					options={currencyCodeOptions}
+        					name="selected-state"
+        					value={selectedCurrency}
+        					onChange={e => this.editUnitInfo({currencyCode: e.value})}
+        					searchable
+        				/>
               </div>
             ),
             setDefaultLifPrice: (
