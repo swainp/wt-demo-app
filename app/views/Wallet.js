@@ -171,11 +171,14 @@ export default class App extends React.Component {
     }
 
     requestEth(){
+      var self = this;
+      self.setState({loading: true});
       var data = this.state.walletKeystore.address
       superagent.post('https://faucet.metamask.io/')
       .type('application/rawdata')
       .send(data)
       .end((err, resp) => {
+        self.setState({loading: false});
         if (err) {
           toast.error(err);
         } else {
@@ -306,11 +309,6 @@ export default class App extends React.Component {
             <br></br>
             <div class="row justify-content-around">
               <button class="btn btn-primary" onClick={() => self.requestEth()}>Claim ETH from Faucet</button>
-            </div>
-            <br></br>
-            <div class="row justify-content-around">
-              <a class="btn btn-link" href={"mailto:faucet@windingtree.com?subject=Request%20ETH&body=My%20address:%20"+self.state.walletKeystore.address}>Request 0.1 ETH to faucet@windingtree.com</a>
-              <button class="btn btn-primary" onClick={() => self.claimFaucet(true)}>Claim Lif from Faucet</button>
             </div>
             <br></br>
             <span class="help-block">
