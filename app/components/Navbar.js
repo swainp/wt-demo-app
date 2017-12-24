@@ -34,8 +34,8 @@ export default class App extends React.Component {
     render() {
       var self = this;
       return(
-        <nav class='navbar navbar-expand-md navbar-dark fixed-top bg-dark'>
-          <Link class='navbar-brand' to='/'>WT</Link>
+        <nav class='navbar navbar-expand-md fixed-top navbar-main'>
+          <Link class='navbar-brand' to='/'><strong>WT</strong></Link>
           <button class='navbar-toggler' type='button' data-toggle='collapse' data-target='#navbarCollapse' aria-controls='navbarCollapse' aria-expanded='false' aria-label='Toggle navigation'>
             <span class='navbar-toggler-icon'></span>
           </button>
@@ -53,7 +53,7 @@ export default class App extends React.Component {
             </ul>
             <ul class="navbar-nav ml-auto">
               <li class='nav-item pull-right'>
-                <a class="nav-link">Block #{self.state.blockNumber} - {self.state.networkType}</a>
+                <span class="nav-link text-success">Block #{self.state.blockNumber} - {self.state.networkType}</span>
               </li>
               <li class={window.location.pathname == '/config' ? 'nav-item pull-right active' : 'nav-item pull-right'}>
                 <Link class='nav-link config-icon' to='/config'><span class="fa fa-cog"></span></Link>

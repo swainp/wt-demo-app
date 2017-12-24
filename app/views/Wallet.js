@@ -193,12 +193,14 @@ export default class App extends React.Component {
       var self = this;
 
       var wallet =
-        <div class="jumbotron">
+        <div>
           {(self.state.walletSection == 'create') ?
           <form key="createWalletForm" onSubmit={(e) => {e.preventDefault(); self.createWallet()}}>
-            <h3>Create a new wallet</h3>
+            <h1>Create a new wallet</h1>
+            <p className="lead">Don't have a wallet yet? Create one now.</p>
+            <hr/>
             <div class="form-group">
-              <label>Wallet password</label>
+              <label class="h4">Wallet password</label>
               <div class="input-group">
                 <input
                   type={self.state.showPassword ? "text" : "password"}
@@ -206,16 +208,23 @@ export default class App extends React.Component {
                   autoFocus="true"
                   defaultValue={self.state.password}
                   required
-                  placeholder="This password will be used to encrypt your new wallet. Use a strong one!"
+                  placeholder="Enter your password here"
                   onChange={(event) => self.setState({ password: event.target.value })}/>
                 <span class="input-group-addon">
                   {self.state.showPassword ?
-                    <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
+                    <span onClick={() => self.setState({showPassword: false})}>
+                      <span style={{paddingRight: 6}}>Show/Hide</span>
+                      <span class="fa fa-eye"></span>
+                    </span>
                   :
-                    <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
+                    <span onClick={() => self.setState({showPassword: true})}>
+                      <span style={{paddingRight: 6}}>Show/Hide</span>
+                      <span class="fa fa-eye-slash"></span>
+                    </span>
                   }
                 </span>
               </div>
+              <p class="text-muted"><small><em>— This password will be used to encrypt your new wallet. Use a strong one!</em></small></p>
             </div>
             {self.state.walletKeystore.address ?
               <a class="btn btn-primary pointer"
@@ -230,9 +239,25 @@ export default class App extends React.Component {
           </form>
           : (self.state.walletSection == 'open') ?
           <form key="OpenWalletForm" onSubmit={(e) => {e.preventDefault(); self.openWallet()}}>
-            <h3>Open an existing wallet</h3>
+
+            <h1>Open an existing wallet</h1>
+            <p className="lead">Start by adding a wallet. You can use any wallets you have or create a new one.</p>
+            <hr/>
+
+            {(self.state.walletError) ?
+              <div class="alert alert-danger" role="alert">
+                There was an error trying to open the wallet, is that the correct password?
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                  onClick={()=> self.setState({walletError: false})}
+                  >
+                    <span aria-hidden="true">&times;</span>
+                  </button>
+              </div>
+              : null
+            }
+
             <div class="form-group">
-              <label>Encrypted wallet</label>
+              <label class="h4">Encrypted wallet</label>
               <div class="input-group">
                 <input
                   type="text"
@@ -245,7 +270,7 @@ export default class App extends React.Component {
                   }}/>
                 <span class="input-group-addon pointer" onClick={() => {
                   document.getElementById('inputFile').click();
-                }}> Select File <span class="fa fa-upload"> </span>
+                }}> <span style={{paddingRight: 6}}>Select File</span> <span class="fa fa-upload"> </span>
                   <input id="inputFile" class="file-upload" accept=".json" type="file" onChange={(event) => {
                     var reader = new FileReader();
                     reader.onload = (function(theFile) {
@@ -263,36 +288,45 @@ export default class App extends React.Component {
                   }} />
                 </span>
               </div>
-              <span class="help-block">
-                This is the encrypted wallet as saved into the browser keystore. In the real system, there will be different alternatives to help you manage your wallet
-              </span>
+              <p class="text-muted">
+                <small>
+                  <em>— This is the encrypted wallet as saved into the browser keystore. In the real system,
+                    there will be different alternatives to help you manage your wallet</em>
+                </small>
+              </p>
             </div>
-            <div class="form-group">
-              <label>Wallet password</label>
+
+            <div class="form-group mb-xl">
+              <label class="h4">Wallet password</label>
               <div class="input-group">
                 <input
                   type={self.state.showPassword ? "text" : "password"}
                   class="form-control"
                   defaultValue={self.state.password}
-                  autoFocus="true"
                   placeholder="This password will be used to encrypt your new wallet. Use a strong one!"
                   onChange={(event) => {
                     self.setState({ password: event.target.value });
                   }}/>
                 <span class="input-group-addon">
                   {self.state.showPassword ?
-                    <span class="fa fa-eye" onClick={() => self.setState({showPassword: false})}></span>
+                    <span onClick={() => self.setState({showPassword: false})} style={{cursor: 'pointer'}}>
+                      <span style={{paddingRight: 6}}>Show/Hide</span>
+                      <span class="fa fa-eye"></span>
+                    </span>
                   :
-                    <span class="fa fa-eye-slash" onClick={() => self.setState({showPassword: true})}></span>
+                    <span onClick={() => self.setState({showPassword: true})} style={{cursor: 'pointer'}}>
+                      <span style={{paddingRight: 6}}>Show/Hide</span>
+                      <span class="fa fa-eye-slash"></span>
+                    </span>
                   }
                 </span>
               </div>
             </div>
+
             <input type="submit" class="btn btn-primary" value="Open wallet" />
             <button class="btn btn-link" onClick={() => self.setState({walletSection: 'create'})}>Or create a new wallet</button>
-            {(self.state.walletError)
-              ? <p class="bg-danger" style={{padding: "10px", marginTop: "5px"}}>There was an error trying to open the wallet, is that the correct password?</p>
-              : <div></div>}
+
+
           </form>
           : (self.state.walletSection == 'show') ?
           <div>
@@ -337,7 +371,7 @@ export default class App extends React.Component {
                 <h3>Send ETH or LIF <button class="btn btn-primary pull-right" onClick={() => self.setState({walletSection: 'show'})}><span class="fa fa-arrow-left"></span> Back</button></h3>
                 <form key="sendForm" onSubmit={(e) => {e.preventDefault(); self.sendTx()}}>
                   <div class="form-group">
-                    <label>Currency:</label>
+                    <label><b>Currency:</b></label>
                     <div class="input-group">
                       <select class="form-control" defaultValue={self.state.currency} onChange={(event) => self.setState({ currency: event.target.value })}>
                         <option value="ETH">ETH</option>
@@ -346,25 +380,23 @@ export default class App extends React.Component {
                     </div>
                   </div>
                   <div class="form-group">
-                    <label>To:</label>
+                    <label><b>To:</b></label>
                     <div class="input-group">
                       <input
                         type="text"
                         class="form-control"
-                        autoFocus="true"
                         defaultValue={self.state.receiverAddress}
                         placeholder="Receiver Address"
                         onChange={(event) => self.setState({ receiverAddress: event.target.value })}/>
                     </div>
                   </div>
                   <div class="form-group">
-                    <label>Amount:</label>
+                    <label><b>Amount:</b></label>
                     <div class="input-group">
                       <input
                         type="number"
                         step="any"
                         class="form-control"
-                        autoFocus="true"
                         defaultValue={self.state.sendAmount}
                         placeholder="Amount to send"
                         onChange={(event) => self.setState({ sendAmount: event.target.value })}/>
@@ -374,12 +406,11 @@ export default class App extends React.Component {
                   {self.state.currency === 'ETH' &&
                   <div id="advanced">
                     <div class="form-group">
-                      <label>Gas:</label>
+                      <label><b>Gas:</b></label>
                       <div class="input-group">
                         <input
                           type="number"
                           class="form-control"
-                          autoFocus="true"
                           defaultValue={self.state.gasAmount}
                           placeholder="Amount of gas"
                           min="21000"
@@ -387,12 +418,11 @@ export default class App extends React.Component {
                       </div>
                     </div>
                     <div class="form-group">
-                      <label>Data:</label>
+                      <label><b>Data:</b></label>
                       <div class="input-group">
                         <input
                           type="text"
                           class="form-control"
-                          autoFocus="true"
                           defaultValue={self.state.txData}
                           placeholder="Hex encoded data"
                           onChange={(event) => self.setState({ txData: event.target.value })}/>
@@ -413,7 +443,7 @@ export default class App extends React.Component {
         <div class={self.state.loading ? "loading" : ""}>
           <ToastContainer style={{zIndex: 2000}}/>
           <div class="row justify-content-center">
-            <div class="col-md-8">
+            <div class="col-sm-10">
               <div>{wallet}</div>
             </div>
           </div>
