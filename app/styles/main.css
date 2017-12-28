@@ -36,6 +36,10 @@ h4, .h4 {
 p.lead {font-size: 22px!important;}
 p {font-size: 18px;}
 
+a:hover {
+  cursor: pointer;
+}
+
 hr {margin: 30px 0;}
 
 ul.list-wt > li {
@@ -45,10 +49,47 @@ ul.list-wt > li {
 
 input[required] {box-shadow: none;} /* Remove red shadow*/
 
+
+
+.help-block {
+  display: block;
+  margin-bottom: 20px;
+  font-size: 16px;
+  line-height: 1.2;
+}
+.help-block > * {margin-bottom: 10px;}
+.help-block > p {font-size: 16px;}
+.help-block > :last-child {margin-bottom: 0;}
+
+
+.wt-btnClose {
+  position: absolute;
+  top: 5px;
+  right: 15px;
+  display: block;
+  width: 65px;
+  height: 65px;
+  text-indent: -5000px;
+  background: url(/assets/icon-close.png) no-repeat center center;
+  border: 0;
+  opacity: .7;
+  background-size: 96px;
+  padding: 0;
+}
+.wt-btnClose:hover {opacity: .3; cursor: pointer!important;}
+.wt-btnClose:focus {outline: 0;}
+
+
+
 .btn-link:hover {
   cursor: pointer;
 }
 
+.btn-light {
+  background: #E9ECEF;
+  border-color: #E9ECEF;
+  background: #fff;
+}
 
 .navbar.navbar-main {
   padding-top: 10px;
@@ -98,11 +139,6 @@ input[required] {box-shadow: none;} /* Remove red shadow*/
 }
 .pointer {
   cursor: pointer;
-}
-
-.address-row h2 {
-  padding: 0;
-  border-top: 0;
 }
 
 .file-upload {
@@ -228,3 +264,5 @@ input[required] {box-shadow: none;} /* Remove red shadow*/
 .mb-md {margin-bottom: 15px !important;}
 .mb-lg {margin-bottom: 20px !important;}
 .mb-xl {margin-bottom: 25px !important;}
+
+.hidden {display: none !important;}

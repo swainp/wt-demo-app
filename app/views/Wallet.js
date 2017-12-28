@@ -197,34 +197,46 @@ export default class App extends React.Component {
           {(self.state.walletSection == 'create') ?
           <form key="createWalletForm" onSubmit={(e) => {e.preventDefault(); self.createWallet()}}>
             <h1>Create a new wallet</h1>
-            <p className="lead">Don't have a wallet yet? Create one now.</p>
+            <p class="lead">Don't have a wallet? Create one now.</p>
             <hr/>
+            <h4 class="mb-xl">
+              In order to create a wallet you'll need to choose a password.
+            </h4>
             <div class="form-group">
-              <label class="h4">Wallet password</label>
-              <div class="input-group">
-                <input
-                  type={self.state.showPassword ? "text" : "password"}
-                  class="form-control"
-                  autoFocus="true"
-                  defaultValue={self.state.password}
-                  required
-                  placeholder="Enter your password here"
-                  onChange={(event) => self.setState({ password: event.target.value })}/>
-                <span class="input-group-addon">
-                  {self.state.showPassword ?
-                    <span onClick={() => self.setState({showPassword: false})}>
-                      <span style={{paddingRight: 6}}>Show/Hide</span>
-                      <span class="fa fa-eye"></span>
-                    </span>
-                  :
-                    <span onClick={() => self.setState({showPassword: true})}>
-                      <span style={{paddingRight: 6}}>Show/Hide</span>
-                      <span class="fa fa-eye-slash"></span>
-                    </span>
-                  }
-                </span>
+              <label><b>Wallet password</b></label>
+
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="input-group">
+                  <input
+                    autoComplete="off"
+                    type={self.state.showPassword ? "text" : "password"}
+                    class="form-control"
+                    defaultValue={self.state.password}
+                    required
+                    placeholder="Enter your password here"
+                    onChange={(event) => self.setState({ password: event.target.value })}/>
+                  <span class="input-group-addon">
+                    {self.state.showPassword ?
+                      <span onClick={() => self.setState({showPassword: false})}>
+                        <span style={{paddingRight: 6}}>Show/Hide</span>
+                        <span class="fa fa-eye"></span>
+                      </span>
+                    :
+                      <span onClick={() => self.setState({showPassword: true})}>
+                        <span style={{paddingRight: 6}}>Show/Hide</span>
+                        <span class="fa fa-eye-slash"></span>
+                      </span>
+                    }
+                  </span>
+                  </div>
+
+                  <p class="text-muted">
+                    <small>The password will be used to encrypt and protect the data, use a strong one!</small>
+                  </p>
+
+                </div>
               </div>
-              <p class="text-muted"><small><em>— This password will be used to encrypt your new wallet. Use a strong one!</em></small></p>
             </div>
             {self.state.walletKeystore.address ?
               <a class="btn btn-primary pointer"
@@ -241,85 +253,96 @@ export default class App extends React.Component {
           <form key="OpenWalletForm" onSubmit={(e) => {e.preventDefault(); self.openWallet()}}>
 
             <h1>Open an existing wallet</h1>
-            <p className="lead">Start by adding a wallet. You can use any wallets you have or create a new one.</p>
+            <p class="lead">Start by opening a wallet, you can use any wallets you have or create a new one.</p>
             <hr/>
 
-            {(self.state.walletError) ?
-              <div class="alert alert-danger" role="alert">
-                There was an error trying to open the wallet, is that the correct password?
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close"
-                  onClick={()=> self.setState({walletError: false})}
-                  >
-                    <span aria-hidden="true">&times;</span>
-                  </button>
-              </div>
-              : null
-            }
+            {/*<h4 class="mb-xl"> Please, enter the information to open you wallet. </h4>*/}
 
-            <div class="form-group">
-              <label class="h4">Encrypted wallet</label>
-              <div class="input-group">
-                <input
-                  type="text"
-                  class="form-control"
-                  value={JSON.stringify(self.state.walletKeystore)}
-                  defaultValue={JSON.stringify(self.state.walletKeystore)}
-                  placeholder="This password will be used to encrypt your new wallet. Use a strong one!"
-                  onChange={(event) => {
-                    self.setState({ walletKeystore: event.target.value, walletError: false });
-                  }}/>
-                <span class="input-group-addon pointer" onClick={() => {
-                  document.getElementById('inputFile').click();
-                }}> <span style={{paddingRight: 6}}>Select File</span> <span class="fa fa-upload"> </span>
-                  <input id="inputFile" class="file-upload" accept=".json" type="file" onChange={(event) => {
-                    var reader = new FileReader();
-                    reader.onload = (function(theFile) {
-                      return function(e) {
-                        var base64 = reader.result;
-                        var fileData = window.atob(base64.split(';base64,')[1]);
-                        self.setState({
-                          walletKeystore: JSON.parse(fileData)
-                        });
-                        window.localStorage.wallet = fileData;
-                      };
-                    })(event.target.files[0]);
-                    if (event.target.files && event.target.files[0])
-                      reader.readAsDataURL(event.target.files[0]);
-                  }} />
-                </span>
+            <div class="row">
+              <div class="col-lg-6">
+
+                {(self.state.walletError) ?
+                  <div class="alert alert-danger" role="alert">
+                    There was an error trying to open the wallet, is that the correct password?
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close"
+                      onClick={()=> self.setState({walletError: false})}
+                      >
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                  </div>
+                  : null
+                }
+
+                <div class="form-group">
+                  <label><b>Encrypted wallet</b></label>
+                  <div class="input-group">
+                    <input
+                      type="text"
+                      class="form-control"
+                      value={JSON.stringify(self.state.walletKeystore)}
+                      defaultValue={JSON.stringify(self.state.walletKeystore)}
+                      placeholder="This password will be used to encrypt your new wallet. Use a strong one!"
+                      onChange={(event) => {
+                        self.setState({ walletKeystore: event.target.value, walletError: false });
+                      }}/>
+                    <span class="input-group-addon pointer" onClick={() => {
+                      document.getElementById('inputFile').click();
+                    }}> <span style={{paddingRight: 6}}>Select File</span> <span class="fa fa-upload"> </span>
+                      <input id="inputFile" class="file-upload" accept=".json" type="file" onChange={(event) => {
+                        var reader = new FileReader();
+                        reader.onload = (function(theFile) {
+                          return function(e) {
+                            var base64 = reader.result;
+                            var fileData = window.atob(base64.split(';base64,')[1]);
+                            self.setState({
+                              walletKeystore: JSON.parse(fileData)
+                            });
+                            window.localStorage.wallet = fileData;
+                          };
+                        })(event.target.files[0]);
+                        if (event.target.files && event.target.files[0])
+                          reader.readAsDataURL(event.target.files[0]);
+                      }} />
+                    </span>
+                  </div>
+                  <p class="text-muted mb-lg" style={{lineHeight: 1.2, paddingTop: 4}}>
+                    <small>
+                      <em>This is the encrypted wallet as saved into the browser keystore. In the real system,
+                        there will be different alternatives to help you manage your wallet</em>
+                    </small>
+                  </p>
+                </div>
               </div>
-              <p class="text-muted">
-                <small>
-                  <em>— This is the encrypted wallet as saved into the browser keystore. In the real system,
-                    there will be different alternatives to help you manage your wallet</em>
-                </small>
-              </p>
             </div>
 
-            <div class="form-group mb-xl">
-              <label class="h4">Wallet password</label>
-              <div class="input-group">
-                <input
-                  type={self.state.showPassword ? "text" : "password"}
-                  class="form-control"
-                  defaultValue={self.state.password}
-                  placeholder="This password will be used to encrypt your new wallet. Use a strong one!"
-                  onChange={(event) => {
-                    self.setState({ password: event.target.value });
-                  }}/>
-                <span class="input-group-addon">
-                  {self.state.showPassword ?
-                    <span onClick={() => self.setState({showPassword: false})} style={{cursor: 'pointer'}}>
-                      <span style={{paddingRight: 6}}>Show/Hide</span>
-                      <span class="fa fa-eye"></span>
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="form-group mb-xl">
+                  <label><b>Wallet password</b></label>
+                  <div class="input-group">
+                    <input
+                      autoComplete={false}
+                      type={self.state.showPassword ? "text" : "password"}
+                      class="form-control"
+                      defaultValue={self.state.password}
+                      onChange={(event) => {
+                        self.setState({ password: event.target.value });
+                      }}/>
+                    <span class="input-group-addon">
+                      {self.state.showPassword ?
+                        <span onClick={() => self.setState({showPassword: false})} style={{cursor: 'pointer'}}>
+                          <span style={{paddingRight: 6}}>Show/Hide</span>
+                          <span class="fa fa-eye"></span>
+                        </span>
+                      :
+                        <span onClick={() => self.setState({showPassword: true})} style={{cursor: 'pointer'}}>
+                          <span style={{paddingRight: 6}}>Show/Hide</span>
+                          <span class="fa fa-eye-slash"></span>
+                        </span>
+                      }
                     </span>
-                  :
-                    <span onClick={() => self.setState({showPassword: true})} style={{cursor: 'pointer'}}>
-                      <span style={{paddingRight: 6}}>Show/Hide</span>
-                      <span class="fa fa-eye-slash"></span>
-                    </span>
-                  }
-                </span>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -330,111 +353,181 @@ export default class App extends React.Component {
           </form>
           : (self.state.walletSection == 'show') ?
           <div>
-            <div class="row justify-content-around address-row">
-              <h2>Wallet <small><Address address={self.state.walletKeystore.address} web3={web3}/></small></h2>
+            <h1>Active Wallet</h1>
+            <p class="lead">Address: <Address address={self.state.walletKeystore.address} web3={web3}/></p>
+
+            <hr/>
+
+            <h2>Current Balances</h2>
+
+            <div class="row">
+              <div class="col">
+                <div class="card mb-sm">
+                  <div class="card-body">
+                    <div class="row align-items-center">
+                      <div class="col">
+                        <p class="mb-0 h5">ETH Balance: {self.state.ethBalance}</p>
+                      </div>
+                      <div class="col">
+                        <p class="mb-0 h5">Lif Balance: {self.state.lifBalance}</p>
+                      </div>
+                      <div class="col-2">
+                        <button class="btn btn-primary btn-block" onClick={() => self.setState({walletSection: 'send'})}><span class="fa fa-send"></span> Send</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <hr></hr>
-            <div class="row justify-content-around">
-              <h4>ETH Balance: {self.state.ethBalance}</h4>
-              <h4>Lif Balance: {self.state.lifBalance}</h4>
-              <button class="btn btn-info" onClick={() => self.updateBalances()}>Update Balances <span class="fa fa-refresh"></span></button>
-              <button class="btn btn-primary" onClick={() => self.setState({walletSection: 'send'})}> Send <span class="fa fa-send"></span></button>
+
+
+            <div class="row mb-xl">
+              <div class="col">
+                <p>
+                  <small>
+                    <a tabIndex='4' onClick={() => self.requestEth()}>Claim ETH from Faucet</a>
+                    <span className="text-muted">&nbsp; | &nbsp;</span>
+                    <a tabIndex='5' onClick={() => self.updateBalances()}>Update Balances</a>
+                  </small>
+                </p>
+              </div>
             </div>
-            <br></br>
-            <div class="row justify-content-around">
-              <button class="btn btn-primary" onClick={() => self.requestEth()}>Claim ETH from Faucet</button>
+
+            <div class="help-block text-muted mb-lg">
+              <p>
+                Once you have ETH we reccomend you to request tokens first, you can have up to 50 tokens and 0.1 ETH, if you have less
+                than that you can request more to the token contract.
+                In case you have 0 ETH you will need to request more to faucet@windingtree.com.
+              </p>
+              <p>
+                <strong>The ETH and Lif tokens are for testing, they are issued over a testnet ethereum network.</strong>
+              </p>
+              <p>
+                Make sure to always have ETH in your wallet because you will need it for everything, to transfer tokens, create hotels, edit them, make bookings, etc.
+                This is because for every transaction that you want to execute you need to pay a small fee to the network that cant be charged in tokens, only in ETH, for now ;).
+              </p>
             </div>
-            <br></br>
-            <span class="help-block">
-              Once you have ETH we reccomend you to request tokens first, you can have up to 50 tokens and 0.1 ETH, if you have less
-              than that you can request more to the token contract.
-              In case you have 0 ETH you will need to request more to faucet@windingtree.com.
-            </span>
-            <br></br>
-            <span class="help-block">
-              <strong>The ETH and Lif tokens are for testing, they are issued over a testnet ethereum network.</strong>
-            </span>
-            <br></br>
-            <span class="help-block">
-              Make sure to always have ETH in your wallet because you will need it for everything, to transfer tokens, create hotels, edit them, make bookings, etc.
-              This is because for every transaction that you want to execute you need to pay a small fee to the network that cant be charged in tokens, only in ETH, for now ;).
-            </span>
+
+            <br/>
+
+            {self.state.walletKeystore.address &&
+              <p>
+                <a class="btn btn-light"
+                  href={"data:application/json;base64,"+window.btoa(window.localStorage.wallet)}
+                  download={self.state.walletKeystore.address+".json"}
+                >
+                   <span class="fa fa-download"></span> Download Wallet
+                </a>
+              </p>
+            }
+
+
           </div>
           :
           <div>
-            <div class="row justify-content-around address-row">
-              <h2>Wallet <small><Address address={self.state.walletKeystore.address} web3={web3}/></small></h2>
-            </div>
-            <hr></hr>
-            <div class="row justify-content-around">
-              <div class="col-md-6">
-                <h3>Send ETH or LIF <button class="btn btn-primary pull-right" onClick={() => self.setState({walletSection: 'show'})}><span class="fa fa-arrow-left"></span> Back</button></h3>
-                <form key="sendForm" onSubmit={(e) => {e.preventDefault(); self.sendTx()}}>
+            <h1>Send ETH or LIF</h1>
+            <p class="lead">Wallet Address: <Address address={self.state.walletKeystore.address} web3={web3}/></p>
+
+            <button class="wt-btnClose" onClick={() => self.setState({walletSection: 'show'})}>Back</button>
+
+            <hr/>
+
+            <h2>
+              Please fill out the form in order to make the transfer.
+            </h2>
+
+
+            <form key="sendForm" onSubmit={(e) => {e.preventDefault(); self.sendTx()}}>
+
+              <div class="row">
+                <div class="col-lg-8">
+
                   <div class="form-group">
-                    <label><b>Currency:</b></label>
-                    <div class="input-group">
-                      <select class="form-control" defaultValue={self.state.currency} onChange={(event) => self.setState({ currency: event.target.value })}>
-                        <option value="ETH">ETH</option>
-                        <option value="LIF">LIF</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div class="form-group">
-                    <label><b>To:</b></label>
+                    <label><b>Receiver Address:</b></label>
                     <div class="input-group">
                       <input
                         type="text"
                         class="form-control"
                         defaultValue={self.state.receiverAddress}
-                        placeholder="Receiver Address"
+                        placeholder="0x..."
                         onChange={(event) => self.setState({ receiverAddress: event.target.value })}/>
                     </div>
                   </div>
-                  <div class="form-group">
-                    <label><b>Amount:</b></label>
-                    <div class="input-group">
-                      <input
-                        type="number"
-                        step="any"
-                        class="form-control"
-                        defaultValue={self.state.sendAmount}
-                        placeholder="Amount to send"
-                        onChange={(event) => self.setState({ sendAmount: event.target.value })}/>
-                      <span class="input-group-addon">{self.state.currency}</span>
+
+                  <div className="row">
+                    <div className="col-md-6">
+                      <div class="form-group">
+                        <label><b>Currency:</b></label>
+                        <div class="input-group">
+                          <select class="form-control" defaultValue={self.state.currency} onChange={(event) => self.setState({ currency: event.target.value })}>
+                            <option value="ETH">ETH</option>
+                            <option value="LIF">LIF</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="col-md-6">
+                      <div class="form-group">
+                        <label><b>Amount:</b></label>
+                        <div class="input-group">
+                          <input
+                            type="number"
+                            step="any"
+                            class="form-control"
+                            defaultValue={self.state.sendAmount}
+                            placeholder="Amount to send"
+                            onChange={(event) => self.setState({ sendAmount: event.target.value })}/>
+                          <span class="input-group-addon">{self.state.currency}</span>
+                        </div>
+                      </div>
                     </div>
                   </div>
+
                   {self.state.currency === 'ETH' &&
-                  <div id="advanced">
-                    <div class="form-group">
-                      <label><b>Gas:</b></label>
-                      <div class="input-group">
-                        <input
-                          type="number"
-                          class="form-control"
-                          defaultValue={self.state.gasAmount}
-                          placeholder="Amount of gas"
-                          min="21000"
-                          onChange={(event) => self.setState({ gasAmount: event.target.value })}/>
+                    <div className="row">
+                      <div className="col-md-6">
+                        <div class="form-group">
+                          <label><b>Gas:</b></label>
+                          <div class="input-group">
+                            <input
+                              type="number"
+                              class="form-control"
+                              defaultValue={self.state.gasAmount}
+                              placeholder="Amount of gas"
+                              min="21000"
+                              onChange={(event) => self.setState({ gasAmount: event.target.value })}/>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="col-md-6">
+                        <div class="form-group">
+                          <label><b>Data:</b></label>
+                          <div class="input-group">
+                            <input
+                              type="text"
+                              class="form-control"
+                              defaultValue={self.state.txData}
+                              placeholder="Hex encoded data"
+                              onChange={(event) => self.setState({ txData: event.target.value })}/>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <div class="form-group">
-                      <label><b>Data:</b></label>
-                      <div class="input-group">
-                        <input
-                          type="text"
-                          class="form-control"
-                          defaultValue={self.state.txData}
-                          placeholder="Hex encoded data"
-                          onChange={(event) => self.setState({ txData: event.target.value })}/>
-                      </div>
-                    </div>
-                  </div>}
-                  <div class="row justify-content-around">
-                    <input type="submit" class="btn btn-primary" value="Send" />
-                  </div>
-                </form>
+                  }
+
+                  <br/>
+
+                  <input type="submit" class="btn btn-primary" value="Make transfer" />
+                  <button type="button" class="btn btn-link"
+                    onClick={() => self.setState({walletSection: 'show'})}
+                  >or Cancel</button>
+
+                </div>
               </div>
-            </div>
+
+            </form>
           </div>
           }
         </div>

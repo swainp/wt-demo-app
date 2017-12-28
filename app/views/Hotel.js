@@ -522,17 +522,19 @@ export default class App extends React.Component {
             </div>
           </h3>
           <div class="form-group">
-            <label>Choose a hotel</label>
-            {self.state.hotels ?
-              <Select
-                name="Hotels"
-                clearable={false}
-                options={self.state.hotelOptions}
-                onChange={ (val) => self.loadHotel(val.value)}
-                value={self.state.hotel.address}
-              />
-            :
-              <div>No hotels, click the button on the right to add one.</div>
+            {self.state.hotels.length > 0 ?
+              <div>
+                <label>Choose a hotel</label>
+                <Select
+                  name="Hotels"
+                  clearable={false}
+                  options={self.state.hotelOptions}
+                  onChange={ (val) => self.loadHotel(val.value)}
+                  value={self.state.hotel.address}
+                />
+              </div>
+              :
+                <p>No hotels, click the button on the right to add one.</p>
             }
           </div>
           {self.state.hotel.address != ''
