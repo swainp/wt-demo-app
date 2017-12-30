@@ -405,13 +405,14 @@ export default class App extends React.Component {
       var self = this;
 
       var actions =
-        <div>
-          <ul class="list-unstyled" id="actions">
-            <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotels' ? " btn-success" : "")} onClick={() => self.setState({section: 'hotels'})}>Hotels</button> </li>
-            <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotelBookings' ? " btn-success" : "")} onClick={() => self.setState({section: 'hotelBookings'})}>Hotel Bookings</button> </li>
-            <li><button class={"btn btn-default btn-action" + (self.state.section == 'hotelTxs' ? " btn-success" : "")} onClick={() => self.setState({section: 'hotelTxs'})}>Blockchain Txs</button> </li>
-          </ul>
-        </div>
+      <div class="nav flex-column nav-pills" id="actions" role="tablist" aria-orientation="vertical">
+        <a class={'nav-link ' + (self.state.section == 'hotels' ? 'active bg-secondary' : '')} id="v-pills-home-tab" data-toggle="pill" role="tab" aria-controls="v-pills-home" aria-selected="true"
+          onClick={() => self.setState({section: 'hotels'})}>Home</a>
+        <a class={'nav-link ' + (self.state.section == 'hotelBookings' ? 'active bg-secondary' : '')} id="v-pills-profile-tab" data-toggle="pill" role="tab" aria-controls="v-pills-profile" aria-selected="false"
+          onClick={() => self.setState({section: 'hotelBookings'})}>Profile</a>
+        <a class={'nav-link ' + (self.state.section == 'hotelTxs' ? 'active bg-secondary' : '')} id="v-pills-messages-tab" data-toggle="pill" role="tab" aria-controls="v-pills-messages" aria-selected="false"
+          onClick={() => self.setState({section: 'hotelTxs'})}>Messages</a>
+      </div>
 
       var createHotel =
         <CreateHotel
@@ -514,13 +515,18 @@ export default class App extends React.Component {
       />
 
       var hotels =
-        <div class="box">
-          <h3>
-            Hotels
-            <div class="pull-right">
+        <div class="card">
+        <div class="card-header">
+          <div className="row align-items-center">
+            <div class="col">
+              <h3 class="mb-0">Hotels</h3>
+            </div>
+            <div class="col text-right">
               <button class="btn btn-primary" onClick={() => self.setState({section: 'hotels', hotelSection: 'new'})}>+ New hotel</button>
             </div>
-          </h3>
+          </div>
+        </div>
+        <div class="card-body">
           <div class="form-group">
             {self.state.hotels.length > 0 ?
               <div>
@@ -534,7 +540,7 @@ export default class App extends React.Component {
                 />
               </div>
               :
-                <p>No hotels, click the button on the right to add one.</p>
+                <p>You don't have any hotels yet. Add the first hotel clicking the button on the top right.</p>
             }
           </div>
           {self.state.hotel.address != ''
@@ -611,6 +617,7 @@ export default class App extends React.Component {
             </div>
           : null}
         </div>
+        </div>
 
         var hotelBookings =
         <ViewBookings
@@ -631,30 +638,39 @@ export default class App extends React.Component {
         />
 
       return(
-        <div class={self.state.loading ? "loading" : ""}>
+        <div class={'row justify-content-center ' + (self.state.loading ? "loading" : "")}>
           <ToastContainer style={{zIndex: 2000}}/>
-          <div class="row">
-            <div class="col-md-2 text-center">
-              {actions}
+          <div className="col-sm-11">
+            <div class="row">
+              <div class="col">
+                <h1>Hotel Manager</h1>
+                <p class="lead">Add hotels, administrate bookings, and manage your hotel transactions.</p>
+                <hr/>
+              </div>
             </div>
-            <div class="col-md-10">
-              {self.state.section == 'hotelTxs' ?
-                <div>{hotelTxs}</div>
-              : self.state.section == 'hotels' && self.state.hotelSection == 'edit' ?
-                <div>{editHotel}</div>
-              : self.state.section == 'hotels' && self.state.hotelSection == 'new' ?
-                <div>{createHotel}</div>
-              : self.state.section == 'hotels' && self.state.hotelSection == 'list' ?
-                <div>{hotels}</div>
-              : (self.state.section == 'addHotelUnitType') ?
-                <div>{addHotelUnitType}</div>
-              : (self.state.section == 'editHotelUnitType') ?
-                  <div>{editHotelUnitType}</div>
-              : self.state.section == 'addHotelUnit' ?
-                <div>{addHotelUnit}</div>
-              : self.state.section == 'editHotelUnit' ?
-                <div>{editHotelUnit}</div>
-              : <div>{hotelBookings}</div>}
+            <div class="row">
+              <div class="col-md-2 text-center">
+                {actions}
+              </div>
+              <div class="col-md-10">
+                {self.state.section == 'hotelTxs' ?
+                  <div>{hotelTxs}</div>
+                : self.state.section == 'hotels' && self.state.hotelSection == 'edit' ?
+                  <div>{editHotel}</div>
+                : self.state.section == 'hotels' && self.state.hotelSection == 'new' ?
+                  <div>{createHotel}</div>
+                : self.state.section == 'hotels' && self.state.hotelSection == 'list' ?
+                  <div>{hotels}</div>
+                : (self.state.section == 'addHotelUnitType') ?
+                  <div>{addHotelUnitType}</div>
+                : (self.state.section == 'editHotelUnitType') ?
+                    <div>{editHotelUnitType}</div>
+                : self.state.section == 'addHotelUnit' ?
+                  <div>{addHotelUnit}</div>
+                : self.state.section == 'editHotelUnit' ?
+                  <div>{editHotelUnit}</div>
+                : <div>{hotelBookings}</div>}
+              </div>
             </div>
           </div>
           <Modal

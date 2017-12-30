@@ -29,7 +29,7 @@ export default class App extends React.Component {
         sendAmount: 0,
         gasAmount: 21000,
         txData: '0x',
-        currency: 'ETH',
+        currency: 'LIF',
         lifContract: {},
         networkId: 'ropsten'
       }
@@ -432,7 +432,7 @@ export default class App extends React.Component {
 
             <hr/>
 
-            <h2>
+            <h2 class="h3 mb-lg">
               Please fill out the form in order to make the transfer.
             </h2>
 
@@ -460,8 +460,8 @@ export default class App extends React.Component {
                         <label><b>Currency:</b></label>
                         <div class="input-group">
                           <select class="form-control" defaultValue={self.state.currency} onChange={(event) => self.setState({ currency: event.target.value })}>
-                            <option value="ETH">ETH</option>
                             <option value="LIF">LIF</option>
+                            <option value="ETH">ETH</option>
                           </select>
                         </div>
                       </div>
@@ -536,7 +536,7 @@ export default class App extends React.Component {
         <div class={self.state.loading ? "loading" : ""}>
           <ToastContainer style={{zIndex: 2000}}/>
           <div class="row justify-content-center">
-            <div class="col-sm-10">
+            <div class="col-sm-11">
               <div>{wallet}</div>
             </div>
           </div>
