@@ -11,7 +11,7 @@ export default class Layout extends React.Component {
 	render() {
 		return (
 			<div>
-				<Navbar></Navbar>
+				<Navbar pendingTxHashes={this.props.pendingTxHashes}></Navbar>
 				<div class="container-fluid main-container">
 					{this.props.children}
 				</div>

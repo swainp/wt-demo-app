@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
+import { ButtonDropdown, DropdownToggle, DropdownMenu, DropdownItem } from 'reactstrap';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
@@ -13,7 +14,8 @@ export default class App extends React.Component {
         blockNumber: 0,
         networkType: '',
         logoutModal: false,
-        wallet: window.localStorage.wallet ? JSON.parse(window.localStorage.wallet) : null
+        wallet: window.localStorage.wallet ? JSON.parse(window.localStorage.wallet) : null,
+        dropdownOpen: false
       }
     }
 
@@ -31,8 +33,15 @@ export default class App extends React.Component {
       window.location.reload();
     }
 
+    toggle() {
+      this.setState({
+        dropdownOpen: !this.state.dropdownOpen
+      });
+    }
+
     render() {
       var self = this;
+      var pendingTxs = this.props.pendingTxHashes;
       return(
         <nav class='navbar navbar-expand-md fixed-top navbar-main'>
           <Link class='navbar-brand' to='/'><strong>WT</strong></Link>
@@ -52,6 +61,18 @@ export default class App extends React.Component {
               </li>
             </ul>
             <ul class="navbar-nav ml-auto">
+              <li class="nav-item pull-right">
+                <ButtonDropdown isOpen={this.state.dropdownOpen} toggle={this.toggle.bind(this)}>
+                  <DropdownToggle caret disabled={pendingTxs.length == 0}>
+                    Pending TXs: {pendingTxs.length}
+                  </DropdownToggle>
+                  <DropdownMenu>
+                  {pendingTxs.map(function(tx, i){
+                      return <DropdownItem key={i}>{tx.method.name}</DropdownItem>;
+                  })}
+                  </DropdownMenu>
+                </ButtonDropdown>
+              </li>
               <li class='nav-item pull-right'>
                 <span class="nav-link text-success">Block #{self.state.blockNumber} - {self.state.networkType}</span>
               </li>

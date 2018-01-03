@@ -69,6 +69,7 @@ export default class App extends React.Component {
       web3.eth.accounts.wallet.create(1);
       let wallet = web3.eth.accounts.wallet.encrypt(self.state.password)[0];
       window.localStorage.wallet = JSON.stringify(wallet);
+      window.localStorage.pendingTX = [];
       wallet = web3.eth.accounts.wallet.decrypt([wallet], self.state.password);
       self.setState({walletKeystore: wallet[0], loading: false});
     }

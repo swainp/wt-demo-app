@@ -15,9 +15,11 @@ import AddUnitType from '../components/AddUnitType';
 import EditUnitType from '../components/EditUnitType';
 import ViewBookings from '../components/ViewBookings';
 import ViewHotelTx from '../components/ViewHotelTx';
+import Tx from '../components/Tx';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
+import PromiEvent from 'web3-core-promievent';
 
 import Select from 'react-select';
 var _ = require('lodash');
@@ -85,10 +87,8 @@ export default class App extends React.Component {
       self.setState({loading: true});
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
-        await self.state.hotelManager.createHotel(hotel.name, hotel.description);
-        await self.getHotels();
+        self.state.hotelManager.createHotel(hotel.name, hotel.description, self.props.getCallbacks('register hotel ' + hotel.name));
         self.setState({loading: false, hotelSection: "list"});
-        toast.success('Added new hotel!');
       }
       catch(e) {
         console.log("Error creating the hotel", e);
@@ -102,11 +102,9 @@ export default class App extends React.Component {
       self.setState({loading: true});
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
-        await self.state.hotelManager.addUnit(self.state.hotel.address, self.state.unitType);
-        // select hotel again, so it uses the fresh version (that includes the just created room)
-        await self.selectHotel(self.state.hotel.address);
+        let txOptions = await self.state.hotelManager.addUnit(self.state.hotel.address, self.state.unitType);
+        await self.queueTx(txOptions, 'add a new ' + self.state.unitType);
         self.setState({section: 'hotels', hotelSection: 'list', loading: false});
-        toast.success('Added new room!');
       }
       catch(e) {
         console.log("Error adding hotel room", e);
@@ -121,11 +119,8 @@ export default class App extends React.Component {
 
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
-        await self.state.hotelManager.addUnitType(self.state.hotel.address, newUnitType);
-        // select hotel again, so it uses the fresh version (that includes the just created room)
-        await self.selectHotel(self.state.hotel.address);
+        self.state.hotelManager.addUnitType(self.state.hotel.address, newUnitType, self.props.getCallbacks('add room type ' + newUnitType));
         self.setState({section: 'hotels', hotelSection: 'list', loading: false});
-        toast.success('Added new room type!');
       }
       catch(e) {
         console.log("Error adding room type", e);
@@ -172,12 +167,9 @@ export default class App extends React.Component {
 
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
-        await self.state.hotelManager[self.state.editHotelUnitTypeFunction](...args);
-        await self.getHotels();
-        // select hotel again, so it uses the fresh version (that includes the just created room)
-        await self.selectHotel(self.state.hotel.address);
+        args.push(self.props.getCallbacks('edit room type ' + self.state.unitType));
+        self.state.hotelManager[self.state.editHotelUnitTypeFunction](...args);
         self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
-        toast.success('Edited room type details!');
       } catch(e) {
         console.log("Error editing unit type", e);
         self.setState({loading: false});
@@ -188,6 +180,7 @@ export default class App extends React.Component {
     async editHotel(hotel, image, password) {
       var self = this;
       self.setState({loading: true});
+      let action;
 
       let args = [
         self.state.hotel.address
@@ -205,39 +198,40 @@ export default class App extends React.Component {
           args.push(hotel.lineTwo);
           args.push(hotel.zip);
           args.push(hotel.country);
+          action = "change address of " + self.state.hotel.name;
           break;
         case 'changeHotelInfo':
           args.push(hotel.name);
           args.push(hotel.description);
+          action = "change name and description of " + self.state.hotel.name;
           break;
         case 'changeHotelLocation':
           args.push(hotel.timezone);
           args.push(hotel.latitude);
           args.push(hotel.longitude);
+          action = "change location of " + self.state.hotel.name;
           break;
         case 'setRequireConfirmation':
           args.push(hotel.waitConfirmation);
+          action = "require confirmation before booking for " + self.state.hotel.name;
           break;
         case 'addImageHotel':
           args.push(image.imageUrl);
+          action = "add an image to " + self.state.hotel.name;
+          break;
         case 'removeImageHotel':
           args.push(image.imageIndex);
+          action = "remove an image from " + self.state.hotel.name;
         case 'removeHotel':
           break;
       }
 
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
-
-        await self.state.hotelManager[self.state.editHotelFunction](...args);
-
-        // select hotel again, so it uses the fresh version (that includes the just created room)
-        if(self.state.editHotelFunction !== 'removeHotel')
-          await self.selectHotel(self.state.hotel.address);
-        else
-          await self.getHotels();
-        self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
-        toast.success('Updated hotel!')
+        args.push(self.props.getCallbacks(action));
+        self.state.hotelManager[self.state.editHotelFunction](...args);
+        //await self.queueTx(txOptions, action);
+        self.setState({loading: false});
       } catch(e) {
         console.log("Error editing hotel room", e);
         self.setState({loading: false });
@@ -290,11 +284,9 @@ export default class App extends React.Component {
 
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+        args.push(self.props.getCallbacks('edit ' + self.state.unitType + ' ' + self.state.unit.substring(2,6)));
         await self.state.hotelManager[self.state.editHotelUnitFunction](...args);
-        // select hotel again, so it uses the fresh version (that includes the just created room)
-        await self.selectHotel(self.state.hotel.address);
         self.setState({section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {}});
-        toast.success('Updated room details!');
       } catch(e) {
         console.log("Error adding hotel room", e);
         self.setState({loading: false, addHotelUnitError: true});
