@@ -360,6 +360,7 @@ export default class App extends React.Component {
             <br></br>
             <div class="row justify-content-around">
               <button class="btn btn-primary" onClick={() => self.requestEth()}>Claim ETH from Faucet</button>
+              <button class="btn btn-primary" onClick={() => self.claimFaucet(true)}>Claim Lif from Faucet</button>
             </div>
             <br></br>
             <span class="help-block">
