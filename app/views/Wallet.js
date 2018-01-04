@@ -3,6 +3,7 @@ import {Link} from 'react-router';
 import ReactModal from 'react-modal';
 import Address from '../components/Address';
 import Tx from '../components/Tx';
+import WalletTx from '../components/WalletTx';
 import { ToastContainer, toast } from 'react-toastify';
 import superagent from 'superagent';
 
@@ -85,6 +86,21 @@ export default class App extends React.Component {
         console.log(e);
         self.setState({loading: false, walletError: true});
       }
+    }
+
+    async loadTxs() {
+      var self = this;
+      let network = await web3.eth.net.getNetworkType();
+      self.setState({loading: true});
+      let txs = await Utils.getDecodedTransactions(
+        self.state.walletKeystore.address,
+        (window.localStorage.wtIndexAddress || WTINDEX_ADDRESS),
+        WTINDEX_BLOCK,
+        web3,
+        network);
+        console.log('got TXs');
+        console.log(txs);
+      self.setState({walletTxs: txs, loading: false});
     }
 
     // Update the ETH and Lif balances
@@ -360,6 +376,11 @@ export default class App extends React.Component {
               Make sure to always have ETH in your wallet because you will need it for everything, to transfer tokens, create hotels, edit them, make bookings, etc.
               This is because for every transaction that you want to execute you need to pay a small fee to the network that cant be charged in tokens, only in ETH, for now ;).
             </span>
+            <WalletTx
+              loadTxs={self.loadTxs.bind(self)}
+              walletTxs={self.state.walletTxs}
+              web3={web3}
+            />
           </div>
           :
           <div>
