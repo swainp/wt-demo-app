@@ -27,8 +27,9 @@ export default class CreateHotel extends React.Component {
           </div>
 
           <div class="card-body">
+            <h4>Please provide the following information to create the hotel.</h4>
             <div class="form-group">
-              <label>Hotel Name</label>
+              <label><b>Hotel Name</b></label>
               <input
                 type="text"
                 autoFocus="true"
@@ -38,7 +39,7 @@ export default class CreateHotel extends React.Component {
               />
             </div>
             <div class="form-group">
-              <label>Hotel Description</label>
+              <label><b>Hotel Description</b></label>
               <input
                 type="text"
                 class="form-control"
@@ -47,7 +48,7 @@ export default class CreateHotel extends React.Component {
               />
             </div>
             <div class="form-group">
-              <label>Your Wallet Password</label>
+              <label><b>Your Wallet Password</b></label>
               <div class="input-group">
                 <input
                   type={this.state.showPassword ? "text" : "password"}

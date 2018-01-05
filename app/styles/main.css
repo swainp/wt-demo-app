@@ -109,12 +109,33 @@ input[required] {box-shadow: none;} /* Remove red shadow*/
 .nav-pills > a.nav-link:focus {
   color: #0069d9;
 }
+.nav-pills > a.nav-link.text-muted:not(.active) {
+  padding-top: 3px;
+  padding-bottom: 3px;
+}
+.nav-pills > a.nav-link.text-muted.active {
+  margin-top: 3px;
+  margin-bottom: 3px;
+}
+.nav-pills > a.nav-link.text-muted:hover {
+  color: #007BFF !important;
+}
+
+.nav-pills > a.nav-link.active,
 .nav-pills > a.nav-link.active:hover,
 .nav-pills > a.nav-link.active:focus {
   color: #fff;
   cursor: default;
   pointer-events: none;
 }
+
+.nav-pills > a.nav-link.active.text-dark,
+.nav-pills > a.nav-link.active.text-dark:hover,
+.nav-pills > a.nav-link.active.text-dark:focus {
+  color: #343a40 !important
+}
+
+
 
 .card {
   box-shadow: 0 2px 3px rgba(0,0,0,.1);
@@ -125,7 +146,7 @@ input[required] {box-shadow: none;} /* Remove red shadow*/
 }
 
 .btn-primary {
-  background: #2283ed;
+  /* background: #2283ed; */
 }
 .btn-success {
   background: #60B129;

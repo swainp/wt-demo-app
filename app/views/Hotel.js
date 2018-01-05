@@ -55,6 +55,7 @@ export default class App extends React.Component {
         section: 'hotels',
         userType: 'unknown',
         hotelSection: 'list',
+        hotelSubcat: 'overview',
         hotelManager: {},
         specialLifPrice: '',
         specialPrice: '',
@@ -515,108 +516,166 @@ export default class App extends React.Component {
       />
 
       var hotels =
-        <div class="card">
-        <div class="card-header">
-          <div className="row align-items-center">
-            <div class="col">
-              <h3 class="mb-0">Hotels</h3>
-            </div>
-            <div class="col text-right">
-              <button class="btn btn-primary" onClick={() => self.setState({section: 'hotels', hotelSection: 'new'})}>+ New hotel</button>
-            </div>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="form-group">
-            {self.state.hotels.length > 0 ?
-              <div>
-                <label>Choose a hotel</label>
-                <Select
-                  name="Hotels"
-                  clearable={false}
-                  options={self.state.hotelOptions}
-                  onChange={ (val) => self.loadHotel(val.value)}
-                  value={self.state.hotel.address}
-                />
-              </div>
-              :
-                <p>You don't have any hotels yet. Add the first hotel clicking the button on the top right.</p>
-            }
-          </div>
-          {self.state.hotel.address != ''
-          ? <div>
-              <h3>{self.state.hotel.name}</h3>
-              <p>{self.state.hotel.description}</p>
-              {(self.state.hotel.lineOne != '')
-                ? <h4>Address: {self.state.hotel.lineOne}</h4>
-                : null
-              }
-              {(self.state.hotel.zip != '')
-                ? <h4>Zip: {self.state.hotel.zip}</h4>
-                : null
-              }
-              {(self.state.hotel.country != '')
-                ? <h4>Country: {self.state.hotel.country}</h4>
-                : null
-              }
-              {(self.state.hotel.latitude != '-180.00000' || self.state.hotel.longitude != '-90.00000')
-                ? <h4>Location: LAT ({self.state.hotel.latitude}) - LONG ({self.state.hotel.longitude})</h4>
-                : null
-              }
-              <div><button class="btn btn-primary btn-block" onClick={() => self.setState({section: 'hotels', hotelSection: 'edit'})}>Edit hotel details</button></div>
-
-              <hr />
-
-              <h3>
-                Rooms
-                <div class="pull-right">
-                  <button class="btn btn-primary btn-sm"
-                          onClick={() => self.setState({section: 'addHotelUnitType'})}>
-                    Room Types
-                  </button>
-                  <button class="btn btn-primary btn-sm"
-                          onClick={() => self.setState({section: 'addHotelUnit'})}>
-                    + Hotel Room
+        <div>
+          <div class="card mb-md">
+            <div class="card-header">
+              <div className="row align-items-center">
+                <div class="col">
+                  <h3 class="mb-0">{self.state.hotel.address == '' ? 'Hotels' : self.state.hotel.name}</h3>
+                </div>
+                <div class="col text-right">
+                  <button class="btn btn-primary" onClick={() => self.setState({section: 'hotels', hotelSection: 'new'})}>
+                    <i class="fa fa-plus-circle" aria-hidden="true"></i> Add Hotel
                   </button>
                 </div>
-              </h3>
-              <table class="table table-striped table-hover">
-                <thead>
-                  <tr>
-                    <th class="text-center">Type</th>
-                    <th class="text-center">ID</th>
-                    <th class="text-center">Description</th>
-                    <th class="text-center">Guests</th>
-                    <th class="text-center">Price</th>
-                    <th class="text-center">Active</th>
-                    <th />
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(self.state.hotel.units).map(function(unit, i){
-                    let entryTypeInfo = self.state.hotel.unitTypes[unit[1].unitType].info
-                    return (
-                      <tr key={'unit'+i} class="pointer" onClick={() => console.log(unit)}>
-                        <td class="text-center">{unit[1].unitType}</td>
-                        <td class="text-center">{unit[0].substring(2,6)}</td>
-                        <td class="shortCell">{entryTypeInfo.description}</td>
-                        <td class="text-center">{entryTypeInfo.maxGuests}</td>
-                        <td class="text-center">{unit[1].defaultPrice || 0} {unit[1].currencyCode || ''}</td>
-                        <td class="text-center">{unit[1].active ? 'Active' : 'Inactive'}</td>
-                        <td class="text-center">
-                          <button class="btn btn-primary btn-sm"
-                                  onClick={() => self.setState({section: 'editHotelUnit', unit: unit[0], unitInfo: unit[1]})}>
-                            Edit
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              </div>
             </div>
-          : null}
-        </div>
+            <section class="card-body">
+              {self.state.hotels.length > 0 ?
+                <div>
+                  {self.state.hotel.address == '' &&
+                    <div class="form-group">
+                      <label><b>Choose a {self.state.hotel.address != '' && 'diferent'} hotel</b></label>
+                      <Select
+                        name="Hotels"
+                        clearable={false}
+                        options={self.state.hotelOptions}
+                        onChange={ (val) => self.loadHotel(val.value)}
+                        value={self.state.hotel.address}
+                      />
+                    </div>
+                  }
+                </div>
+                :
+                  <p>You don't have any hotels yet. Add the first hotel clicking the button on the top right.</p>
+              }
+
+              {self.state.hotel.address != ''
+                ? <div>
+
+                    <ul class="nav nav-tabs mb-md">
+                      <li class="nav-item">
+                        <a class={"nav-link " + (self.state.hotelSubcat == 'overview' ? "active" : "")}
+                          onClick={ ()=> {self.setState({hotelSubcat:'overview'})}}
+                        >Hotel Profile</a>
+                      </li>
+                      <li class="nav-item">
+                        <a class={"nav-link " + (self.state.hotelSubcat == 'rooms' ? "active" : "")}
+                          onClick={()=> {self.setState({hotelSubcat:'rooms'})}}
+                        >Manage Rooms</a>
+                      </li>
+                    </ul>
+
+                  {self.state.hotelSubcat == 'overview' ?
+                  <div className="tab-content">
+                    <div className="row">
+                      {(self.state.hotel.description != '') &&
+                        <div className="col">
+                          <dl>
+                            <dt>Description</dt>
+                            <dd>{self.state.hotel.description}</dd>
+                          </dl>
+                        </div>
+                      }
+
+                      <div className="col">
+                        <dl>
+                          {(self.state.hotel.lineOne != '') && <dt>Address:</dt>}
+                          {(self.state.hotel.lineOne != '') && <dd>{self.state.hotel.lineOne}</dd>}
+
+                          {(self.state.hotel.zip != '') && <dt>Zip:</dt>}
+                          {(self.state.hotel.zip != '') && <dd>{self.state.hotel.zip}</dd>}
+                        </dl>
+                      </div>
+
+                      <div className="col">
+                        <dl>
+                          {(self.state.hotel.country != '') && <dt>Country:</dt>}
+                          {(self.state.hotel.country != '') && <dd>{self.state.hotel.country}</dd>}
+
+                          {(self.state.hotel.latitude != '-180.00000' || self.state.hotel.longitude != '-90.00000') &&
+                            <dt>Location:</dt>}
+                          {(self.state.hotel.latitude != '-180.00000' || self.state.hotel.longitude != '-90.00000') &&
+                             <dd>LAT ({self.state.hotel.latitude}) - LONG ({self.state.hotel.longitude})</dd>}
+                        </dl>
+                      </div>
+
+                    </div>
+
+                    <hr class="mb-md"/>
+                    <button class="btn btn-light btn-sm" onClick={() => self.setState({section: 'hotels', hotelSection: 'edit'})}><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit Profile</button>
+
+                    {self.state.hotel.address != '' &&
+                      <button class="btn btn-link btn-sm" onClick={() => self.setState({section: 'hotels', hotelSection: 'list', hotel: { name: '', address: '', units: [] } })}>
+                        or Choose another hotel
+                      </button>
+                    }
+                  </div>
+                  :
+                  <div className="tab-content">
+
+                    {Object.keys(self.state.hotel.units).length > 0 ?
+
+                      <table class="table table-striped table-hover">
+                      <thead>
+                        <tr>
+                          <th class="text-center">Type</th>
+                          <th class="text-center">ID</th>
+                          <th class="text-center">Description</th>
+                          <th class="text-center">Guests</th>
+                          <th class="text-center">Price</th>
+                          <th class="text-center">Active</th>
+                          <th />
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {Object.entries(self.state.hotel.units).map(function(unit, i){
+                          let entryTypeInfo = self.state.hotel.unitTypes[unit[1].unitType].info
+                          return (
+                            <tr key={'unit'+i} class="pointer" onClick={() => console.log(unit)}>
+                              <td class="text-center">{unit[1].unitType}</td>
+                              <td class="text-center">{unit[0].substring(2,6)}</td>
+                              <td class="shortCell">{entryTypeInfo.description}</td>
+                              <td class="text-center">{entryTypeInfo.maxGuests}</td>
+                              <td class="text-center">{unit[1].defaultPrice || 0} {unit[1].currencyCode || ''}</td>
+                              <td class="text-center">{unit[1].active ? 'Active' : 'Inactive'}</td>
+                              <td class="text-center">
+                                <button class="btn btn-primary btn-sm"
+                                        onClick={() => self.setState({section: 'editHotelUnit', unit: unit[0], unitInfo: unit[1]})}>
+                                  Edit
+                                </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                      :
+                      <p>The hotel has no rooms, use the button below to create one.</p>
+                    }
+                    <hr class="mb-md"/>
+                    {
+                    // <button class="btn btn-light btn-sm"
+                    //   onClick={() => self.setState({section: 'addHotelUnitType'})}>
+                    //   Room Types
+                    // </button>
+                    }
+                    {' '}
+                    <button class="btn btn-light btn-sm"
+                      onClick={() => self.setState({section: 'addHotelUnit'})}>
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i> Add Room
+                    </button>
+                    <button class="btn btn-link btn-sm"
+                     onClick={() => self.setState({section: 'addHotelUnitType'})}>
+                      or Create a new room type
+                    </button>
+                  </div>
+                  }
+
+                  </div>
+                : null}
+            </section>
+          </div>
         </div>
 
         var hotelBookings =
@@ -701,7 +760,7 @@ export default class App extends React.Component {
             }}
           >
             <h3>You need to open a wallet to use the Hotel Manager</h3>
-            <Link class='top-margin' to='/wallet'><h4>Go to Wallet</h4></Link>
+            <Link class='btn btn-primary' to='/wallet'>Go to Wallet</Link>
           </Modal>
         </div>
       )
