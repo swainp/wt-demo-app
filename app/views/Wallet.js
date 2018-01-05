@@ -3,6 +3,7 @@ import {Link} from 'react-router';
 import ReactModal from 'react-modal';
 import Address from '../components/Address';
 import Tx from '../components/Tx';
+import WalletTx from '../components/WalletTx';
 import { ToastContainer, toast } from 'react-toastify';
 import superagent from 'superagent';
 
@@ -69,6 +70,7 @@ export default class App extends React.Component {
       web3.eth.accounts.wallet.create(1);
       let wallet = web3.eth.accounts.wallet.encrypt(self.state.password)[0];
       window.localStorage.wallet = JSON.stringify(wallet);
+      window.localStorage.pendingTX = [];
       wallet = web3.eth.accounts.wallet.decrypt([wallet], self.state.password);
       self.setState({walletKeystore: wallet[0], loading: false});
     }
@@ -84,6 +86,21 @@ export default class App extends React.Component {
         console.log(e);
         self.setState({loading: false, walletError: true});
       }
+    }
+
+    async loadTxs() {
+      var self = this;
+      let network = await web3.eth.net.getNetworkType();
+      self.setState({loading: true});
+      let txs = await Utils.getDecodedTransactions(
+        self.state.walletKeystore.address,
+        (window.localStorage.wtIndexAddress || WTINDEX_ADDRESS),
+        WTINDEX_BLOCK,
+        web3,
+        network);
+        console.log('got TXs');
+        console.log(txs);
+      self.setState({walletTxs: txs, loading: false});
     }
 
     // Update the ETH and Lif balances
@@ -387,6 +404,8 @@ export default class App extends React.Component {
                   <small>
                     <a tabIndex='4' onClick={() => self.requestEth()}>Claim ETH from Faucet</a>
                     <span className="text-muted">&nbsp; | &nbsp;</span>
+                    <a tabIndex='5' onClick={() => self.claimFaucet(true)}>Claim Lif from Faucet</a>
+                    <span className="text-muted">&nbsp; | &nbsp;</span>
                     <a tabIndex='5' onClick={() => self.updateBalances()}>Update Balances</a>
                   </small>
                 </p>
@@ -421,7 +440,12 @@ export default class App extends React.Component {
               </p>
             }
 
-
+            <WalletTx
+              loadTxs={self.loadTxs.bind(self)}
+              walletTxs={self.state.walletTxs}
+              web3={web3}
+            />
+          
           </div>
           :
           <div>
