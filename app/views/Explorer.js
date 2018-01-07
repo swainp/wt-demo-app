@@ -220,12 +220,17 @@ export default class App extends React.Component {
 
       var hotelsSection =
         <div>
-          <div class='row'>
-            <div class='col-md-12 text-center'>
-              <h3>{self.state.totalHotels} Hotels in WT</h3>
+
+
+          <div class="row">
+            <div class="col">
+              <h1>Hotels registered in WT</h1>
+            <p class="lead">Check the list below to see the hotels registratered in our platform.</p>
+              <hr/>
             </div>
           </div>
-          <hr></hr>
+
+
           <div class='row'>
             <div class='col-6'>
               <div class='list-group'>
@@ -428,8 +433,8 @@ export default class App extends React.Component {
       return(
         <div class='row justify-content-md-center'>
           <ToastContainer style={{zIndex: 2000}}/>
-          <div class='col-md-10'>
-            <div class={self.state.loading ? 'jumbotron loading' : 'jumbotron'}>
+          <div class='col-md-11'>
+            <div class={self.state.loading ? 'loading' : ''}>
               { self.state.section == 'unitTypes' ?
                 unitTypesSection
               : self.state.section == 'units' ?

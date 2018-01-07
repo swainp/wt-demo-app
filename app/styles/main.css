@@ -162,6 +162,11 @@ input[required] {box-shadow: none;} /* Remove red shadow*/
 
 
 
+.table-striped tbody tr:nth-of-type(2n+1) {
+  background-color: rgb(251, 251, 251);
+}
+
+
 
 .navbar.navbar-main {
   padding-top: 10px;

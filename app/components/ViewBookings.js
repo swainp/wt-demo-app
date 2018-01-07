@@ -27,59 +27,74 @@ export default class ViewBookings extends React.Component {
         <div class="card">
 
           <div class="card-header">
-            <h3 class="mb-0">Hotel Bookings</h3>
+            <h3 class="mb-0">{hotel.name != '' ? <span>{hotel.name}:</span> : 'Hotel'} Bookings</h3>
           </div>
 
-          <div className="card-body">
-            <div class="form-group">
-              <label>Choose a hotel</label>
-              <Select
-                name="Hotels"
-                clearable={false}
-                options={this.props.hotelOptions}
-                value={hotel.address}
-                onChange={(e) => { this.props.onHotelChange(e.value) }}
-              />
-            </div>
-            <hr></hr>
+            <div className="card-body">
+
+            {hotel.name == '' &&
+              <div className="row">
+                <div className="col-sm-6">
+                  <div class="form-group">
+                    <label><b>Choose a hotel</b></label>
+                    <Select
+                      name="Hotels"
+                      clearable={false}
+                      options={this.props.hotelOptions}
+                      value={hotel.address}
+                      onChange={(e) => { this.props.onHotelChange(e.value) }}
+                    />
+                  </div>
+                </div>
+              </div>
+            }
+
             {hotel &&
             <div>
-            {this.props.bookings &&
-            <div>
-              <h3>Completed Bookings</h3>
-              <table class="table table-striped table-hover">
-                <thead>
-                  <tr>
-                    <th>Hotel Name</th>
-                    <th>Room Type</th>
-                    <th>Room ID</th>
-                    <th>From Day</th>
-                    <th>To Day</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {this.props.bookings.map(function(booking, i){
-                    let unitBooked = hotel.units[booking.unit]
-                    if(unitBooked) {
-                      return (
-                        <tr key={'booking'+i} class="pointer" onClick={() => this.setState({transaction: booking.transactionHash})}>
-                          <td>{hotel.name}</td>
-                          <td>{unitBooked.unitType}</td>
-                          <td>{booking.unit.substring(2,6)}</td>
-                            <td>{moment(booking.fromDate).format('YYYY MM DD')}</td>
-                            <td>{moment(booking.fromDate).add(booking.daysAmount, 'days').format('YYYY MM DD')}</td>
-                          <td>Accepted</td>
-                        </tr>
-                      );
-                    } else {
-                      return (<tr></tr>);
-                    }
+            {this.props.bookings.length == 0 ?
+              <p>
+                {hotel.address != '' && 'There are no bookings yet.'}
+              </p>
+              :
+              <div>
+              <hr/>
+              <div>
+                <h5>Completed Bookings</h5>
+                <table class="table table-striped table-hover">
+                  <thead>
+                    <tr>
+                      <th>Hotel Name</th>
+                      <th>Room Type</th>
+                      <th>Room ID</th>
+                      <th>From Day</th>
+                      <th>To Day</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {this.props.bookings.map(function(booking, i){
+                      let unitBooked = hotel.units[booking.unit]
+                      if(unitBooked) {
+                        return (
+                          <tr key={'booking'+i} class="pointer" onClick={() => this.setState({transaction: booking.transactionHash})}>
+                            <td>{hotel.name}</td>
+                            <td>{unitBooked.unitType}</td>
+                            <td>{booking.unit.substring(2,6)}</td>
+                              <td>{moment(booking.fromDate).format('YYYY MM DD')}</td>
+                              <td>{moment(booking.fromDate).add(booking.daysAmount, 'days').format('YYYY MM DD')}</td>
+                            <td>Accepted</td>
+                          </tr>
+                        );
+                      } else {
+                        return (<tr></tr>);
+                      }
 
-                  })}
-                </tbody>
-              </table>
-            </div>}
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            }
             {this.props.bookingRequests && this.props.bookingRequests.length > 0 &&
               <div>
                 <h3>Booking Requests</h3>

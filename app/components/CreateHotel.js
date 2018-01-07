@@ -27,7 +27,9 @@ export default class CreateHotel extends React.Component {
           </div>
 
           <div class="card-body">
-            <h4>Please provide the following information to create the hotel.</h4>
+          <h4>Please provide the following information to create the hotel.</h4>
+          <div class="row">
+          <div class="col-sm-6">
             <div class="form-group">
               <label><b>Hotel Name</b></label>
               <input
@@ -67,6 +69,10 @@ export default class CreateHotel extends React.Component {
                 </span>
               </div>
             </div>
+            </div>
+            </div>
+
+            <hr class="mb-md"/>
             <input type="submit" class="btn btn-primary" value="Add Hotel" />
             <input type="reset" class="btn btn-link" value="or Cancel" onClick={this.props.onBack} />
 

@@ -73,10 +73,12 @@ export default class EditHotel extends React.Component {
           <div class="card-header">
             <div className="row align-items-center">
               <div class="col">
-                <h3 class="mb-0">Update hotel profile</h3>
+                <h3 class="mb-0">{this.props.hotel.name}: update basic info</h3>
               </div>
               <div className="col text-right">
-                <button type="button" class="btn btn-primary" onClick={this.props.onBack}>Back to hotels</button>
+                <button title="Cancel" type="button" class="btn btn-light" onClick={this.props.onBack}>
+                  <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
               </div>
             </div>
           </div>
@@ -339,7 +341,7 @@ export default class EditHotel extends React.Component {
 
                 <hr class="mb-md"/>
 
-                <button type="submit" class="btn btn-primary">Update profile</button>
+              <button type="submit" class="btn btn-primary">Update basic info</button>
                 <button type="button" class="btn btn-link" onClick={this.props.onBack}>or Discard changes</button>
               </div>
               : null}

@@ -516,9 +516,17 @@ export default class App extends React.Component {
                   <h3 class="mb-0">{self.state.hotel.address == '' ? 'Hotels' : self.state.hotel.name}</h3>
                 </div>
                 <div class="col text-right">
-                  <button class="btn btn-primary" onClick={() => self.setState({section: 'hotels', hotelSection: 'new'})}>
-                    <i class="fa fa-plus-circle" aria-hidden="true"></i> Add Hotel
-                  </button>
+
+                  {self.state.hotel.address != '' ?
+                    <button title="Cancel" class="btn btn-light" onClick={() => self.setState({section: 'hotels', hotelSection: 'list', hotel: { name: '', address: '', units: [] } })}>
+                      <i class="fa fa-times" aria-hidden="true"></i>
+                    </button>
+                    :
+                    <button class="btn btn-primary" onClick={() => self.setState({section: 'hotels', hotelSection: 'new'})}>
+                      <i class="fa fa-plus-circle" aria-hidden="true"></i> Add Hotel
+                    </button>
+                  }
+
                 </div>
               </div>
             </div>
@@ -526,8 +534,10 @@ export default class App extends React.Component {
               {self.state.hotels.length > 0 ?
                 <div>
                   {self.state.hotel.address == '' &&
+                    <div class="row">
+                    <div class="col-sm-6">
                     <div class="form-group">
-                      <label><b>Choose a {self.state.hotel.address != '' && 'diferent'} hotel</b></label>
+                      <label><b>Choose a hotel</b></label>
                       <Select
                         name="Hotels"
                         clearable={false}
@@ -535,6 +545,8 @@ export default class App extends React.Component {
                         onChange={ (val) => self.loadHotel(val.value)}
                         value={self.state.hotel.address}
                       />
+                    </div>
+                    </div>
                     </div>
                   }
                 </div>
@@ -595,10 +607,10 @@ export default class App extends React.Component {
                     </div>
 
                     <hr class="mb-md"/>
-                    <button class="btn btn-light btn-sm" onClick={() => self.setState({section: 'hotels', hotelSection: 'edit'})}><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit Profile</button>
+                  <button class="btn btn-primary" onClick={() => self.setState({section: 'hotels', hotelSection: 'edit'})}><i class="fa fa-pencil-square-o" aria-hidden="true"></i> Edit basic info</button>
 
                     {self.state.hotel.address != '' &&
-                      <button class="btn btn-link btn-sm" onClick={() => self.setState({section: 'hotels', hotelSection: 'list', hotel: { name: '', address: '', units: [] } })}>
+                      <button class="btn btn-link" onClick={() => self.setState({section: 'hotels', hotelSection: 'list', hotel: { name: '', address: '', units: [] } })}>
                         or Choose another hotel
                       </button>
                     }
@@ -631,10 +643,11 @@ export default class App extends React.Component {
                               <td class="text-center">{entryTypeInfo.maxGuests}</td>
                               <td class="text-center">{unit[1].defaultPrice || 0} {unit[1].currencyCode || ''}</td>
                               <td class="text-center">{unit[1].active ? 'Active' : 'Inactive'}</td>
-                              <td class="text-center">
-                                <button class="btn btn-primary btn-sm"
-                                        onClick={() => self.setState({section: 'editHotelUnit', unit: unit[0], unitInfo: unit[1]})}>
-                                  Edit
+                            <td class="text-right">
+                                <button
+                                  class="btn btn-light btn-sm"
+                                  onClick={() => self.setState({section: 'editHotelUnit', unit: unit[0], unitInfo: unit[1]})}>
+                                  Edit room
                                 </button>
                               </td>
                             </tr>
@@ -647,17 +660,17 @@ export default class App extends React.Component {
                     }
                     <hr class="mb-md"/>
                     {
-                    // <button class="btn btn-light btn-sm"
+                    // <button class="btn btn-light"
                     //   onClick={() => self.setState({section: 'addHotelUnitType'})}>
                     //   Room Types
                     // </button>
                     }
                     {' '}
-                    <button class="btn btn-light btn-sm"
+                    <button class="btn btn-primary"
                       onClick={() => self.setState({section: 'addHotelUnit'})}>
                       <i class="fa fa-plus-circle" aria-hidden="true"></i> Add Room
                     </button>
-                    <button class="btn btn-link btn-sm"
+                    <button class="btn btn-link"
                      onClick={() => self.setState({section: 'addHotelUnitType'})}>
                       or Create a new room type
                     </button>
