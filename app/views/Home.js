@@ -13,11 +13,11 @@ export default class App extends React.Component {
 
       return(
         <div class="row justify-content-center">
-          <div class="col-sm-10">
+          <div class="col-sm-11">
 
             <div className="page-header">
-                <h1>WindingTree Hotels Demo App</h1>
-                <p class="lead">This is a demo app for the WT platform</p>
+                <h1><b class="main-header">Hotels App</b> <small class="text-muted">by WindingTree </small></h1>
+                <p class="lead">This app is demo of our platform</p>
               </div>
               <hr/>
 

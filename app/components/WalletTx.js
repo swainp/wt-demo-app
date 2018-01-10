@@ -28,10 +28,13 @@ export default class WalletTx extends React.Component {
     render() {
       let self = this;
       return(
-        <div class="box">
-          <h2>Transactions</h2>
-          {self.props.walletTxs &&
-          <div>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="mb-0">Transactions</h3>
+          </div>
+          <div class="card-body">
+            {self.props.walletTxs &&
+            <div>
             <table class="table table-striped table-hover">
               <thead>
                 <tr>
@@ -57,6 +60,7 @@ export default class WalletTx extends React.Component {
               </tbody>
             </table>
           </div>}
+          </div>
           </div>
       );
     }

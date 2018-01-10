@@ -21,10 +21,14 @@ export default class ViewHotelTx extends React.Component {
     render() {
       let self = this;
       return(
-        <div class="box">
-          <h2>Hotel Transactions</h2>
-          {self.props.hotelTxs &&
-          <div>
+        <div class="card">
+          <div class="card-header">
+            <h3 class="mb-0">Hotel Transactions</h3>
+          </div>
+
+          <div class="card-body">
+            {self.props.hotelTxs &&
+            <div>
             <table class="table table-striped table-hover">
               <thead>
                 <tr>
@@ -49,7 +53,8 @@ export default class ViewHotelTx extends React.Component {
               </tbody>
             </table>
           </div>}
-          </div>
+        </div>
+        </div>
       );
     }
 

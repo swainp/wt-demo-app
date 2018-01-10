@@ -219,104 +219,135 @@ export default class App extends React.Component {
       var self = this;
 
       var hotelsSection =
-        <div>
-          <div class='row'>
-            <div class='col-md-12 text-center'>
-              <h3>{self.state.totalHotels} Hotels in WT</h3>
+          <div class="card" style={{position: 'sticky', top: 120}}>
+            <div class="card-header">
+              {self.state.hotel.name.length > 0 ?
+                <h3 class="mb-0">
+                  {self.state.hotel.name}
+                </h3>
+                :
+                <h3 class="mb-0">Choose a Hotel</h3>
+              }
             </div>
-          </div>
-          <hr></hr>
-          <div class='row'>
-            <div class='col-6'>
-              <div class='list-group'>
-              {self.state.hotels.map((hotel, i) => {
-                return <a
-                  key={hotel.instance._address}
-                  class={hotel.instance._address == self.state.hotel.address ?
-                    'list-group-item list-group-item-action active' :
-                    'list-group-item list-group-item-action'
-                  }
-                  onClick={() => {
-                    self.loadHotelInfo(hotel.instance._address)
-                  }}
-                >
-                  [{(i+1)}] {hotel.name} - <small><Address address={hotel.instance._address} web3={web3}/></small>
-                </a>
-              })}
-              </div>
-            </div>
-            <div class={self.state.loading ? 'col-6 loading' : 'col-6'}>
-              <ul>
+            <div class="card-body">
+
+              {/* If No Data */}
+              {self.state.hotel.name.length <= 0 &&
+                <p class="mb-0">Please, select a hotel from the list.</p>
+              }
+
+              {/* If Has Data */}
+              <ul class={self.state.hotel.name.length <= 0 ? 'mb-0' : ''}>
                 {self.state.hotel.name.length > 0 ?
-                  <li>Name: {self.state.hotel.name}</li>
+                  <li>
+                    <p class="mb-xs"><b>Name:</b> {self.state.hotel.name}</p>
+                  </li>
                   : <div></div>
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
                   && !self.state.loading) ?
-                  <li>Manager: <Address address={self.state.hotel.manager} web3={web3}/></li>
+                  <li>
+                    <p class="mb-xs">
+                      <b>Address:</b> <Address address={self.state.hotel.address} web3={web3}/>
+                      <small class="text-muted"> <i class="fa fa-external-link" aria-hidden="true"></i></small>
+                    </p>
+                  </li>
+                  : <div></div>
+                }
+                {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
+                  && !self.state.loading) ?
+                  <li>
+                    <p class="mb-xs">
+                      <b>Manager:</b> <Address address={self.state.hotel.manager} web3={web3}/>
+                      <small class="text-muted"> <i class="fa fa-external-link" aria-hidden="true"></i></small>
+                    </p>
+                  </li>
                   : <div></div>
                 }
                 {self.state.hotel.country ?
-                  <li>Country: {self.state.hotel.country}</li>
+                  <li>
+                    <p class="mb-xs"><b>Country:</b> {self.state.hotel.country}</p>
+                  </li>
                   : <div></div>
                 }
                 {self.state.hotel.lineOne ?
-                  <li>Address: {self.state.hotel.lineOne}</li>
+                  <li>
+                    <p class="mb-xs"><b>Address:</b> {self.state.hotel.lineOne}</p>
+                  </li>
                   : <div></div>
                 }
                 {self.state.hotel.latitude && self.state.hotel.longitude ?
-                  <li>GPS: {self.state.hotel.latitude} {self.state.hotel.longitude}</li>
+                  <li><p class="mb-xs"><b>GPS:</b> {self.state.hotel.latitude} {self.state.hotel.longitude}</p></li>
                   : <div></div>
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
                   && !self.state.loading) ?
-                  <li>Instant Booking: {self.state.hotel.waitConfirmation ? 'Yes' : 'No'}</li>
+                  <li><p class="mb-xs"><b>Instant Booking:</b> {self.state.hotel.waitConfirmation ? 'Yes' : 'No'}</p></li>
                   : <div></div>
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
                   && !self.state.loading) ?
-                  <li>Total Units: {self.state.hotel.totalUnits}</li>
+                  <li><p><b>Total Units:</b> {self.state.hotel.totalUnits}</p></li>
                   : <div></div>
                 }
                 {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
                   && !self.state.loading) ?
-                  <div type="button" class="btn btn-primary" onClick={() => self.setState({section: 'unitTypes'})} >
-                    View Unit unitTypes
+                  <div>
+                    <div type="button" class="btn btn-sm btn-light" onClick={() => self.setState({section: 'unitTypes'})} >
+                      View Unit unitTypes
+                    </div>
+                    <hr/>
                   </div>
                   : <div></div>
                 }
               </ul>
+
+              {/* Hotel Description */}
               {self.state.hotel.description.length > 0 ?
-                <div>
-                  <hr></hr>
+                <div class="lead">
                   {self.state.hotel.description}
+                </div>
+                : <div></div>
+              }
+
+              {/* Hotel Images */}
+              {self.state.hotel.images.length > 0 && <hr/>}
+              {self.state.hotel.images.length > 0 ?
+                <div class="col-6">
+                  <Carousel showArrows={true} infiniteLoop={true} >
+                  {self.state.hotel.images.map(function(src, i){
+                    return <div key={self.state.hotel.address+'Image'+i}><img src={src} /></div>;
+                  })}
+                  </Carousel>
                 </div>
                 : <div></div>
               }
             </div>
           </div>
-          {self.state.hotel.images.length > 0 ?
-            <div>
-              <br></br>
-              <Carousel showArrows={true} infiniteLoop={true} >
-              {self.state.hotel.images.map(function(src, i){
-                return <div key={self.state.hotel.address+'Image'+i}><img src={src} /></div>;
-              })}
-              </Carousel>
-            </div>
-            : <div></div>
-          }
-        </div>
 
       var unitTypesSection =
-        <div>
-          <div class="pull-right">
-            <div type="button" class="btn btn-link" onClick={() => self.setState({section: 'hotels'})} >
-              Back to Hotels
+      <div class="card" style={{position: 'sticky', top: 120}}>
+
+
+        <div class="card-header">
+          <div class="row align-items-center">
+            <div class="col">
+              <h3 class="mb-0">{self.state.hotel.name + ': Unit types '}</h3>
+            </div>
+            <div class="col text-right">
+              <button title="Cancel" class="btn btn-light" onClick={() => self.setState({section: 'hotels'})}>
+                <i class="fa fa-times" aria-hidden="true"></i>
+              </button>
             </div>
           </div>
+        </div>
+
+        <div class="card-body">
+
+          <p>Choose a unit type to see its data.</p>
+
           <div class='row'>
-            <div class='col-6'>
+            <div class='col-3'>
               <div class='list-group'>
               {self.state.hotel.unitTypes.map((unitType, i) => {
                 return <a
@@ -329,21 +360,22 @@ export default class App extends React.Component {
                     self.setState({unitType: unitType, section: 'unitTypes'})}
                   }
                 >
-                  {unitType.name} - <small><Address address={unitType.address} web3={web3}/></small>
+                  {unitType.name}
                 </a>
               })}
               </div>
             </div>
             {self.state.unitType.address != '0x0000000000000000000000000000000000000000' ?
-              <div class='col-6'>
+              <div class='col-9'>
                 <ul>
-                  <li>Name: {self.state.unitType.name}</li>
-                  <li>Minimun Guests: {self.state.unitType.info.minGuests}</li>
-                  <li>Maximun Guests: {self.state.unitType.info.maxGuests}</li>
-                  <li>Instant Booking: {self.state.hotel.waitConfirmation ? 'Yes' : 'No'}</li>
-                  <li>Total Units: {self.state.unitType.totalUnits}</li>
+                  <li class="mb-xs"><b>Name:</b> {self.state.unitType.name}</li>
+                  <li class="mb-xs"><b>Address:</b> <Address address={self.state.unitType.address} web3={web3}/></li>
+                  <li class="mb-xs"><b>Minimun Guests:</b> {self.state.unitType.info.minGuests}</li>
+                  <li class="mb-xs"><b>Maximun Guests:</b> {self.state.unitType.info.maxGuests}</li>
+                  <li class="mb-xs"><b>Instant Booking:</b> {self.state.hotel.waitConfirmation ? 'Yes' : 'No'}</li>
+                  <li class="mb-xs"><b>Total Units:</b> {self.state.unitType.totalUnits}</li>
                 </ul>
-                <div type="button" class="btn btn-primary" onClick={() => self.setState({section: 'units'})} >
+                <div type="button" class="btn btn-sm btn-light" onClick={() => self.setState({section: 'units'})} >
                   View Units
                 </div>
                 {self.state.unitType.info.description ?
@@ -360,7 +392,6 @@ export default class App extends React.Component {
           </div>
           {self.state.unitType.images.length > 0 ?
             <div>
-              <br></br>
               <Carousel showArrows={true} infiniteLoop={true} >
               {self.state.unitType.images.map(function(src, i){
                 return <div key={self.state.unitType.address+'Image'+i}><img src={src} /></div>;
@@ -369,76 +400,144 @@ export default class App extends React.Component {
             </div>
             : <div></div>
           }
-        </div>;
+
+        </div>
+
+      </div>;
 
       let currencyOptions = [{value: 'lif', label: 'Lif'}, {value: 'fiat', label: 'Fiat'}];
 
       var unitsSection =
-        <div>
-          <div class="pull-right">
-            <div type="button" class="btn btn-link" onClick={() => self.setState({section: 'unitTypes'})} >
-              Back to Unit Types
-            </div>
-          </div>
-          <div class='row'>
-            <div class='col-8'>
-              <div class='list-group'>
-              {self.state.hotel.units.map((unit, i) => {
-                if (self.state.unitType.name == unit.unitType)
-                  return <a
-                    key={unit.address}
-                    class={unit.address == self.state.unitSelected.address ?
-                      'list-group-item list-group-item-action active' :
-                      'list-group-item list-group-item-action'
-                    }
-                    onClick={() => {
-                      self.setState({unitSelected: unit })}
-                    }
-                  >
-                    [{i}] {unit.unitType} - <small><Address address={unit.address} web3={web3}/></small>
-                  </a>
-              })}
+      <div class="card">
+          <div class="card-header">
+            <div class="row align-items-center">
+              <div class="col">
+                <h3 class="mb-0">{self.state.hotel.name + ': Units '}</h3>
+              </div>
+              <div class="col text-right">
+                <button title="Cancel" class="btn btn-light" onClick={() => self.setState({
+                  section: 'unitTypes',
+                  unitSelected: {
+                    address: '0x0000000000000000000000000000000000000000'
+                  }
+                })}>
+                  <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
               </div>
             </div>
-            {self.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
-              <div class='col-4'>
-                {self.state.user.account != '0x0000000000000000000000000000000000000000' ?
-                  <BookUnit
-                    waitConfirmation={self.state.hotel.waitConfirmation}
-                    startDate={self.state.startDate}
-                    endDate={self.state.endDate}
-                    bookLifPrice={self.state.bookLifPrice}
-                    bookPrice={self.state.bookPrice}
-                    available={self.state.unitAvailable}
-                    currency={self.state.currency}
-                    currencyOptions={currencyOptions}
-                    onDatesChange={self.updateBookingPrice.bind(self)}
-                    onCurrencyChange={(val) => self.setState({currency: val})}
-                    onSubmit={self.bookRoom.bind(self)}
-                  ></BookUnit>
-                :
-                <Link to='/wallet'>Please create a wallet</Link>}
-              </div>
-            :
-              <div></div>
-            }
           </div>
-        </div>;
 
-      return(
-        <div class='row justify-content-md-center'>
-          <ToastContainer style={{zIndex: 2000}}/>
-          <div class='col-md-10'>
-            <div class={self.state.loading ? 'jumbotron loading' : 'jumbotron'}>
-              { self.state.section == 'unitTypes' ?
-                unitTypesSection
-              : self.state.section == 'units' ?
-                unitsSection
-              : hotelsSection
+
+          <div class='card-body'>
+            <p>Choose a unit to see its data.</p>
+            <div class='row'>
+              <div class='col-3'>
+                <div class='list-group'>
+                {self.state.hotel.units.map((unit, i) => {
+                  if (self.state.unitType.name == unit.unitType)
+                    return <a
+                      key={unit.address}
+                      class={unit.address == self.state.unitSelected.address ?
+                        'list-group-item list-group-item-action active' :
+                        'list-group-item list-group-item-action'
+                      }
+                      onClick={() => {
+                        self.setState({unitSelected: unit })}
+                      }
+                    >
+                      {unit.unitType}
+                    </a>
+                })}
+                </div>
+              </div>
+              {self.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
+                <div class='col-9'>
+                  {self.state.user.account != '0x0000000000000000000000000000000000000000' ?
+                    <div>
+                      <BookUnit
+                        waitConfirmation={self.state.hotel.waitConfirmation}
+                        startDate={self.state.startDate}
+                        endDate={self.state.endDate}
+                        bookLifPrice={self.state.bookLifPrice}
+                        bookPrice={self.state.bookPrice}
+                        available={self.state.unitAvailable}
+                        currency={self.state.currency}
+                        currencyOptions={currencyOptions}
+                        onDatesChange={self.updateBookingPrice.bind(self)}
+                        onCurrencyChange={(val) => self.setState({currency: val})}
+                        onSubmit={self.bookRoom.bind(self)}
+                      ></BookUnit>
+                      <br/>
+                      <p>
+                        <b>Address: </b><Address address={self.state.unitSelected.address} web3={web3}/>
+                      </p>
+                    </div>
+                  :
+                  <Link to='/wallet'>Please create a wallet</Link>}
+                </div>
+              :
+                <div></div>
               }
             </div>
           </div>
+
+        </div>;
+
+      return(
+        <div class={"row justify-content-center " + (self.state.loading ? 'loading' : '')}>
+          <ToastContainer style={{zIndex: 2000}}/>
+          <div class="col-sm-11">
+
+            {/* Page Header */}
+            <div class="row">
+              <div class="col">
+                <h1>Hotels registered in WT</h1>
+                <p class="lead">Review the hotels data, including unit types and rooms.</p>
+                <hr/>
+              </div>
+            </div>
+
+            <div class="row">
+              <div class="col">
+
+                {/* Hotels Menu */}
+                <div class='row'>
+                  <div class='col-sm-7 col-md-6 col-lg-5'>
+                    <div class='list-group'>
+                    {self.state.hotels.map((hotel, i) => {
+                      return <a
+                        key={hotel.instance._address}
+                        class={hotel.instance._address == self.state.hotel.address ?
+                          'list-group-item list-group-item-action active  text-ellipsis' :
+                          'list-group-item list-group-item-action  text-ellipsis'
+                        }
+                        onClick={() => {
+                          self.loadHotelInfo(hotel.instance._address)
+                        }}
+                      >
+                        <span class="list-group-item-number">{(i+1)}</span> {hotel.name}
+                      </a>
+                    })}
+                    </div>
+                  </div>
+
+                  <div class='col-sm-5 col-md-6 col-lg-7'>
+                    { self.state.section == 'unitTypes' ?
+                      unitTypesSection
+                    : self.state.section == 'units' ?
+                      unitsSection
+                    : hotelsSection
+                    }
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
         </div>
+
+
       )
     }
 
