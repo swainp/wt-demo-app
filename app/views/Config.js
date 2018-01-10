@@ -42,12 +42,18 @@ export default class App extends React.Component {
       return(
         <div class={self.state.loading ? "loading" : ""}>
           <ToastContainer style={{zIndex: 2000}}/>
+          <div className="row">
+            <div className="col text-center">
+              <h1 style={{margin: 15}}><small><b>App Settings</b></small></h1>
+              <hr/>
+            </div>
+          </div>
           <div class="row justify-content-md-center">
             <div class="col-md-5">
-               <div class="jumbotron text-center">
+               <div class="text-center">
                 <form key="editConfig" onSubmit={(e) => {e.preventDefault()}}>
                   <div class="form-group">
-                    <label>Web3 Provider</label>
+                    <label class="h5"><b>Web3 Provider</b></label>
                     <div class="input-group">
                       <input
                         type="text"
@@ -57,15 +63,17 @@ export default class App extends React.Component {
                         onChange={(event) => self.setState({ web3Provider: event.target.value })}/>
                     </div>
                   </div>
-                  <p>
-                  Main Ethereum Network<br></br>
-                  <small>https://mainnet.infura.io/WKNyJ0kClh8Ao5LdmO7z</small>
-                  <br></br>
-                  Test Ethereum Network (Ropsten)<br></br>
-                  <small>https://ropsten.infura.io/WKNyJ0kClh8Ao5LdmO7z</small>
-                  </p>
+
+                  <p className="h6"><b>Main Ethereum Network</b></p>
+                  <p>https://mainnet.infura.io/WKNyJ0kClh8Ao5LdmO7z</p>
+
+                  <p className="h6"><b>Test Ethereum Network (Ropsten)</b></p>
+                  <p>https://ropsten.infura.io/WKNyJ0kClh8Ao5LdmO7z</p>
+
+                  <hr/>
+
                   <div class="form-group">
-                    <label>WT Index Address</label>
+                    <label class="h5"><b>WT Index Address</b></label>
                     <div class="input-group">
                       <input
                         type="text"
@@ -75,8 +83,8 @@ export default class App extends React.Component {
                         onChange={(event) => self.setState({ wtIndexAddress: event.target.value })}/>
                     </div>
                   </div>
-                  <div class="form-group">
-                    <label>LifToken Address</label>
+                  <div class="form-group mb-xl">
+                    <label class="h5"><b>LifToken Address</b></label>
                     <div class="input-group">
                       <input
                         type="text"
@@ -86,12 +94,12 @@ export default class App extends React.Component {
                         onChange={(event) => self.setState({ lifTokenAddress: event.target.value })}/>
                     </div>
                   </div>
+                  <button class="btn btn-light" onClick={() => self.restoreDefault()}>
+                    Restore Default
+                  </button>
+                  &nbsp;&nbsp;
                   <button class="btn btn-primary" onClick={() => self.changeConfig()}>
                     Change Config
-                  </button>
-                  <br></br><br></br>
-                  <button class="btn btn-info" onClick={() => self.restoreDefault()}>
-                    Restore Default
                   </button>
                 </form>
               </div>

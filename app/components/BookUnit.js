@@ -15,7 +15,7 @@ export default class BookUnit extends React.Component {
       return(
         <form onSubmit={(e) => {e.preventDefault(); this.props.onSubmit(this.state.password)}}>
           <div class="form-group">
-            <label>Dates to book:</label>
+            <label><b>Dates to book: </b></label>
             <DateRangePicker
               startDate={this.props.startDate} // momentPropTypes.momentObj or null,
               endDate={this.props.endDate} // momentPropTypes.momentObj or null,
@@ -27,7 +27,7 @@ export default class BookUnit extends React.Component {
           {this.props.startDate && this.props.endDate && (this.props.available ?
             <div>
               <div class="form-group">
-                <label>Book with:</label>
+                <label><b>Book with:</b></label>
                 <Select
                   name="Currency"
                   clearable={false}
@@ -40,16 +40,16 @@ export default class BookUnit extends React.Component {
                 <div>
                   {this.props.currency === 'lif' &&
                     <div class="form-group">
-                      <label>Price in Lif: {this.props.bookLifPrice}</label>
+                      <label><b>Price in Lif: {this.props.bookLifPrice}</b></label>
                     </div>
                   }
                   {this.props.currency === 'fiat' &&
                     <div class="form-group">
-                      <label>Price in Fiat: {this.props.bookPrice}</label>
+                      <label><b>Price in Fiat: {this.props.bookPrice}</b></label>
                     </div>
                   }
                   <div class="form-group">
-                    <label>Your Wallet Password</label>
+                    <label><b>Your Wallet Password</b></label>
                     <div class="input-group">
                       <input
                         type={this.state.showPassword ? "text" : "password"}
@@ -68,12 +68,12 @@ export default class BookUnit extends React.Component {
                       </span>
                     </div>
                   </div>
-                  <button type="submit" class="btn btn-primary btn-block">{this.props.waitConfirmation ? 'Request Room' : 'Book Room'}</button>
+                  <button type="submit" class="btn btn-primary">{this.props.waitConfirmation ? 'Request Room' : 'Book Room'}</button>
                 </div>
               }
             </div>
           :<div class="form-group">
-            <label>Sorry, this room is not available for the selected dates.</label>
+            <label><b>Sorry, this room is not available for the selected dates.</b></label>
           </div>)}
         </form>
       );

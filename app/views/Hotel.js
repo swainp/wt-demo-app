@@ -399,12 +399,12 @@ export default class App extends React.Component {
 
       var actions =
       <div class="nav flex-column nav-pills" id="actions" role="tablist" aria-orientation="vertical">
-        <a class={'nav-link ' + (self.state.section == 'hotels' ? 'active bg-secondary' : '')} id="v-pills-home-tab" data-toggle="pill" role="tab" aria-controls="v-pills-home" aria-selected="true"
+        <a class={'nav-link ' + (self.state.section == 'hotels' ? 'active bg-secondary' : '')}
           onClick={() => self.setState({section: 'hotels'})}>Home</a>
-        <a class={'nav-link ' + (self.state.section == 'hotelBookings' ? 'active bg-secondary' : '')} id="v-pills-profile-tab" data-toggle="pill" role="tab" aria-controls="v-pills-profile" aria-selected="false"
-          onClick={() => self.setState({section: 'hotelBookings'})}>Profile</a>
-        <a class={'nav-link ' + (self.state.section == 'hotelTxs' ? 'active bg-secondary' : '')} id="v-pills-messages-tab" data-toggle="pill" role="tab" aria-controls="v-pills-messages" aria-selected="false"
-          onClick={() => self.setState({section: 'hotelTxs'})}>Messages</a>
+        <a class={'nav-link ' + (self.state.section == 'hotelBookings' ? 'active bg-secondary' : '')}
+          onClick={() => self.setState({section: 'hotelBookings'})}>Bookings</a>
+        <a class={'nav-link ' + (self.state.section == 'hotelTxs' ? 'active bg-secondary' : '')} 
+          onClick={() => self.setState({section: 'hotelTxs'})}>Transactions</a>
       </div>
 
       var createHotel =

@@ -338,7 +338,7 @@ export default class App extends React.Component {
                   <label><b>Wallet password</b></label>
                   <div class="input-group">
                     <input
-                      autoComplete={false}
+                      autoComplete="off"
                       type={self.state.showPassword ? "text" : "password"}
                       class="form-control"
                       defaultValue={self.state.password}
@@ -430,8 +430,8 @@ export default class App extends React.Component {
             <br/>
 
             {self.state.walletKeystore.address &&
-              <p>
-                <a class="btn btn-light"
+              <p class="mb-xl">
+                <a class="btn btn-light mb-lg"
                   href={"data:application/json;base64,"+window.btoa(window.localStorage.wallet)}
                   download={self.state.walletKeystore.address+".json"}
                 >
@@ -445,7 +445,7 @@ export default class App extends React.Component {
               walletTxs={self.state.walletTxs}
               web3={web3}
             />
-          
+
           </div>
           :
           <div>

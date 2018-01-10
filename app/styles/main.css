@@ -1,15 +1,12 @@
 
 html {
   background: #f3f6f8;
-  background: linear-gradient(to bottom, #ffffff 0%,#f3f6f8 600px);
   background: linear-gradient(to bottom, #F3F6F9 0%,#fff 750px);
+  background-attachment: fixed;
   min-height: 100%;
 }
 
 body {
-  /*background: #fff url(/assets/wallet.png) no-repeat 30px 70px;*/
-  /*background: #E2E7EA url(/assets/wallet.png) no-repeat 30px 70px;*/
-  /*background: #F3F6F8 url(/assets/wallet.png) no-repeat 30px 70px;*/
   background: none;
 }
 
@@ -71,7 +68,7 @@ ul.list-wt > li {
 
 input[required] {box-shadow: none;} /* Remove red shadow*/
 
-
+.card-body .list-group-item {padding: 7px;}
 
 .help-block {
   display: block;
@@ -137,8 +134,24 @@ input[required] {box-shadow: none;} /* Remove red shadow*/
 
 
 
-.card {
+.card, .list-group {
   box-shadow: 0 2px 3px rgba(0,0,0,.1);
+}
+
+.list-group .list-group-item.active,
+.list-group .list-group-item.active:hover {
+  color: #fff;
+  background-color: #007bff;
+  border-color: #007bff;
+  pointer-events: none;
+}
+.list-group-item-number {
+  display: inline-block;
+  min-width: 60px;
+  padding-right: 20px;
+  margin-right: 15px;
+  text-align:right;
+  border-right: 1px solid #DFDFDF;
 }
 
 .btn-link:hover {
@@ -160,13 +173,21 @@ input[required] {box-shadow: none;} /* Remove red shadow*/
   background: #758492 !important;
 }
 
-
-
 .table-striped tbody tr:nth-of-type(2n+1) {
   background-color: rgb(251, 251, 251);
 }
 
 
+.thumbs-wrapper {
+  margin-left: 0!important;
+  margin-right: 0!important;
+}
+
+label + .DateRangePicker {margin-left: 10px; }
+.DateRangePickerInput {}
+.DateRangePickerInput.DateRangePickerInput__withBorder {box-shadow: 2px 2px 2px rgba(0,0,0,.08);}
+.DateInput input{ font-size: 15px; }
+.DateInput_input {padding: 12px 12px!important; }
 
 .navbar.navbar-main {
   padding-top: 10px;
@@ -343,7 +364,11 @@ input[required] {box-shadow: none;} /* Remove red shadow*/
 .text-success { color: #60B129; }
 
 
-
+.text-ellipsis {
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
 .mb-0 {margin-bottom: 0 !important;}
 .mb-xs {margin-bottom: 5px !important;}
 .mb-sm {margin-bottom: 10px !important;}
