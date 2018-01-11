@@ -19,6 +19,8 @@ var _ = require('lodash');
 
 let WTUtils = Utils;
 
+const hotelsPerPage = 5;
+
 export default class App extends React.Component {
 
     constructor() {
@@ -32,6 +34,8 @@ export default class App extends React.Component {
         hotels: [],
         totalHotels: 0,
         hotelOptions: [],
+        hotelsPage: 1,
+        totalPages: 0,
         hotel: {
           address: '0x0000000000000000000000000000000000000000',
           name: '',
@@ -80,24 +84,29 @@ export default class App extends React.Component {
           web3: web3                     // Web3 object instantiated with a provider
         })
         await this.setState({hotelManager: hotelManager, bookingData: bookingData, user: user});
-        await this.loadHotels();
+        await this.loadHotels(1);
         console.log('HM:', hotelManager);
         console.log('Web3:', web3);
         console.log('Hotels:', this.state.hotels);
     }
 
-    async loadHotels() {
+    async loadHotels(page) {
       var self = this;
       self.setState({loading: true});
       var hotelsAddrs = await self.state.hotelManager.WTIndex.methods.getHotels().call();
       hotelsAddrs = hotelsAddrs.filter(addr => addr !== "0x0000000000000000000000000000000000000000");
       var hotels = [];
       let totalHotels = hotelsAddrs.length;
-      for (var i = 0; i <= totalHotels - 1; i++)
+      const startIndex = (page - 1) * hotelsPerPage;
+      const endIndex = ((startIndex + hotelsPerPage) > totalHotels) ? totalHotels : (startIndex + hotelsPerPage);
+      for (var i = startIndex; i < endIndex; i++)
         hotels.push(await self.getHotelInfo(hotelsAddrs[i]));
+      console.log('Total hotels:', totalHotels);
       self.setState({
         hotels: hotels,
         totalHotels: totalHotels,
+        hotelsPage: page,
+        totalPages: (totalHotels / hotelsPerPage),
         loading: false
       });
     }
@@ -505,6 +514,7 @@ export default class App extends React.Component {
                   <div class='col-sm-7 col-md-6 col-lg-5'>
                     <div class='list-group'>
                     {self.state.hotels.map((hotel, i) => {
+                      const hotelIndex = ((self.state.hotelsPage - 1) * hotelsPerPage) + i + 1;
                       return <a
                         key={hotel.instance._address}
                         class={hotel.instance._address == self.state.hotel.address ?
@@ -515,10 +525,33 @@ export default class App extends React.Component {
                           self.loadHotelInfo(hotel.instance._address)
                         }}
                       >
-                        <span class="list-group-item-number">{(i+1)}</span> {hotel.name}
+                        <span class="list-group-item-number">{hotelIndex}</span> {hotel.name}
                       </a>
                     })}
                     </div>
+                    {self.state.totalPages > 0 &&
+                      <nav aria-label="Page navigation example">
+                        <ul class="pagination justify-content-center">
+                          {self.state.hotelsPage > 1 &&
+                            <li class="page-item" onClick={() => self.loadHotels(self.state.hotelsPage-1)}>
+                              <a class="page-link"><span class="fa fa-arrow-left"></span></a>
+                            </li>
+                          }
+                          {[...Array(self.state.totalPages)].map((x, i) => {
+                            i ++;
+                            return <li
+                              class={(i == self.state.hotelsPage) ? "page-item active" : "page-item"}
+                              onClick={() => self.loadHotels(i)}
+                            ><a class="page-link" >{i}</a></li>;
+                          })}
+                          {self.state.hotelsPage < self.state.totalPages &&
+                            <li class="page-item" onClick={() => self.loadHotels(self.state.hotelsPage+1)}>
+                              <a class="page-link"><span class="fa fa-arrow-right"></span></a>
+                            </li>
+                          }
+                        </ul>
+                      </nav>
+                    }
                   </div>
 
                   <div class='col-sm-5 col-md-6 col-lg-7'>
