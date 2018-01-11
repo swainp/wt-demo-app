@@ -33,7 +33,7 @@ export default class App extends React.Component {
 			console.log(hash);
 			toast.info('Sent Tx to ' + action);
 			toast.info(<Tx hash={hash} />);
-			Utils.decodeTxInput(hash, (window.localStorage.wtIndexAddress || WTINDEX_ADDRESS), this.state.wallet.address, web3)
+			Utils.decodeTxInput(hash, (window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length-1].address), this.state.wallet.address, web3)
 			.then(decodedTx => {
 				console.log('App.addPendingTx decodedTx');
 				console.log(decodedTx);

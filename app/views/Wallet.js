@@ -94,8 +94,8 @@ export default class App extends React.Component {
       self.setState({loading: true});
       let txs = await Utils.getDecodedTransactions(
         self.state.walletKeystore.address,
-        (window.localStorage.wtIndexAddress || WTINDEX_ADDRESS),
-        WTINDEX_BLOCK,
+        (window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length-1].address),
+        (window.localStorage.wtIndexBlock || WT_INDEXES[WT_INDEXES.length-1].block),
         web3,
         network);
         console.log('got TXs');

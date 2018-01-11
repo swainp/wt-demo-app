@@ -73,7 +73,7 @@ export default class App extends React.Component {
       )
         {
         let hotelManager = new HotelManager({
-          indexAddress: window.localStorage.wtIndexAddress || WTINDEX_ADDRESS,
+          indexAddress: window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length-1].address,
           owner: this.state.importKeystore.address,
           web3: web3,
           gasMargin: 1.5
@@ -371,8 +371,8 @@ export default class App extends React.Component {
       self.setState({loading: true});
       let txs = await Utils.getDecodedTransactions(
         '0x' + self.state.importKeystore.address,
-        (window.localStorage.wtIndexAddress || WTINDEX_ADDRESS),
-        WTINDEX_BLOCK,
+        (window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length-1].address),
+        (window.localStorage.wtIndexBlock || WT_INDEXES[WT_INDEXES.length-1].block),
         web3,
         network);
       self.setState({hotelTxs: txs, loading: false});
@@ -403,7 +403,7 @@ export default class App extends React.Component {
           onClick={() => self.setState({section: 'hotels'})}>Home</a>
         <a class={'nav-link ' + (self.state.section == 'hotelBookings' ? 'active bg-secondary' : '')}
           onClick={() => self.setState({section: 'hotelBookings'})}>Bookings</a>
-        <a class={'nav-link ' + (self.state.section == 'hotelTxs' ? 'active bg-secondary' : '')} 
+        <a class={'nav-link ' + (self.state.section == 'hotelTxs' ? 'active bg-secondary' : '')}
           onClick={() => self.setState({section: 'hotelTxs'})}>Transactions</a>
       </div>
 

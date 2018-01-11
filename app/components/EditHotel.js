@@ -10,7 +10,7 @@ export default class EditHotel extends React.Component {
     constructor(props) {
       super(props);
       let googleMapsClient = googleMaps.createClient({
-        key: MAPS_API,
+        key: MAPS_API_KEY,
         Promise: Promise
       });
       this.state = {
