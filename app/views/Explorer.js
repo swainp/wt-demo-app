@@ -66,7 +66,7 @@ export default class App extends React.Component {
     async componentWillMount() {
         let address = (this.state.importKeystore ? this.state.importKeystore.address : '0x0000000000000000000000000000000000000000');
         let hotelManager = new HotelManager({
-          indexAddress: window.localStorage.wtIndexAddress || WTINDEX_ADDRESS,
+          indexAddress: window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length-1].address,
           owner: address,
           web3: web3,
           gasMargin: 1.5
@@ -445,7 +445,7 @@ export default class App extends React.Component {
                         self.setState({unitSelected: unit })}
                       }
                     >
-                      {unit.unitType}
+                      #{i+1}
                     </a>
                 })}
                 </div>

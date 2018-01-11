@@ -15,7 +15,7 @@ export default class AddUnitType extends React.Component {
           <div class="card-header">
             <div className="row align-items-center">
               <div class="col">
-                <h3 class="mb-0">{this.props.hotel.name}: add room type</h3>
+                <h3 class="mb-0">{this.props.hotel.name}: Add room type</h3>
               </div>
               <div className="col text-right">
                 <button title="Cancel" type="button" class="btn btn-light" onClick={this.props.onBack}>

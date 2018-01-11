@@ -2,9 +2,17 @@ import React from 'react';
 import {Link} from "react-router";
 import ReactModal from "react-modal";
 import { ToastContainer, toast } from 'react-toastify';
+import Select from 'react-select';
 
 import Web3 from 'web3';
 var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_PROVIDER));
+
+var wtIndexes = [];
+for (var i = 0; i < WT_INDEXES.length; i++) {
+  wtIndexes.push(WT_INDEXES[i]);
+  wtIndexes[i].version = wtIndexes[i].version + " - " + wtIndexes[i].address;
+  wtIndexes[i].value = wtIndexes[i].address;
+}
 
 export default class App extends React.Component {
 
@@ -12,7 +20,7 @@ export default class App extends React.Component {
       super();
       this.state = {
         web3Provider: window.localStorage.web3Provider || WEB3_PROVIDER,
-        wtIndexAddress: window.localStorage.wtIndexAddress || WTINDEX_ADDRESS,
+        wtIndexAddresses: window.localStorage.wtIndexAddress || wtIndexes[wtIndexes.length-1].address,
         lifTokenAddress: window.localStorage.lifTokenAddress || LIFTOKEN_ADDRESS,
       }
     }
@@ -21,16 +29,20 @@ export default class App extends React.Component {
       window.localStorage.web3Provider = this.state.web3Provider;
       window.localStorage.wtIndexAddress = this.state.wtIndexAddress;
       window.localStorage.lifTokenAddress = this.state.lifTokenAddress;
+      for (var i = 0; i < wtIndexes.length; i++)
+        if (this.state.wtIndexAddress == wtIndexes[i].address)
+        window.localStorage.wtIndexBlock = wtIndexes[wtIndexes.length-1].block;
       toast.success('Configuration updated');
     }
 
     restoreDefault(){
       window.localStorage.web3Provider = WEB3_PROVIDER;
-      window.localStorage.wtIndexAddress = WTINDEX_ADDRESS;
+      window.localStorage.wtIndexAddress = wtIndexes[wtIndexes.length-1].address;
+      window.localStorage.wtIndexBlock = wtIndexes[wtIndexes.length-1].block;
       window.localStorage.lifTokenAddress = LIFTOKEN_ADDRESS;
       this.setState({
         web3Provider: WEB3_PROVIDER,
-        wtIndexAddress: WTINDEX_ADDRESS,
+        wtIndexAddress: wtIndexes[wtIndexes.length-1].address,
         lifTokenAddress: LIFTOKEN_ADDRESS,
       });
       toast.success('Configuration restored to default');
@@ -74,14 +86,14 @@ export default class App extends React.Component {
 
                   <div class="form-group">
                     <label class="h5"><b>WT Index Address</b></label>
-                    <div class="input-group">
-                      <input
-                        type="text"
-                        class="form-control"
-                        autoFocus="true"
-                        defaultValue={self.state.wtIndexAddress}
-                        onChange={(event) => self.setState({ wtIndexAddress: event.target.value })}/>
-                    </div>
+                    <Select
+                      name="wtIndexes"
+                      clearable={false}
+                      options={wtIndexes}
+                      onChange={ (val) =>  self.setState({ wtIndexAddress: val.value })}
+                      value={self.state.wtIndexAddress || window.localStorage.wtIndexAddress}
+                      labelKey="version"
+                    />
                   </div>
                   <div class="form-group mb-xl">
                     <label class="h5"><b>LifToken Address</b></label>
