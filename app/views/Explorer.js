@@ -445,7 +445,7 @@ export default class App extends React.Component {
                         self.setState({unitSelected: unit })}
                       }
                     >
-                      {unit.unitType}
+                      #{i+1}
                     </a>
                 })}
                 </div>
