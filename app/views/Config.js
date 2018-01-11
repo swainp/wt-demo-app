@@ -91,7 +91,7 @@ export default class App extends React.Component {
                       clearable={false}
                       options={wtIndexes}
                       onChange={ (val) =>  self.setState({ wtIndexAddress: val.value })}
-                      value={self.state.wtIndexAddress}
+                      value={self.state.wtIndexAddress || window.localStorage.wtIndexAddress}
                       labelKey="version"
                     />
                   </div>
