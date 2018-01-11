@@ -12,9 +12,9 @@ export default class App extends React.Component {
                   <img src="assets/wt.svg" style={{height: "24px", marginRight: "0.5em"}} />Winding Tree
                 </a>
                 <span className="text-muted"> · </span>
-                <a href="https://github.com/windingtree">Github</a>
+                <a href="https://github.com/windingtree/wt-demo-app">Github</a>
                 <span className="text-muted"> · </span>
-                <a href="https://windingtree.github.io/wt-js-libs/">Documentation</a>
+                <a href="https://windingtree.github.io/wt-js-libs/"> JS Libs Documentation</a>
               </div>
             </div>
           </div>
