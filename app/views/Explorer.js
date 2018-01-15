@@ -20,7 +20,7 @@ let WTUtils = Utils;
 
 const hotelsPerPage = 5;
 
-export default class App extends React.Component {
+export default class Explorer extends React.Component {
 
     constructor() {
       super();
@@ -240,15 +240,12 @@ export default class App extends React.Component {
             }
 
             {/* If Has Data */}
-            <ul class={hotel.name.length <= 0 ? 'mb-0' : ''}>
-              {hotel.name.length ?
-                <li>
-                  <p class="mb-xs"><b>Name:</b> {hotel.name}</p>
-                </li>
-                : <div></div>
-              }
+            <ul class={!hotel.name.length ? 'mb-0' : ''}>
+              <li>
+                { hotel.name && <p class="mb-xs"><b>Name:</b> {hotel.name}</p>}
+              </li>
               {(hotel.address != '0x0000000000000000000000000000000000000000'
-                && !loading) ?
+                && !loading) &&
                 [
                   <li>
                     <p class="mb-xs">
@@ -263,46 +260,37 @@ export default class App extends React.Component {
                     </p>
                   </li>
                 ]
-                : <div></div>
               }
-              {hotel.country ?
+              {hotel.country &&
                 <li>
                   <p class="mb-xs"><b>Country:</b> {hotel.country}</p>
                 </li>
-                : <div></div>
               }
-              {hotel.lineOne ?
+              { hotel.lineOne &&
                 <li>
                   <p class="mb-xs"><b>Address:</b> {hotel.lineOne}</p>
                 </li>
-                : <div></div>
               }
-              {hotel.latitude && hotel.longitude ?
+              {hotel.latitude && hotel.longitude &&
                 <li><p class="mb-xs"><b>GPS:</b> {hotel.latitude} {hotel.longitude}</p></li>
-                : <div></div>
               }
-              {(hotel.address != '0x0000000000000000000000000000000000000000'
-                && !loading) ?
+              {hotel.address != '0x0000000000000000000000000000000000000000'
+                && !loading &&
                 [
                   <li><p class="mb-xs"><b>Instant Booking:</b> {hotel.waitConfirmation ? 'Yes' : 'No'}</p></li>,
                   <li><p><b>Total Units:</b> {hotel.totalUnits}</p></li>,
+                  <li>
+                    <div type="button" class="btn btn-sm btn-light" onClick={() => this.setState({section: 'unitTypes'})} >
+                      View Unit Types
+                    </div>
+                    <hr/>
+                  </li>
                 ]
-                : <div></div>
-              }
-              {(hotel.address != '0x0000000000000000000000000000000000000000'
-                && !loading) ?
-                <div>
-                  <div type="button" class="btn btn-sm btn-light" onClick={() => this.setState({section: 'unitTypes'})} >
-                    View Unit unitTypes
-                  </div>
-                  <hr/>
-                </div>
-                : <div></div>
               }
             </ul>
 
             {/* Hotel Description */}
-            {hotel.description.length ?
+            {hotel.description ?
               <div class="lead">
                 {hotel.description}
               </div>
@@ -310,18 +298,19 @@ export default class App extends React.Component {
             }
 
             {/* Hotel Images */}
-            {hotel.images.length > 0 ?
+            {hotel.images.length &&
               [
                 <hr/>,
                 <div class="col-6">
                   <Carousel showArrows={true} infiniteLoop={true} >
-                  {hotel.images.map(function(src, i){
-                    return <div key={hotel.address+'Image'+i}><img src={src} /></div>;
-                  })}
+                    {
+                      hotel.images.map(function(src, i){
+                        return <div key={hotel.address+'Image'+i}><img src={src} /></div>;
+                      })
+                    }
                   </Carousel>
                 </div>
               ]
-              : <div></div>
             }
           </div>
         </div>
@@ -350,31 +339,30 @@ export default class App extends React.Component {
             <div class='row'>
               <div class='col-3'>
                 <div class='list-group'>
-                {hotel.unitTypes.map((hotelUnitType, i) => {
-                  return <a
-                    key={unitType.name}
-                    class={unitType.address === hotelUnitType.address ?
-                      'list-group-item list-group-item-action active' :
-                      'list-group-item list-group-item-action'
-                    }
-                    onClick={() => {
-                      this.setState({unitType: hotelUnitType, section: 'unitTypes'})}
-                    }
-                  >
-                    {hotelUnitType.name}
-                  </a>
-                })}
+                  {
+                    hotel.unitTypes.map(hotelUnitType =>
+                      <a
+                        key={hotelUnitType.name}
+                        class={`list-group-item list-group-item-action ${unitType.address == hotelUnitType.address ? 'active' : ''}`}
+                        onClick={() => {
+                          this.setState({unitType: hotelUnitType, section: 'unitTypes'})}
+                        }
+                      >
+                        {hotelUnitType.name}
+                      </a>
+                    )
+                  }
                 </div>
               </div>
               {unitType.address != '0x0000000000000000000000000000000000000000' ?
                 <div class='col-9'>
                   <ul>
-                    <li class="mb-xs"><b>Name:</b> {this.state.unitType.name}</li>
-                    <li class="mb-xs"><b>Address:</b> <Address address={this.state.unitType.address} web3={web3}/></li>
-                    <li class="mb-xs"><b>Minimum Guests:</b> {this.state.unitType.info.minGuests}</li>
-                    <li class="mb-xs"><b>Maximum Guests:</b> {this.state.unitType.info.maxGuests}</li>
+                    <li class="mb-xs"><b>Name:</b> {unitType.name}</li>
+                    <li class="mb-xs"><b>Address:</b> <Address address={unitType.address} web3={web3}/></li>
+                    <li class="mb-xs"><b>Minimum Guests:</b> {unitType.info.minGuests}</li>
+                    <li class="mb-xs"><b>Maximum Guests:</b> {unitType.info.maxGuests}</li>
                     <li class="mb-xs"><b>Instant Booking:</b> {hotel.waitConfirmation ? 'Yes' : 'No'}</li>
-                    <li class="mb-xs"><b>Total Units:</b> {this.state.unitType.totalUnits}</li>
+                    <li class="mb-xs"><b>Total Units:</b> {unitType.totalUnits}</li>
                   </ul>
                   <div type="button" class="btn btn-sm btn-light" onClick={() => this.setState({section: 'units'})} >
                     View Units
@@ -408,7 +396,6 @@ export default class App extends React.Component {
           </div>
         </div>
       );
-
 
       const currencyOptions = [{value: 'lif', label: 'Lif'}, {value: 'fiat', label: 'Fiat'}];
 
