@@ -24,7 +24,7 @@ import PromiEvent from 'web3-core-promievent';
 import Select from 'react-select';
 var _ = require('lodash');
 
-export default class App extends React.Component {
+export default class Hotel extends React.Component {
 
     constructor() {
       super();

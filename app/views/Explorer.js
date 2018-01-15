@@ -1,27 +1,26 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import ReactModal from 'react-modal';
-import { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Carousel } from 'react-responsive-carousel';
-
+import _ from 'lodash';
 import moment from 'moment';
+import Select from 'react-select';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
+import { ToastContainer, toast } from 'react-toastify';
+import Web3 from 'web3';
+
 import BookUnit from '../components/BookUnit';
 import Address from '../components/Address';
-import { ToastContainer, toast } from 'react-toastify';
 
-import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
+const web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
 
-import Select from 'react-select';
-var _ = require('lodash');
 
 let WTUtils = Utils;
 
 const hotelsPerPage = 5;
 
-export default class App extends React.Component {
+export default class Explorer extends React.Component {
 
     constructor() {
       super();
@@ -90,19 +89,18 @@ export default class App extends React.Component {
         console.log('Hotels:', this.state.hotels);
     }
 
-    async loadHotels(page) {
-      var self = this;
-      self.setState({loading: true});
-      var hotelsAddrs = await self.state.hotelManager.WTIndex.methods.getHotels().call();
+    loadHotels = async (page) => {
+      this.setState({loading: true});
+      let hotelsAddrs = await this.state.hotelManager.WTIndex.methods.getHotels().call();
       hotelsAddrs = hotelsAddrs.filter(addr => addr !== "0x0000000000000000000000000000000000000000");
-      var hotels = [];
-      let totalHotels = hotelsAddrs.length;
+      const hotels = [];
+      const totalHotels = hotelsAddrs.length;
       const startIndex = (page - 1) * hotelsPerPage;
       const endIndex = ((startIndex + hotelsPerPage) > totalHotels) ? totalHotels : (startIndex + hotelsPerPage);
       for (var i = startIndex; i < endIndex; i++)
-        hotels.push(await self.getHotelInfo(hotelsAddrs[i]));
+        hotels.push(await this.getHotelInfo(hotelsAddrs[i]));
       console.log('Total hotels:', totalHotels);
-      self.setState({
+      this.setState({
         hotels: hotels,
         totalHotels: totalHotels,
         hotelsPage: page,
@@ -111,18 +109,17 @@ export default class App extends React.Component {
       });
     }
 
-    async getHotelInfo(hotelAddr) {
-      var self = this;
-      var hotelInstance = WTUtils.getInstance('Hotel', hotelAddr, self.state.hotelManager.context);
+    getHotelInfo = async (hotelAddr) => {
+      var hotelInstance = WTUtils.getInstance('Hotel', hotelAddr, this.state.hotelManager.context);
       return {
         instance: hotelInstance,
         name: await hotelInstance.methods.name().call(),
       };
     }
 
-    async loadHotelInfo(hotelAddr) {
-      var self = this;
-      self.setState({
+    loadHotelInfo = async (hotelAddr) => {
+      const { hotelManager } = this.state;
+      this.setState({
         loading: true,
         hotel: {
           address: hotelAddr,
@@ -148,8 +145,8 @@ export default class App extends React.Component {
         section: 'hotels'
       });
       const hotelInfo = await WTUtils.getHotelInfo(
-        WTUtils.getInstance('Hotel', hotelAddr, self.state.hotelManager.context),
-        self.state.hotelManager.context
+        WTUtils.getInstance('Hotel', hotelAddr, hotelManager.context),
+        hotelManager.context
       );
       const unitTypesArray = [];
       const unitArray = [];
@@ -173,258 +170,244 @@ export default class App extends React.Component {
       hotelInfo.units = unitArray;
       hotelInfo.address = hotelAddr;
       console.log('Hotel information:',hotelInfo);
-      self.setState({
+      this.setState({
         hotel: hotelInfo,
         loading: false
       });
     }
 
-    async updateBookingPrice(startDate, endDate) {
-      let self = this;
-      self.setState({startDate: startDate, endDate: endDate, bookPrice: '...', bookLifPrice: '...'});
+    updateBookingPrice = async (startDate, endDate) => {
+      const { unitSelected: { address }, bookingData } = this.state;
+      this.setState({ startDate, endDate, bookPrice: '...', bookLifPrice: '...'});
       if(startDate && endDate && endDate.isSameOrAfter(startDate)) {
-        let available = await self.state.bookingData.unitIsAvailable(self.state.unitSelected.address, startDate.toDate(), endDate.diff(startDate, 'days'));
-        let cost = await self.state.bookingData.getCost(self.state.unitSelected.address, startDate.toDate(), endDate.diff(startDate, 'days'));
-        let lifCost = await self.state.bookingData.getLifCost(self.state.unitSelected.address, startDate.toDate(), endDate.diff(startDate, 'days'));
-        self.setState({ bookPrice: cost, bookLifPrice: lifCost, unitAvailable: available});
+        const bookingDays = endDate.diff(startDate, 'days');
+        const available = await bookingData.unitIsAvailable(address, startDate.toDate(), bookingDays);
+        const cost = await bookingData.getCost(address, startDate.toDate(), bookingDays);
+        const lifCost = await bookingData.getLifCost(address, startDate.toDate(), bookingDays);
+        this.setState({ bookPrice: cost, bookLifPrice: lifCost, unitAvailable: available});
       }
     }
 
-    async bookRoom(password) {
-      var self = this;
-      self.setState({loading: true});
+    bookRoom = async (password) => {
+      this.setState({loading: true});
 
       //async book(hotelAddress: Address, unitAddress: Address, fromDate: Date, daysAmount: Number, guestData: String): Promievent
       //async bookWithLif(hotelAddress: Address, unitAddress: Address, fromDate: Date, daysAmount: Number, guestData: String): Promievent
       let args = [
-        self.state.hotel.address,
-        self.state.unitSelected.address,
-        self.state.startDate,
-        self.state.endDate.diff(self.state.startDate, 'days'),
+        this.state.hotel.address,
+        this.state.unitSelected.address,
+        this.state.startDate,
+        this.state.endDate.diff(this.state.startDate, 'days'),
         'guestData'
       ]
 
       try {
-        web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
-        if(self.state.currency === 'lif') {
-          await self.state.user.bookWithLif(...args);
+        web3.eth.accounts.wallet.decrypt([this.state.importKeystore], password);
+        if(this.state.currency === 'lif') {
+          await this.state.user.bookWithLif(...args);
         } else {
-          await self.state.user.book(...args);
+          await this.state.user.book(...args);
         }
-        self.setState({loading: false });
-        if(self.state.hotel.waitConfirmation) {
-          toast.success('Successfully requested to book ' + self.state.unitSelected.unitType + ' from ' + self.state.startDate.format('YYYY MM DD') + ' to ' + self.state.endDate.format('YYYY MM DD'));
+        this.setState({loading: false });
+        const bookingDescription =  `${this.state.unitSelected.unitType} from ${this.state.startDate.format('YYYY MM DD')} to ${this.state.endDate.format('YYYY MM DD')}`;
+        if(this.state.hotel.waitConfirmation) {
+          toast.success(`Successfully requested to book ${bookingDescription}`);
         } else {
-          toast.success('Successfully booked ' + self.state.unitSelected.unitType + ' from ' + self.state.startDate.format('YYYY MM DD') + ' to ' + self.state.endDate.format('YYYY MM DD'));
+          toast.success(`Successfully booked ${bookingDescription}`);
         }
       } catch(e) {
         console.log("Error booking a room", e);
-        self.setState({loading: false});
+        this.setState({loading: false});
         toast.error(e);
       }
     }
 
     render() {
-      var self = this;
+      const { hotels, hotelsPage, hotel, hotelManager, loading, unitType, totalPages, section } = this.state;
 
-      var hotelsSection =
-          <div class="card" style={{position: 'sticky', top: 120}}>
-            <div class="card-header">
-              {self.state.hotel.name.length > 0 ?
-                <h3 class="mb-0">
-                  {self.state.hotel.name}
-                </h3>
-                :
-                <h3 class="mb-0">Choose a Hotel</h3>
-              }
-            </div>
-            <div class="card-body">
+      const hotelsSection = (
+        <div class="card" style={{position: 'sticky', top: 120}}>
+          <div class="card-header">
+            <h3 class="mb-0">
+              { hotel.name.length ? hotel.name : 'Choose a Hotel' }
+            </h3>
+          </div>
+          <div class="card-body">
 
-              {/* If No Data */}
-              {self.state.hotel.name.length <= 0 &&
-                <p class="mb-0">Please, select a hotel from the list.</p>
-              }
+            {/* If No Data */}
+            { !hotel.name.length &&
+              <p class="mb-0">Please, select a hotel from the list.</p>
+            }
 
-              {/* If Has Data */}
-              <ul class={self.state.hotel.name.length <= 0 ? 'mb-0' : ''}>
-                {self.state.hotel.name.length > 0 ?
-                  <li>
-                    <p class="mb-xs"><b>Name:</b> {self.state.hotel.name}</p>
-                  </li>
-                  : <div></div>
-                }
-                {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loading) ?
+            {/* If Has Data */}
+            <ul class={!hotel.name.length ? 'mb-0' : ''}>
+              <li>
+                { hotel.name && <p class="mb-xs"><b>Name:</b> {hotel.name}</p>}
+              </li>
+              {(hotel.address != '0x0000000000000000000000000000000000000000'
+                && !loading) &&
+                [
                   <li>
                     <p class="mb-xs">
-                      <b>Address:</b> <Address address={self.state.hotel.address} web3={web3}/>
+                      <b>Address:</b> <Address address={hotel.address} web3={web3}/>
+                      <small class="text-muted"> <i class="fa fa-external-link" aria-hidden="true"></i></small>
+                    </p>
+                  </li>,
+                  <li>
+                    <p class="mb-xs">
+                      <b>Manager:</b> <Address address={hotel.manager} web3={web3}/>
                       <small class="text-muted"> <i class="fa fa-external-link" aria-hidden="true"></i></small>
                     </p>
                   </li>
-                  : <div></div>
-                }
-                {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loading) ?
+                ]
+              }
+              {hotel.country &&
+                <li>
+                  <p class="mb-xs"><b>Country:</b> {hotel.country}</p>
+                </li>
+              }
+              { hotel.lineOne &&
+                <li>
+                  <p class="mb-xs"><b>Address:</b> {hotel.lineOne}</p>
+                </li>
+              }
+              {hotel.latitude && hotel.longitude &&
+                <li><p class="mb-xs"><b>GPS:</b> {hotel.latitude} {hotel.longitude}</p></li>
+              }
+              {hotel.address != '0x0000000000000000000000000000000000000000'
+                && !loading &&
+                [
+                  <li><p class="mb-xs"><b>Instant Booking:</b> {hotel.waitConfirmation ? 'Yes' : 'No'}</p></li>,
+                  <li><p><b>Total Units:</b> {hotel.totalUnits}</p></li>,
                   <li>
-                    <p class="mb-xs">
-                      <b>Manager:</b> <Address address={self.state.hotel.manager} web3={web3}/>
-                      <small class="text-muted"> <i class="fa fa-external-link" aria-hidden="true"></i></small>
-                    </p>
-                  </li>
-                  : <div></div>
-                }
-                {self.state.hotel.country ?
-                  <li>
-                    <p class="mb-xs"><b>Country:</b> {self.state.hotel.country}</p>
-                  </li>
-                  : <div></div>
-                }
-                {self.state.hotel.lineOne ?
-                  <li>
-                    <p class="mb-xs"><b>Address:</b> {self.state.hotel.lineOne}</p>
-                  </li>
-                  : <div></div>
-                }
-                {self.state.hotel.latitude && self.state.hotel.longitude ?
-                  <li><p class="mb-xs"><b>GPS:</b> {self.state.hotel.latitude} {self.state.hotel.longitude}</p></li>
-                  : <div></div>
-                }
-                {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loading) ?
-                  <li><p class="mb-xs"><b>Instant Booking:</b> {self.state.hotel.waitConfirmation ? 'Yes' : 'No'}</p></li>
-                  : <div></div>
-                }
-                {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loading) ?
-                  <li><p><b>Total Units:</b> {self.state.hotel.totalUnits}</p></li>
-                  : <div></div>
-                }
-                {(self.state.hotel.address != '0x0000000000000000000000000000000000000000'
-                  && !self.state.loading) ?
-                  <div>
-                    <div type="button" class="btn btn-sm btn-light" onClick={() => self.setState({section: 'unitTypes'})} >
-                      View Unit unitTypes
+                    <div type="button" class="btn btn-sm btn-light" onClick={() => this.setState({section: 'unitTypes'})} >
+                      View Unit Types
                     </div>
                     <hr/>
-                  </div>
-                  : <div></div>
-                }
-              </ul>
-
-              {/* Hotel Description */}
-              {self.state.hotel.description.length > 0 ?
-                <div class="lead">
-                  {self.state.hotel.description}
-                </div>
-                : <div></div>
+                  </li>
+                ]
               }
+            </ul>
 
-              {/* Hotel Images */}
-              {self.state.hotel.images.length > 0 && <hr/>}
-              {self.state.hotel.images.length > 0 ?
+            {/* Hotel Description */}
+            {hotel.description ?
+              <div class="lead">
+                {hotel.description}
+              </div>
+              : <div></div>
+            }
+
+            {/* Hotel Images */}
+            {hotel.images.length &&
+              [
+                <hr/>,
                 <div class="col-6">
                   <Carousel showArrows={true} infiniteLoop={true} >
-                  {self.state.hotel.images.map(function(src, i){
-                    return <div key={self.state.hotel.address+'Image'+i}><img src={src} /></div>;
-                  })}
+                    {
+                      hotel.images.map(function(src, i){
+                        return <div key={hotel.address+'Image'+i}><img src={src} /></div>;
+                      })
+                    }
                   </Carousel>
                 </div>
-                : <div></div>
-              }
-            </div>
-          </div>
-
-      var unitTypesSection =
-      <div class="card" style={{position: 'sticky', top: 120}}>
-
-
-        <div class="card-header">
-          <div class="row align-items-center">
-            <div class="col">
-              <h3 class="mb-0">{self.state.hotel.name + ': Unit types '}</h3>
-            </div>
-            <div class="col text-right">
-              <button title="Cancel" class="btn btn-light" onClick={() => self.setState({section: 'hotels'})}>
-                <i class="fa fa-times" aria-hidden="true"></i>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-body">
-
-          <p>Choose a unit type to see its data.</p>
-
-          <div class='row'>
-            <div class='col-3'>
-              <div class='list-group'>
-              {self.state.hotel.unitTypes.map((unitType, i) => {
-                return <a
-                  key={unitType.name}
-                  class={unitType.address == self.state.unitType.address ?
-                    'list-group-item list-group-item-action active' :
-                    'list-group-item list-group-item-action'
-                  }
-                  onClick={() => {
-                    self.setState({unitType: unitType, section: 'unitTypes'})}
-                  }
-                >
-                  {unitType.name}
-                </a>
-              })}
-              </div>
-            </div>
-            {self.state.unitType.address != '0x0000000000000000000000000000000000000000' ?
-              <div class='col-9'>
-                <ul>
-                  <li class="mb-xs"><b>Name:</b> {self.state.unitType.name}</li>
-                  <li class="mb-xs"><b>Address:</b> <Address address={self.state.unitType.address} web3={web3}/></li>
-                  <li class="mb-xs"><b>Minimun Guests:</b> {self.state.unitType.info.minGuests}</li>
-                  <li class="mb-xs"><b>Maximun Guests:</b> {self.state.unitType.info.maxGuests}</li>
-                  <li class="mb-xs"><b>Instant Booking:</b> {self.state.hotel.waitConfirmation ? 'Yes' : 'No'}</li>
-                  <li class="mb-xs"><b>Total Units:</b> {self.state.unitType.totalUnits}</li>
-                </ul>
-                <div type="button" class="btn btn-sm btn-light" onClick={() => self.setState({section: 'units'})} >
-                  View Units
-                </div>
-                {self.state.unitType.info.description ?
-                  <div>
-                    <hr></hr>
-                    {self.state.unitType.info.description}
-                  </div>
-                  : <div></div>
-                }
-              </div>
-            :
-              <div></div>
+              ]
             }
           </div>
-          {self.state.unitType.images.length > 0 ?
-            <div>
-              <Carousel showArrows={true} infiniteLoop={true} >
-              {self.state.unitType.images.map(function(src, i){
-                return <div key={self.state.unitType.address+'Image'+i}><img src={src} /></div>;
-              })}
-              </Carousel>
-            </div>
-            : <div></div>
-          }
-
         </div>
+      );
 
-      </div>;
 
-      let currencyOptions = [{value: 'lif', label: 'Lif'}, {value: 'fiat', label: 'Fiat'}];
-
-      var unitsSection =
-      <div class="card">
+      var unitTypesSection = (
+        <div class="card" style={{position: 'sticky', top: 120}}>
           <div class="card-header">
             <div class="row align-items-center">
               <div class="col">
-                <h3 class="mb-0">{self.state.hotel.name + ': Units '}</h3>
+                <h3 class="mb-0">{hotel.name + ': Unit types '}</h3>
               </div>
               <div class="col text-right">
-                <button title="Cancel" class="btn btn-light" onClick={() => self.setState({
+                <button title="Cancel" class="btn btn-light" onClick={() => this.setState({section: 'hotels'})}>
+                  <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="card-body">
+
+            <p>Choose a unit type to see its data.</p>
+
+            <div class='row'>
+              <div class='col-3'>
+                <div class='list-group'>
+                  {
+                    hotel.unitTypes.map(hotelUnitType =>
+                      <a
+                        key={hotelUnitType.name}
+                        class={`list-group-item list-group-item-action ${unitType.address == hotelUnitType.address ? 'active' : ''}`}
+                        onClick={() => {
+                          this.setState({unitType: hotelUnitType, section: 'unitTypes'})}
+                        }
+                      >
+                        {hotelUnitType.name}
+                      </a>
+                    )
+                  }
+                </div>
+              </div>
+              {unitType.address != '0x0000000000000000000000000000000000000000' ?
+                <div class='col-9'>
+                  <ul>
+                    <li class="mb-xs"><b>Name:</b> {unitType.name}</li>
+                    <li class="mb-xs"><b>Address:</b> <Address address={unitType.address} web3={web3}/></li>
+                    <li class="mb-xs"><b>Minimum Guests:</b> {unitType.info.minGuests}</li>
+                    <li class="mb-xs"><b>Maximum Guests:</b> {unitType.info.maxGuests}</li>
+                    <li class="mb-xs"><b>Instant Booking:</b> {hotel.waitConfirmation ? 'Yes' : 'No'}</li>
+                    <li class="mb-xs"><b>Total Units:</b> {unitType.totalUnits}</li>
+                  </ul>
+                  <div type="button" class="btn btn-sm btn-light" onClick={() => this.setState({section: 'units'})} >
+                    View Units
+                  </div>
+                  {unitType.info.description ?
+                    <div>
+                      <hr></hr>
+                      {unitType.info.description}
+                    </div>
+                    : <div></div>
+                  }
+                </div>
+              :
+                <div></div>
+              }
+            </div>
+            {unitType.images.length ?
+              <div>
+                <Carousel showArrows={true} infiniteLoop={true} >
+                  {
+                    unitType.images.map((src, i) =>
+                      <div key={`${unitType.address}Image${i}`}>
+                        <img src={src} />
+                      </div>
+                    )
+                  }
+                </Carousel>
+              </div>
+              : <div></div>
+            }
+          </div>
+        </div>
+      );
+
+      const currencyOptions = [{value: 'lif', label: 'Lif'}, {value: 'fiat', label: 'Fiat'}];
+
+      const unitsSection = (
+        <div class="card">
+          <div class="card-header">
+            <div class="row align-items-center">
+              <div class="col">
+                <h3 class="mb-0">{hotel.name + ': Units '}</h3>
+              </div>
+              <div class="col text-right">
+                <button title="Cancel" class="btn btn-light" onClick={() => this.setState({
                   section: 'unitTypes',
                   unitSelected: {
                     address: '0x0000000000000000000000000000000000000000'
@@ -436,22 +419,18 @@ export default class App extends React.Component {
             </div>
           </div>
 
-
           <div class='card-body'>
             <p>Choose a unit to see its data.</p>
             <div class='row'>
               <div class='col-3'>
                 <div class='list-group'>
-                {self.state.hotel.units.map((unit, i) => {
-                  if (self.state.unitType.name == unit.unitType)
+                {hotel.units.map((unit, i) => {
+                  if (this.state.unitType.name == unit.unitType)
                     return <a
                       key={unit.address}
-                      class={unit.address == self.state.unitSelected.address ?
-                        'list-group-item list-group-item-action active' :
-                        'list-group-item list-group-item-action'
-                      }
+                      class={`list-group-item list-group-item-action ${unit.address == this.state.unitSelected.address ? 'active' : ''}`}
                       onClick={() => {
-                        self.setState({unitSelected: unit })}
+                        this.setState({unitSelected: unit })}
                       }
                     >
                       #{i+1}
@@ -459,26 +438,26 @@ export default class App extends React.Component {
                 })}
                 </div>
               </div>
-              {self.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
+              {this.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
                 <div class='col-9'>
-                  {self.state.user.account != '0x0000000000000000000000000000000000000000' ?
+                  {this.state.user.account != '0x0000000000000000000000000000000000000000' ?
                     <div>
                       <BookUnit
-                        waitConfirmation={self.state.hotel.waitConfirmation}
-                        startDate={self.state.startDate}
-                        endDate={self.state.endDate}
-                        bookLifPrice={self.state.bookLifPrice}
-                        bookPrice={self.state.bookPrice}
-                        available={self.state.unitAvailable}
-                        currency={self.state.currency}
+                        waitConfirmation={hotel.waitConfirmation}
+                        startDate={this.state.startDate}
+                        endDate={this.state.endDate}
+                        bookLifPrice={this.state.bookLifPrice}
+                        bookPrice={this.state.bookPrice}
+                        available={this.state.unitAvailable}
+                        currency={this.state.currency}
                         currencyOptions={currencyOptions}
-                        onDatesChange={self.updateBookingPrice.bind(self)}
-                        onCurrencyChange={(val) => self.setState({currency: val})}
-                        onSubmit={self.bookRoom.bind(self)}
+                        onDatesChange={this.updateBookingPrice.bind(this)}
+                        onCurrencyChange={(val) => this.setState({currency: val})}
+                        onSubmit={this.bookRoom.bind(this)}
                       ></BookUnit>
                       <br/>
                       <p>
-                        <b>Address: </b><Address address={self.state.unitSelected.address} web3={web3}/>
+                        <b>Address: </b><Address address={this.state.unitSelected.address} web3={web3}/>
                       </p>
                     </div>
                   :
@@ -489,11 +468,11 @@ export default class App extends React.Component {
               }
             </div>
           </div>
-
-        </div>;
+        </div>
+      );
 
       return(
-        <div class={"row justify-content-center " + (self.state.loading ? 'loading' : '')}>
+        <div class={"row justify-content-center " + (this.state.loading ? 'loading' : '')}>
           <ToastContainer style={{zIndex: 2000}}/>
           <div class="col-sm-11">
 
@@ -513,39 +492,42 @@ export default class App extends React.Component {
                 <div class='row'>
                   <div class='col-sm-7 col-md-6 col-lg-5'>
                     <div class='list-group'>
-                    {self.state.hotels.map((hotel, i) => {
-                      const hotelIndex = ((self.state.hotelsPage - 1) * hotelsPerPage) + i + 1;
+                    {hotels && hotels.map((hotel, i) => {
+                      const hotelIndex = ((hotelsPage - 1) * hotelsPerPage) + i + 1;
                       return <a
                         key={hotel.instance._address}
-                        class={hotel.instance._address == self.state.hotel.address ?
+                        class={hotel.instance._address == hotel.address ?
                           'list-group-item list-group-item-action active  text-ellipsis' :
                           'list-group-item list-group-item-action  text-ellipsis'
                         }
                         onClick={() => {
-                          self.loadHotelInfo(hotel.instance._address)
+                          this.loadHotelInfo(hotel.instance._address)
                         }}
                       >
                         <span class="list-group-item-number">{hotelIndex}</span> {hotel.name}
                       </a>
                     })}
                     </div>
-                    {self.state.totalPages > 0 &&
+                    {totalPages > 0 &&
                       <nav aria-label="Page navigation example">
                         <ul class="pagination justify-content-center">
-                          {self.state.hotelsPage > 1 &&
-                            <li class="page-item" onClick={() => self.loadHotels(self.state.hotelsPage-1)}>
+                          {hotelsPage > 1 &&
+                            <li class="page-item" onClick={() => this.loadHotels(hotelsPage-1)}>
                               <a class="page-link"><span class="fa fa-arrow-left"></span></a>
                             </li>
                           }
-                          {[...Array(self.state.totalPages)].map((x, i) => {
-                            i ++;
-                            return <li
-                              class={(i == self.state.hotelsPage) ? "page-item active" : "page-item"}
-                              onClick={() => self.loadHotels(i)}
-                            ><a class="page-link" >{i}</a></li>;
-                          })}
-                          {self.state.hotelsPage < self.state.totalPages &&
-                            <li class="page-item" onClick={() => self.loadHotels(self.state.hotelsPage+1)}>
+                          {
+                            Array.from({ length: totalPages }, (x, i) => {
+                              <li
+                                class={((i + 1) == hotelsPage) ? "page-item active" : "page-item"}
+                                onClick={() => this.loadHotels(i + 1)}
+                              >
+                                <a class="page-link" >{i + 1}</a>
+                              </li>
+                            })
+                          }
+                          {hotelsPage < totalPages &&
+                            <li class="page-item" onClick={() => this.loadHotels(hotelsPage+1)}>
                               <a class="page-link"><span class="fa fa-arrow-right"></span></a>
                             </li>
                           }
@@ -555,11 +537,11 @@ export default class App extends React.Component {
                   </div>
 
                   <div class='col-sm-5 col-md-6 col-lg-7'>
-                    { self.state.section == 'unitTypes' ?
+                    { section === 'unitTypes' ?
                       unitTypesSection
-                    : self.state.section == 'units' ?
+                    : (section === 'units' ?
                       unitsSection
-                    : hotelsSection
+                    : hotelsSection)
                     }
                   </div>
                 </div>

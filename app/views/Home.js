@@ -2,7 +2,7 @@ import React from 'react';
 import {Link} from "react-router";
 import ReactModal from "react-modal";
 
-export default class App extends React.Component {
+export default class Home extends React.Component {
 
     constructor() {
       super();

@@ -14,7 +14,7 @@ for (var i = 0; i < WT_INDEXES.length; i++) {
   wtIndexes[i].value = wtIndexes[i].address;
 }
 
-export default class App extends React.Component {
+export default class Config extends React.Component {
 
     constructor() {
       super();
