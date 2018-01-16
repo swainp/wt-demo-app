@@ -14,7 +14,7 @@ var BN = web3.utils.BN;
 
 var LifABI = Utils.abis.LifToken;
 
-export default class App extends React.Component {
+export default class Wallet extends React.Component {
 
     constructor() {
       super();
