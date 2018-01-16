@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ReactModal from 'react-modal';
@@ -322,7 +323,7 @@ export default class App extends React.Component {
               {/* Hotel Images */}
               {self.state.hotel.images.length > 0 && <hr/>}
               {self.state.hotel.images.length > 0 ?
-                <div class="col-6">
+                <div class="col-sm-12 col-md-8 col-lg-6">
                   <Carousel showArrows={true} infiniteLoop={true} >
                   {self.state.hotel.images.map(function(src, i){
                     return <div key={self.state.hotel.address+'Image'+i}><img src={src} /></div>;

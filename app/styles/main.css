@@ -360,6 +360,106 @@ label + .DateRangePicker {margin-left: 10px; }
 }
 
 
+@media (max-width: 991px) and (min-width: 768px) {
+  #navbarCollapse {
+    overflow:hidden;
+    margin-right: 0!important;
+  }
+  #navbarCollapse > .navbar-nav > .nav-item:not(:first-child) {
+    border: none !important;
+    padding: 0px!important;
+  }
+  #navbarCollapse > .navbar-nav,
+  #navbarCollapse .navbar-nav + .form-inline {
+    float: left;
+  }
+}
+
+
+@media (max-width: 991px) {
+
+  .navbar-main,
+  .navbar-brand {display:block; }
+  .navbar-brand {float:left;}
+  .navbar-toggler {float:right;  margin-top: 7px; margin-right: 8px;}
+  #app-nav {float:left; margin-top: 5px;}
+  #app-nav .navbar-nav  {
+    display:block;
+  }
+  #app-nav .navbar-nav  > .nav-item {
+    display: inline-block;
+    margin-right: 20px
+  }
+  #navbarCollapse {
+    display:block!important;
+    clear: both;
+    padding: 20px 0;
+    outline: 0!important;
+    background: #FAFBFC;
+    border:1px solid #eee;
+    border-radius: 10px;
+    margin: 20px 8px 20px 0;
+    position: relative;
+    top: 10px;
+  }
+  #navbarCollapse > .navbar-nav > .nav-item:not(:first-child) {
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  #navbarCollapse > .navbar-nav > .nav-item:not(:first-child) {
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
+  }
+
+  #navbarCollapse > .navbar-nav .nav-item {
+    margin: 0 15px;
+    float: none !important;
+  }
+  .logout-button {
+    position: relative;
+    left: 15px;
+  }
+
+  h1, .h1 {
+    font-size: 42px !important;
+    line-height: 1.1;
+  }
+  h2, .h2 {
+    font-size: 32px !important;
+    line-height: 1.1;
+  }
+  h3, .h3 {
+    font-size: 22px !important;
+    line-height: 1.1;
+  }
+  p.lead {
+    font-size: 20px !important;
+    line-height: 1.2;
+  }
+
+  .wt-btnClose {
+    width: 35px;
+    height: 35px;
+    background-size: 54px;
+  }
+
+}
+#collapseWrapper {
+  flex-grow: 1;
+}
+
+@media (max-width: 570px) {
+  #actions {
+    display: block;
+    margin: 0 8px 20px 7px;
+  }
+  #actions > * {
+    display:inline-block;
+    width: 33%;
+    padding: 8px 3px;
+  }
+}
 
 .text-success { color: #60B129; }
 
@@ -369,9 +469,11 @@ label + .DateRangePicker {margin-left: 10px; }
   overflow: hidden !important;
   text-overflow: ellipsis !important;
 }
-.mb-0 {margin-bottom: 0 !important;}
+/* .mb-0 {margin-bottom: 0 !important;} */
 .mb-xs {margin-bottom: 5px !important;}
 .mb-sm {margin-bottom: 10px !important;}
 .mb-md {margin-bottom: 15px !important;}
 .mb-lg {margin-bottom: 20px !important;}
 .mb-xl {margin-bottom: 25px !important;}
+
+.break-word {word-break: break-all;}

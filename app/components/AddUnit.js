@@ -28,7 +28,7 @@ export default class AddUnit extends React.Component {
             <form onSubmit={(e) => {e.preventDefault(); this.props.addUnit(this.state.password)}}>
 
               <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-12 col-md-9 col-lg-6">
                   <div class="form-group">
                     <label>Room Type</label>
                     <Select
@@ -45,7 +45,7 @@ export default class AddUnit extends React.Component {
               </div>
 
               <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-12 col-md-9 col-lg-6">
                   <div class="form-group">
                     <label>Your Wallet Password</label>
                     <div class="input-group">

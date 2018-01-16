@@ -104,8 +104,8 @@ export default class EditHotel extends React.Component {
               <div>
 
                 <div className="row">
-                  <div className="col-sm-5 col-md-5 col-lg-3">
-                    <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                  <div className="col-sm-12 col-md-5 col-lg-3">
+                    <div class="nav flex-column nav-pills mb-4" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                       <a onClick={() => this.props.onFunctionChange('changeHotelInfo')} class={"nav-link text-muted " + (this.props.editHotelFunction == 'changeHotelInfo' ? 'active bg-light text-dark' : '' )}>Basic information</a>
                       <a onClick={() => this.props.onFunctionChange('changeHotelAddress')} class={"nav-link text-muted " + (this.props.editHotelFunction == 'changeHotelAddress' ? 'active bg-light text-dark' : '' )}>Address</a>
                       <a onClick={() => this.props.onFunctionChange('setRequireConfirmation')} class={"nav-link text-muted " + (this.props.editHotelFunction == 'setRequireConfirmation' ? 'active bg-light text-dark' : '' )}>Confirmation required</a>
@@ -113,9 +113,9 @@ export default class EditHotel extends React.Component {
                       <a onClick={() => this.props.onFunctionChange('removeImageHotel')} class={"nav-link text-muted " + (this.props.editHotelFunction == 'removeImageHotel' ? 'active bg-light text-dark' : '' )}>Remove image</a>
                       <a onClick={() => this.props.onFunctionChange('removeHotel')} class={"nav-link text-muted " + (this.props.editHotelFunction == 'removeHotel' ? 'active bg-light text-dark' : '' )}>Remove hotel</a>
                     </div>
-
+                    <hr class="d-block d-md-none"/>
                   </div>
-                  <div className="col">
+                  <div className="col-sm-12 col-md-9 col-lg-6">
                     <div class="tab-content" id="v-pills-tabContent">
 
                       {{
@@ -296,7 +296,7 @@ export default class EditHotel extends React.Component {
                       }[this.props.editHotelFunction]}
 
                       <div class="row">
-                        <div class="col-6">
+                        <div class="col-sm-12 col-md-8 col-lg-6">
                           <div class="form-group">
                             <label><b>Your Wallet Password</b></label>
                             <div class="input-group">
