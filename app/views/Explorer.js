@@ -538,7 +538,7 @@ export default class App extends React.Component {
                               <a class="page-link"><span class="fa fa-arrow-left"></span></a>
                             </li>
                           }
-                          {[...Array(self.state.totalPages)].map((x, i) => {
+                          {[...Array(self.state.totalHotels)].map((x, i) => {
                             i ++;
                             return <li
                               class={(i == self.state.hotelsPage) ? "page-item active" : "page-item"}
