@@ -9,8 +9,8 @@ module.exports = {
     },
     {
       "version": "0.0.2",
-      "address":"0xD2Cb069E4148b360920554cc929f0d2D9acd6D89",
-      "block": "2434195"
+      "address":"0xaD15Aa12DD0698feD6dA60A1192dB55f5175a388",
+      "block": "2462294"
     }
   ],
   "MAPS_API_KEY": "AIzaSyAmxaZIZKNk2jBChEOpSBSTI1SGLXLAhM0"

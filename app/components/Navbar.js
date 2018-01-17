@@ -60,6 +60,9 @@ export default class App extends React.Component {
               <li class={window.location.pathname == '/explorer' ? 'nav-item active' : 'nav-item'}>
                 <Link class='nav-link' to='/explorer'>Explorer</Link>
               </li>
+              <li class={window.location.pathname == '/mybookings' ? 'nav-item active' : 'nav-item'}>
+                <Link class='nav-link' to='/mybookings'>My Bookings</Link>
+              </li>
             </ul>
           </div>
 
