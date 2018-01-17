@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import ReactModal from 'react-modal';
+import Modal from 'react-modal';
 import { Component } from 'react';
 import ReactDOM from 'react-dom';
 import { Carousel } from 'react-responsive-carousel';
@@ -23,7 +23,7 @@ export default class MyBookings extends React.Component {
 
     constructor() {
       super();
-      let keyStore;
+      let keyStore = '';
       if(window.localStorage.wallet) {
         keyStore = JSON.parse(window.localStorage.wallet);
       }
@@ -42,23 +42,25 @@ export default class MyBookings extends React.Component {
     }
 
     async componentWillMount() {
-        let address = (this.state.importKeystore ? this.state.importKeystore.address : '0x0000000000000000000000000000000000000000');
-        let hotelManager = new HotelManager({
-          indexAddress: window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length-1].address,
-          owner: address,
-          web3: web3,
-          gasMargin: 1.5
-        });
-        hotelManager.setWeb3(web3);
-        let bookingData = new BookingData(web3);
-        let user = new User({
-          account: address,       // Client's account address
-          gasMargin: 2,               // Multiple to increase gasEstimate by to ensure tx success.
-          tokenAddress: window.localStorage.lifTokenAddress || LIFTOKEN_ADDRESS,  // LifToken contract address
-          web3: web3                     // Web3 object instantiated with a provider
-        })
-        await this.setState({hotelManager: hotelManager, bookingData: bookingData, user: user});
-        await this.loadTxs();
+        if(this.state.importKeystore) {
+          let address = (this.state.importKeystore ? this.state.importKeystore.address : '0x0000000000000000000000000000000000000000');
+          let hotelManager = new HotelManager({
+            indexAddress: window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length-1].address,
+            owner: address,
+            web3: web3,
+            gasMargin: 1.5
+          });
+          hotelManager.setWeb3(web3);
+          let bookingData = new BookingData(web3);
+          let user = new User({
+            account: address,       // Client's account address
+            gasMargin: 2,               // Multiple to increase gasEstimate by to ensure tx success.
+            tokenAddress: window.localStorage.lifTokenAddress || LIFTOKEN_ADDRESS,  // LifToken contract address
+            web3: web3                     // Web3 object instantiated with a provider
+          })
+          await this.setState({hotelManager: hotelManager, bookingData: bookingData, user: user});
+          await this.loadTxs();
+        }
     }
 
     async loadTxs() {
@@ -80,44 +82,83 @@ export default class MyBookings extends React.Component {
       var self = this;
 
       return(
-        <div class='row justify-content-md-center'>
+        <div class={'row justify-content-center ' + (self.state.loading ? "loading" : "")}>
           <ToastContainer style={{zIndex: 2000}}/>
-          <div class='col-md-10'>
-            <div class={self.state.loading ? 'jumbotron loading' : 'jumbotron'}>
-            <div class="box">
-              <h2>My Bookings</h2>
-              {self.state.bookingTxs &&
-              <div>
-                <table class="table table-striped table-hover">
-                  <thead>
-                    <tr>
-                      <th>Hotel Name</th>
-                      <th>Action</th>
-                      <th>Unit</th>
-                      <th>From Date</th>
-                      <th>To Date</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {self.state.bookingTxs.map(function(tx, i){
-                        return (
-                          <tr key={'tx'+i} class="pointer">
-                            <td>{tx.hotelName}</td>
-                            <td>{tx.method.name}</td>
-                            <td>{tx.unitType + ' ' + tx.method.params.find(param => param.name == 'unitAddress').value.substring(2,6)}</td>
-                            <td>{moment(tx.fromDate).format('MMMM Do YYYY')}</td>
-                            <td>{moment(tx.toDate).format('MMMM Do YYYY')}</td>
-                            <td>{tx.status ? 'Approved' : 'Pending'}</td>
-                          </tr>
-                        );
-                    })}
-                  </tbody>
-                </table>
-              </div>}
+          <div class='col-sm-11'>
+            <div class="row">
+              <div class="col">
+                <h1>My Bookings</h1>
+                <p class="lead">View your booking history</p>
+                <hr/>
               </div>
             </div>
-          </div>
+            <div class="card">
+                <div class="card-header">
+                  <h3 class="mb-0">Booking Transactions</h3>
+                </div>
+                <div class="card-body">
+                {self.state.bookingTxs &&
+                <div>
+                  <table class="table table-striped table-hover">
+                    <thead>
+                      <tr>
+                        <th>Hotel Name</th>
+                        <th>Action</th>
+                        <th>Unit</th>
+                        <th>From Date</th>
+                        <th>To Date</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {self.state.bookingTxs.map(function(tx, i){
+                          return (
+                            <tr key={'tx'+i} class="pointer">
+                              <td>{tx.hotelName}</td>
+                              <td>{tx.method.name}</td>
+                              <td>{tx.unitType + ' ' + tx.method.params.find(param => param.name == 'unitAddress').value.substring(2,6)}</td>
+                              <td>{moment(tx.fromDate).format('MMMM Do YYYY')}</td>
+                              <td>{moment(tx.toDate).format('MMMM Do YYYY')}</td>
+                              <td>{tx.status ? 'Approved' : 'Pending'}</td>
+                            </tr>
+                          );
+                      })}
+                    </tbody>
+                  </table>
+                </div>}
+                </div>
+              </div>
+            </div>
+          <Modal
+            isOpen={(self.state.importKeystore == '')}
+            contentLabel='Modal'
+            style={{
+              overlay : {
+                position          : 'fixed',
+                top               : 50,
+                left              : 0,
+                right             : 0,
+                bottom            : 0,
+                backgroundColor   : 'rgba(255, 255, 255, 0.75)'
+              },
+              content : {
+                maxWidth                   : '350px',
+                maxHeight                  : '200px',
+                margin                     : 'auto',
+                textAlign                  : 'center',
+                border                     : '1px solid #ccc',
+                background                 : '#fff',
+                overflow                   : 'auto',
+                WebkitOverflowScrolling    : 'touch',
+                borderRadius               : '4px',
+                outline                    : 'none',
+                padding                    : '20px'
+              }
+            }}
+          >
+            <h3>You need to open a wallet to view bookings</h3>
+            <Link class='btn btn-primary' to='/wallet'>Go to Wallet</Link>
+          </Modal>
         </div>
       )
     }
