@@ -62,6 +62,7 @@ export default class Explorer extends React.Component {
         section: 'hotels',
         hotelSection: 'list',
         hotelManager: {},
+        hotelManagerSection: 'hotels',
         loading: false
       }
     }
@@ -223,7 +224,7 @@ export default class Explorer extends React.Component {
     }
 
     render() {
-      const { hotels, hotelsPage, hotel, hotelManager, loading, unitType, totalPages, section } = this.state;
+      const { hotels, hotelsPage, hotel, hotelManager, loading, unitType, totalPages, section, hotelManagerSection } = this.state;
 
       const hotelsSection = (
         <div class="card" style={{position: 'sticky', top: 120}}>
@@ -321,10 +322,10 @@ export default class Explorer extends React.Component {
         <div class="card" style={{position: 'sticky', top: 120}}>
           <div class="card-header">
             <div class="row align-items-center">
-              <div class="col">
+              <div class="col-9">
                 <h3 class="mb-0">{hotel.name + ': Unit types '}</h3>
               </div>
-              <div class="col text-right">
+              <div class="col-3 text-right">
                 <button title="Cancel" class="btn btn-light" onClick={() => this.setState({section: 'hotels'})}>
                   <i class="fa fa-times" aria-hidden="true"></i>
                 </button>
@@ -337,8 +338,8 @@ export default class Explorer extends React.Component {
             <p>Choose a unit type to see its data.</p>
 
             <div class='row'>
-              <div class='col-3'>
-                <div class='list-group'>
+              <div class='col-12 col-md-4'>
+                <div class='list-group mb-3 mb-md-0'>
                   {
                     hotel.unitTypes.map(hotelUnitType =>
                       <a
@@ -355,7 +356,7 @@ export default class Explorer extends React.Component {
                 </div>
               </div>
               {unitType.address != '0x0000000000000000000000000000000000000000' ?
-                <div class='col-9'>
+                <div class='col-12 col-md-8'>
                   <ul>
                     <li class="mb-xs"><b>Name:</b> {unitType.name}</li>
                     <li class="mb-xs"><b>Address:</b> <Address address={unitType.address} web3={web3}/></li>
@@ -403,10 +404,10 @@ export default class Explorer extends React.Component {
         <div class="card">
           <div class="card-header">
             <div class="row align-items-center">
-              <div class="col">
+              <div class="col-9">
                 <h3 class="mb-0">{hotel.name + ': Units '}</h3>
               </div>
-              <div class="col text-right">
+              <div class="col-3 text-right">
                 <button title="Cancel" class="btn btn-light" onClick={() => this.setState({
                   section: 'unitTypes',
                   unitSelected: {
@@ -422,8 +423,8 @@ export default class Explorer extends React.Component {
           <div class='card-body'>
             <p>Choose a unit to see its data.</p>
             <div class='row'>
-              <div class='col-3'>
-                <div class='list-group'>
+              <div class='col-12 col-md-4'>
+                <div class='list-group mb-3 mb-md-0'>
                 {hotel.units.map((unit, i) => {
                   if (this.state.unitType.name == unit.unitType)
                     return <a
@@ -439,7 +440,7 @@ export default class Explorer extends React.Component {
                 </div>
               </div>
               {this.state.unitSelected.address != '0x0000000000000000000000000000000000000000' ?
-                <div class='col-9'>
+                <div class='col-12 col-md-8'>
                   {this.state.user.account != '0x0000000000000000000000000000000000000000' ?
                     <div>
                       <BookUnit
@@ -488,9 +489,32 @@ export default class Explorer extends React.Component {
             <div class="row">
               <div class="col">
 
+                <div className="row d-block d-md-none">
+                  <div className="col">
+                    <ul class="nav nav-tabs mb-3">
+                      <li class="nav-item">
+                        <a class={"nav-link "+ (hotelManagerSection=='hotels'?'active':'')}
+                          onClick={()=>{
+                            this.setState({hotelManagerSection:'hotels'});
+                          }}>
+                          Hotels
+                        </a>
+                      </li>
+                      <li class="nav-item">
+                        <a class={"nav-link "+ (hotelManagerSection=='detail'?'active':'')}
+                          onClick={()=>{
+                            this.setState({hotelManagerSection:'detail'});
+                          }}>
+                          Detail
+                        </a>
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+
                 {/* Hotels Menu */}
                 <div class='row'>
-                  <div class='col-sm-7 col-md-6 col-lg-5'>
+                  <div class={'col-md-4 col-lg-5 d-md-block '+(hotelManagerSection=='hotels'?' d-block col-12':' d-none')}>
                     <div class='list-group'>
                     {hotels && hotels.map((hotel, i) => {
                       const hotelIndex = ((hotelsPage - 1) * hotelsPerPage) + i + 1;
@@ -501,10 +525,11 @@ export default class Explorer extends React.Component {
                           'list-group-item list-group-item-action  text-ellipsis'
                         }
                         onClick={() => {
-                          this.loadHotelInfo(hotel.instance._address)
+                          this.loadHotelInfo(hotel.instance._address);
+                          this.setState({hotelManagerSection:'detail'});
                         }}
                       >
-                        <span class="list-group-item-number">{hotelIndex}</span> {hotel.name}
+                        <span class="list-group-item-number d-none d-lg-inline">{hotelIndex}</span> {hotel.name}
                       </a>
                     })}
                     </div>
@@ -536,7 +561,7 @@ export default class Explorer extends React.Component {
                     }
                   </div>
 
-                  <div class='col-sm-5 col-md-6 col-lg-7'>
+                  <div class={'col-md-8 col-lg-7 d-md-block '+(hotelManagerSection=='detail'?' d-block col-12':' d-none')}>
                     { section === 'unitTypes' ?
                       unitTypesSection
                     : (section === 'units' ?
