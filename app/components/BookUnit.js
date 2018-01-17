@@ -1,15 +1,48 @@
 import React from 'react';
 
 import moment from 'moment';
+import _ from 'lodash'
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
+import DayPickerRangeController from 'react-dates/lib/components/DayPickerRangeController';
 import Select from 'react-select';
 
 export default class BookUnit extends React.Component {
 
     constructor(props) {
       super(props);
-      this.state = {}
+      this.state = {
+
+      }
     }
+
+    componentWillMount() {
+      this.props.getUnitAvailability(this.props.unitAddress, moment());
+      this.props.getUnitAvailability(this.props.unitAddress, moment().add(1, 'month'));
+    }
+
+    isDayHighlighted(day) {
+      const { unitAvailability, unitAddress } = this.props;
+      return !_.get(unitAvailability, [
+        unitAddress,
+        day.format('YYYYMM'),
+        Math.round(day.valueOf()/86400000),
+        'available',
+      ], true);
+    }
+
+    checkForMonths(day) {
+      const { unitAvailability, unitAddress, getUnitAvailability } = this.props;
+      if(unitAvailability[unitAddress]) {
+        if(!unitAvailability[unitAddress][day.format('YYYYMM')]) {
+          getUnitAvailability(unitAddress, day);
+        }
+        day.add(1, 'month');
+        if(!unitAvailability[unitAddress][day.format('YYYYMM')]) {
+          getUnitAvailability(unitAddress, day);
+        }
+      }
+    }
+
 
     render() {
       return(
@@ -22,6 +55,9 @@ export default class BookUnit extends React.Component {
               onDatesChange={({ startDate, endDate }) => this.props.onDatesChange(startDate, endDate)} // PropTypes.func.isRequired,
               focusedInput={this.state.focusedInput} // PropTypes.oneOf([START_DATE, END_DATE]) or null,
               onFocusChange={focusedInput => this.setState({ focusedInput: focusedInput })} // PropTypes.func.isRequired,
+              onNextMonthClick={this.checkForMonths.bind(this)}
+              onPrevMonthClick={this.checkForMonths.bind(this)}
+              isDayHighlighted={this.isDayHighlighted.bind(this)}
             />
           </div>
           {this.props.startDate && this.props.endDate && (this.props.available ?

@@ -56,6 +56,7 @@ export default class Explorer extends React.Component {
         unitSelected: {
           address: '0x0000000000000000000000000000000000000000'
         },
+        unitAvailability: {},
         txs: [],
         transaction: {},
         importKeystore: keyStore,
@@ -221,6 +222,19 @@ export default class Explorer extends React.Component {
         this.setState({loading: false});
         toast.error(e);
       }
+    }
+
+    //day - Moment Object
+    async getUnitAvailability(unitAddress, day) {
+      let monthlyAvailability = await this.state.bookingData.unitMonthlyAvailability(unitAddress, day);
+      console.log('monthlyAvailability');
+      console.log(monthlyAvailability);
+      let unitAvailability = this.state.unitAvailability;
+      if(!unitAvailability[unitAddress]) {
+        unitAvailability[unitAddress] = {};
+      }
+      unitAvailability[unitAddress][day.format('YYYYMM')] = monthlyAvailability;
+      this.setState({unitAvailability: unitAvailability});
     }
 
     render() {
@@ -455,6 +469,9 @@ export default class Explorer extends React.Component {
                         onDatesChange={this.updateBookingPrice.bind(this)}
                         onCurrencyChange={(val) => this.setState({currency: val})}
                         onSubmit={this.bookRoom.bind(this)}
+                        unitAddress={this.state.unitSelected.address}
+                        unitAvailability={this.state.unitAvailability}
+                        getUnitAvailability={this.getUnitAvailability.bind(this)}
                       ></BookUnit>
                       <br/>
                       <p>
