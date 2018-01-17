@@ -34,7 +34,7 @@ export default class ViewBookings extends React.Component {
 
             {hotel.name == '' &&
               <div className="row">
-                <div className="col-sm-6">
+                <div className="col-sm-12 col-md-9 col-lg-6">
                   <div class="form-group">
                     <label><b>Choose a hotel</b></label>
                     <Select

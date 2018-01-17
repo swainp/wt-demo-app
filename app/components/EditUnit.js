@@ -48,7 +48,7 @@ export default class EditUnit extends React.Component {
             <form onSubmit={(e) => {e.preventDefault(); this.props.editHotelUnit(this.state.newUnit, this.state.password)}}>
               <label><b>{this.props.unit.substring(3,6)}</b></label>
               <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-12 col-md-9 col-lg-6">
                   <div class="form-group">
                     <Select
                       name="Edit Parameter"
@@ -63,7 +63,7 @@ export default class EditUnit extends React.Component {
               </div>
 
               <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-12 col-md-9 col-lg-6">
                   {{
                     setUnitActive: (
                       <div class="form-group">
@@ -171,7 +171,7 @@ export default class EditUnit extends React.Component {
               </div>
 
               <div class="row">
-                <div class="col-sm-6">
+                <div class="col-sm-12 col-md-9 col-lg-6">
                   <div class="form-group">
                   <label><b>Your Wallet Password</b></label>
                   <div class="input-group">
@@ -194,7 +194,7 @@ export default class EditUnit extends React.Component {
                 </div>
               </div>
 
-              <hr class="mb-md"/>  
+              <hr class="mb-md"/>
               <button type="submit" class="btn btn-primary">Update Hotel Room</button>
 
           </form>

@@ -535,7 +535,7 @@ export default class Hotel extends React.Component {
                 <div>
                   {self.state.hotel.address == '' &&
                     <div class="row">
-                    <div class="col-sm-6">
+                    <div class="col-sm-12 col-md-9 col-lg-6">
                     <div class="form-group">
                       <label><b>Choose a hotel</b></label>
                       <Select
@@ -713,10 +713,10 @@ export default class Hotel extends React.Component {
               </div>
             </div>
             <div class="row">
-              <div class="col-md-2 text-center">
+              <div class="col-sm-3 col-md-2 text-center">
                 {actions}
               </div>
-              <div class="col-md-10">
+              <div class="col-sm-9 col-md-10">
                 {self.state.section == 'hotelTxs' ?
                   <div>{hotelTxs}</div>
                 : self.state.section == 'hotels' && self.state.hotelSection == 'edit' ?

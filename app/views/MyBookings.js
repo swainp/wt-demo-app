@@ -44,7 +44,7 @@ export default class MyBookings extends React.Component {
     async componentWillMount() {
         let address = (this.state.importKeystore ? this.state.importKeystore.address : '0x0000000000000000000000000000000000000000');
         let hotelManager = new HotelManager({
-          indexAddress: window.localStorage.wtIndexAddress || WTINDEX_ADDRESS,
+          indexAddress: window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length-1].address,
           owner: address,
           web3: web3,
           gasMargin: 1.5
@@ -67,8 +67,8 @@ export default class MyBookings extends React.Component {
       self.setState({loading: true});
       let txs = await Utils.getBookingTransactions(
         '0x'+self.state.importKeystore.address,
-        (window.localStorage.wtIndexAddress || WTINDEX_ADDRESS),
-        WTINDEX_BLOCK,
+        (window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length-1].address),
+        (window.localStorage.wtIndexBlock || WT_INDEXES[WT_INDEXES.length-1].block),
         web3,
         network);
         console.log('got TXs');

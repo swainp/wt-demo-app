@@ -371,7 +371,7 @@ export default class Wallet extends React.Component {
           : (self.state.walletSection == 'show') ?
           <div>
             <h1>Active Wallet</h1>
-            <p class="lead">Address: <Address address={self.state.walletKeystore.address} web3={web3}/></p>
+            <p class="lead break-word">Address: <Address address={self.state.walletKeystore.address} web3={web3}/></p>
 
             <hr/>
 
@@ -382,13 +382,17 @@ export default class Wallet extends React.Component {
                 <div class="card mb-sm">
                   <div class="card-body">
                     <div class="row align-items-center">
-                      <div class="col">
-                        <p class="mb-0 h5">ETH Balance: {self.state.ethBalance}</p>
+                      <div className="col-sm-12 col-md-9">
+                        <div className="row">
+                          <div class="col-sm-12 col-md-9 col-lg-6">
+                            <p class="mb-sm-3 mb-md-0 h5"><span className="d-block d-xl-inline">ETH Balance:</span> {self.state.ethBalance}</p>
+                          </div>
+                          <div class="col-sm-12 col-md-9 col-lg-6">
+                            <p class="mb-sm-3 mb-md-0 h5"><span className="d-block d-xl-inline">Lif Balance:</span> {self.state.lifBalance}</p>
+                          </div>
+                        </div>
                       </div>
-                      <div class="col">
-                        <p class="mb-0 h5">Lif Balance: {self.state.lifBalance}</p>
-                      </div>
-                      <div class="col-2">
+                      <div class="col-sm-12 col-md-3">
                         <button class="btn btn-primary btn-block" onClick={() => self.setState({walletSection: 'send'})}><span class="fa fa-send"></span> Send</button>
                       </div>
                     </div>
@@ -449,8 +453,8 @@ export default class Wallet extends React.Component {
           </div>
           :
           <div>
-            <h1>Send ETH or LIF</h1>
-            <p class="lead">Wallet Address: <Address address={self.state.walletKeystore.address} web3={web3}/></p>
+            <h1 style={{paddingRight: 60}}>Send ETH or LIF</h1>
+            <p class="lead break-word">Wallet Address: <Address address={self.state.walletKeystore.address} web3={web3}/></p>
 
             <button class="wt-btnClose" onClick={() => self.setState({walletSection: 'show'})}>Back</button>
 

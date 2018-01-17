@@ -29,7 +29,7 @@ export default class CreateHotel extends React.Component {
           <div class="card-body">
           <h4>Please provide the following information to create the hotel.</h4>
           <div class="row">
-          <div class="col-sm-6">
+          <div class="col-sm-12 col-md-9 col-lg-6">
             <div class="form-group">
               <label><b>Hotel Name</b></label>
               <input

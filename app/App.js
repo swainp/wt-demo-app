@@ -30,14 +30,12 @@ export default class App extends React.Component {
 
 	transactionHashCallback(action) {
 		return (hash) => {
-			console.log('got hash');
-			console.log(hash);
+			console.log('got hash', hash);
 			toast.info('Sent Tx to ' + action);
 			toast.info(<Tx hash={hash} />);
 			Utils.decodeTxInput(hash, (window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length-1].address), this.state.wallet.address, web3)
 			.then(decodedTx => {
-				console.log('App.addPendingTx decodedTx');
-				console.log(decodedTx);
+				console.log('App.addPendingTx decodedTx', decodedTx);
 				this.setState({pendingTxHashes: this.state.pendingTxHashes.concat([decodedTx])}, () => window.localStorage.pendingTxHashes = this.state.pendingTxHashes);
 			})
 		}
@@ -45,8 +43,7 @@ export default class App extends React.Component {
 
 	receiptCallback(action) {
 		return (receipt) => {
-			console.log('got receipt');
-      console.log(receipt);
+			console.log('got receipt', receipt);
       toast.success('Mined TX to ' + action);
 			toast.success(<Tx hash={receipt.transactionHash} />);
       this.setState({
@@ -64,8 +61,7 @@ export default class App extends React.Component {
 			//if it's a "not mined within 50 blocks" error, perform a check
 			if(error.toString().includes("Transaction was not mined within 50 blocks")) {
 				let receipt = await web3.eth.getTransactionReceipt(txHash);
-				console.log('double checking receipt');
-				console.log(receipt);
+				console.log('double checking receipt', receipt);
 				//it was in fact mined!
 				if(receipt && receipt.blockNumber) {
 					toast.success('Mined TX to ' + action);
@@ -91,8 +87,7 @@ export default class App extends React.Component {
 	}
 
 	render() {
-    console.log('App this.state.pendingTxHashes');
-    console.log(this.state.pendingTxHashes);
+    console.log('App this.state.pendingTxHashes', this.state.pendingTxHashes);
 		return (
       <HashRouter>
         <Layout pendingTxHashes={this.state.pendingTxHashes}>

@@ -15,7 +15,8 @@ export default class App extends React.Component {
         networkType: '',
         logoutModal: false,
         wallet: window.localStorage.wallet ? JSON.parse(window.localStorage.wallet) : null,
-        dropdownOpen: false
+        dropdownOpen: false,
+        navBarOpen: false
       }
     }
 
@@ -41,56 +42,89 @@ export default class App extends React.Component {
 
     render() {
       var self = this;
+      var navBarOpen = self.state.navBarOpen;
       var pendingTxs = this.props.pendingTxHashes;
+
       return(
-        <nav class='navbar navbar-expand-md fixed-top navbar-main'>
+        <nav class='navbar navbar-light navbar-expand-md fixed-top navbar-main'>
           <Link class='navbar-brand' to='/'><strong>WT</strong></Link>
-          <button class='navbar-toggler' type='button' data-toggle='collapse' data-target='#navbarCollapse' aria-controls='navbarCollapse' aria-expanded='false' aria-label='Toggle navigation'>
-            <span class='navbar-toggler-icon'></span>
-          </button>
-          <div class='collapse navbar-collapse' id='navbarCollapse'>
+
+          <div id="app-nav">
             <ul class='navbar-nav mr-auto'>
               <li class={window.location.pathname == '/wallet' ? 'nav-item active' : 'nav-item'}>
-                <Link class='nav-link' to='/wallet'>Wallet</Link>
+                <Link class='nav-link' to='/wallet'>
+                  <i class="material-icons">account_balance_wallet</i><span>Wallet</span>
+                </Link>
               </li>
               <li class={window.location.pathname == '/hotel' ? 'nav-item active' : 'nav-item'}>
-                <Link class='nav-link' to='/hotel'>Hotel Manager</Link>
+                <Link class='nav-link' to='/hotel'>
+                  <i class="material-icons">business</i><span>Hotel Manager</span>
+                </Link>
               </li>
               <li class={window.location.pathname == '/explorer' ? 'nav-item active' : 'nav-item'}>
-                <Link class='nav-link' to='/explorer'>Explorer</Link>
+                <Link class='nav-link' to='/explorer'>
+                  <i class="material-icons">search</i><span>Explorer</span>
+                </Link>
               </li>
               <li class={window.location.pathname == '/mybookings' ? 'nav-item active' : 'nav-item'}>
-                <Link class='nav-link' to='/mybookings'>My Bookings</Link>
+                <Link class='nav-link' to='/mybookings'>
+                  <i class="material-icons">hotel</i><span>My Bookings</span>
+                </Link>
               </li>
             </ul>
-            <ul class="navbar-nav ml-auto">
-              <li class="nav-item pull-right">
-                <ButtonDropdown isOpen={this.state.dropdownOpen} toggle={this.toggle.bind(this)}>
-                  <DropdownToggle caret disabled={pendingTxs.length == 0}>
-                    Pending TXs: {pendingTxs.length}
-                  </DropdownToggle>
-                  <DropdownMenu>
-                  {pendingTxs.map(function(tx, i){
-                      return <DropdownItem key={i}>{tx.method.name}</DropdownItem>;
-                  })}
-                  </DropdownMenu>
-                </ButtonDropdown>
-              </li>
-              <li class='nav-item pull-right'>
-                <span class="nav-link text-success">Block #{self.state.blockNumber} - {self.state.networkType}</span>
-              </li>
-              <li class={window.location.pathname == '/config' ? 'nav-item pull-right active' : 'nav-item pull-right'}>
-                <Link class='nav-link config-icon' to='/config'><span class="fa fa-cog"></span></Link>
-              </li>
-            </ul>
-            {self.state.wallet &&
-              <form class='form-inline mt-2 mt-md-0'>
-                <button class='btn btn-link my-2 my-sm-0' type='button'
-                  onClick={() => self.setState({logoutModal:true})}
-                >Logout</button>
-              </form>
-            }
           </div>
+
+          <button
+            type='button'
+            class='navbar-toggler d-block d-lg-none'
+            data-toggle='collapse'
+            data-target='#navbarCollapse'
+            aria-controls='navbarCollapse'
+            aria-expanded='false'
+            aria-label='Toggle navigation'
+            onClick={()=> self.setState({navBarOpen: (!navBarOpen ? true : false)})}
+          >
+            <span class='navbar-toggler-icon'></span>
+          </button>
+
+          <div id="collapseWrapper" class={!navBarOpen ? 'd-none d-lg-flex' : 'd-block d-lg-flex'}>
+            <div class={'d-block d-lg-flex navbar-collapse ' + (!navBarOpen ? 'collapse' : '')} id='navbarCollapse'>
+              {/* Pending transactions */}
+              <ul class="navbar-nav ml-auto">
+                <li class="nav-item pull-right">
+                  <ButtonDropdown style={{position: 'relative', top: 3, marginRight: 10}} isOpen={this.state.dropdownOpen} toggle={this.toggle.bind(this)}>
+                    <DropdownToggle caret disabled={pendingTxs.length == 0}>
+                      <span style={{fontSize: 15}}>Pending TXs: {pendingTxs.length}</span>
+                    </DropdownToggle>
+                    <DropdownMenu>
+                    {pendingTxs.map(function(tx, i){
+                        return <DropdownItem key={i}>{tx.method.name}</DropdownItem>;
+                    })}
+                    </DropdownMenu>
+                  </ButtonDropdown>
+                </li>
+                <li class='nav-item pull-right'>
+                  <span style={{fontSize: 18, lineHeight: '18px'}} class="nav-link text-success">Block #{self.state.blockNumber} <br/> <small style={{fontSize: 14}}>{self.state.networkType}</small></span>
+                </li>
+                <li class={window.location.pathname == '/config' ? 'nav-item pull-right active' : 'nav-item pull-right'}>
+                  <Link class='nav-link config-icon' to='/config'>
+                    <span class="fa fa-cog"></span>{' '}
+                    <span className="d-inline d-lg-none"> Settings</span>
+                  </Link>
+                </li>
+              </ul>
+
+              {self.state.wallet &&
+                <form class='form-inline mt-2 mt-md-0'>
+                  <button class='logout-button btn btn-light my-2 my-sm-0' type='button'
+                    onClick={() => self.setState({logoutModal:true})}
+                  >Logout</button>
+                </form>
+              }
+
+            </div>
+          </div>
+
           {self.state.wallet &&
             <Modal
               isOpen={self.state.logoutModal}
