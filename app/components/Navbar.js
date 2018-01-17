@@ -56,7 +56,7 @@ export default class App extends React.Component {
                   <i class="material-icons">account_balance_wallet</i><span>Wallet</span>
                 </Link>
               </li>
-              <li class={window.location.pathname == '/hotel' ? 'nav-item active' : 'nav-item'}>
+              <li class={!window.localStorage.wallet ? 'd-none' : window.location.pathname == '/hotel' ? 'nav-item active' : 'nav-item'}>
                 <Link class='nav-link' to='/hotel'>
                   <i class="material-icons">business</i><span>Hotel Manager</span>
                 </Link>
@@ -66,7 +66,7 @@ export default class App extends React.Component {
                   <i class="material-icons">search</i><span>Explorer</span>
                 </Link>
               </li>
-              <li class={window.location.pathname == '/mybookings' ? 'nav-item active' : 'nav-item'}>
+              <li class={!window.localStorage.wallet ? 'd-none' : window.location.pathname == '/mybookings' ? 'nav-item active' : 'nav-item'}>
                 <Link class='nav-link' to='/mybookings'>
                   <i class="material-icons">hotel</i><span>My Bookings</span>
                 </Link>
