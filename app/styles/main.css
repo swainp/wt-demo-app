@@ -449,7 +449,52 @@ label + .DateRangePicker {margin-left: 10px; }
   flex-grow: 1;
 }
 
-@media (max-width: 570px) {
+
+
+#app-nav {
+  margin: 0 0 -10px;
+  position: relative;
+  top:-5px;
+}
+#app-nav li.nav-item {
+  border-left: 1px solid #ddd;
+  padding-left: 13px;
+  margin-right: 13px!important;;
+
+}
+#app-nav li.nav-item:last-child {
+  border-right: 1px solid #ddd;
+  padding-right: 13px;
+}
+#app-nav li.nav-item a {
+  text-align:center;
+}
+#app-nav li.nav-item a span {
+  font-size: 12px;
+  text-transform: uppercase;
+  line-height: 12px;
+  display: inline-block;
+  padding-top: 5px;
+}
+#app-nav .material-icons {
+  font-size: 35px;
+  display:block;
+  color:#555;
+}
+#app-nav li.nav-item a:hover .material-icons {
+  color: #333;
+}
+
+@media (max-width: 992px) {
+  #app-nav li.nav-item a span {
+    display:none;
+    outline: 1px solid red;
+  }
+  #app-nav .material-icons {
+    font-size: 42px;
+  }
+}
+@media (max-width: 570px) {}
   #actions {
     display: block;
     margin: 0 8px 20px 7px;

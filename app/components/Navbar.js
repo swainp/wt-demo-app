@@ -52,16 +52,24 @@ export default class App extends React.Component {
           <div id="app-nav">
             <ul class='navbar-nav mr-auto'>
               <li class={window.location.pathname == '/wallet' ? 'nav-item active' : 'nav-item'}>
-                <Link class='nav-link' to='/wallet'>Wallet</Link>
+                <Link class='nav-link' to='/wallet'>
+                  <i class="material-icons">account_balance_wallet</i><span>Wallet</span>
+                </Link>
               </li>
               <li class={window.location.pathname == '/hotel' ? 'nav-item active' : 'nav-item'}>
-                <Link class='nav-link' to='/hotel'>Hotel Manager</Link>
+                <Link class='nav-link' to='/hotel'>
+                  <i class="material-icons">business</i><span>Hotel Manager</span>
+                </Link>
               </li>
               <li class={window.location.pathname == '/explorer' ? 'nav-item active' : 'nav-item'}>
-                <Link class='nav-link' to='/explorer'>Explorer</Link>
+                <Link class='nav-link' to='/explorer'>
+                  <i class="material-icons">search</i><span>Explorer</span>
+                </Link>
               </li>
               <li class={window.location.pathname == '/mybookings' ? 'nav-item active' : 'nav-item'}>
-                <Link class='nav-link' to='/mybookings'>My Bookings</Link>
+                <Link class='nav-link' to='/mybookings'>
+                  <i class="material-icons">hotel</i><span>My Bookings</span>
+                </Link>
               </li>
             </ul>
           </div>
@@ -84,9 +92,9 @@ export default class App extends React.Component {
               {/* Pending transactions */}
               <ul class="navbar-nav ml-auto">
                 <li class="nav-item pull-right">
-                  <ButtonDropdown isOpen={this.state.dropdownOpen} toggle={this.toggle.bind(this)}>
+                  <ButtonDropdown style={{position: 'relative', top: 3, marginRight: 10}} isOpen={this.state.dropdownOpen} toggle={this.toggle.bind(this)}>
                     <DropdownToggle caret disabled={pendingTxs.length == 0}>
-                      Pending TXs: {pendingTxs.length}
+                      <span style={{fontSize: 15}}>Pending TXs: {pendingTxs.length}</span>
                     </DropdownToggle>
                     <DropdownMenu>
                     {pendingTxs.map(function(tx, i){
@@ -96,7 +104,7 @@ export default class App extends React.Component {
                   </ButtonDropdown>
                 </li>
                 <li class='nav-item pull-right'>
-                  <span class="nav-link text-success">Block #{self.state.blockNumber} - {self.state.networkType}</span>
+                  <span style={{fontSize: 18, lineHeight: '18px'}} class="nav-link text-success">Block #{self.state.blockNumber} <br/> <small style={{fontSize: 14}}>{self.state.networkType}</small></span>
                 </li>
                 <li class={window.location.pathname == '/config' ? 'nav-item pull-right active' : 'nav-item pull-right'}>
                   <Link class='nav-link config-icon' to='/config'>
