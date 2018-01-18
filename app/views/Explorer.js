@@ -191,7 +191,8 @@ export default class Explorer extends React.Component {
     }
 
     bookRoom = async (password) => {
-      this.setState({loading: true});
+
+      const bookingDescription =  `${this.state.unitSelected.unitType} from ${this.state.startDate.format('YYYY MM DD')} to ${this.state.endDate.format('YYYY MM DD')}`;
 
       //async book(hotelAddress: Address, unitAddress: Address, fromDate: Date, daysAmount: Number, guestData: String): Promievent
       //async bookWithLif(hotelAddress: Address, unitAddress: Address, fromDate: Date, daysAmount: Number, guestData: String): Promievent
@@ -200,26 +201,25 @@ export default class Explorer extends React.Component {
         this.state.unitSelected.address,
         this.state.startDate,
         this.state.endDate.diff(this.state.startDate, 'days'),
-        'guestData'
+        'guestData',
+        this.props.getCallbacks((this.state.hotel.waitConfirmation ? 'request to book ' + bookingDescription : 'to book ' + bookingDescription))
       ]
 
       try {
         web3.eth.accounts.wallet.decrypt([this.state.importKeystore], password);
         if(this.state.currency === 'lif') {
-          await this.state.user.bookWithLif(...args);
+          this.state.user.bookWithLif(...args);
         } else {
-          await this.state.user.book(...args);
+          this.state.user.book(...args);
         }
-        this.setState({loading: false });
-        const bookingDescription =  `${this.state.unitSelected.unitType} from ${this.state.startDate.format('YYYY MM DD')} to ${this.state.endDate.format('YYYY MM DD')}`;
-        if(this.state.hotel.waitConfirmation) {
-          toast.success(`Successfully requested to book ${bookingDescription}`);
-        } else {
-          toast.success(`Successfully booked ${bookingDescription}`);
-        }
+
+        // if(this.state.hotel.waitConfirmation) {
+        //   toast.success(`Successfully requested to book ${bookingDescription}`);
+        // } else {
+        //   toast.success(`Successfully booked ${bookingDescription}`);
+        // }
       } catch(e) {
         console.log("Error booking a room", e);
-        this.setState({loading: false});
         toast.error(e);
       }
     }
@@ -313,7 +313,7 @@ export default class Explorer extends React.Component {
             }
 
             {/* Hotel Images */}
-            {hotel.images.length &&
+            {hotel.images.length > 0 &&
               [
                 <hr/>,
                 <div class="col-sm-12 col-md-8 col-lg-6">
@@ -341,7 +341,7 @@ export default class Explorer extends React.Component {
               </div>
               <div class="col-3 text-right">
                 <button title="Cancel" class="btn btn-light" onClick={() => this.setState({section: 'hotels'})}>
-                  <i class="fa fa-times" aria-hidden="true"></i>
+                  <i class="fa fa-arrow-left" aria-hidden="true"></i>
                 </button>
               </div>
             </div>
@@ -428,7 +428,7 @@ export default class Explorer extends React.Component {
                     address: '0x0000000000000000000000000000000000000000'
                   }
                 })}>
-                  <i class="fa fa-times" aria-hidden="true"></i>
+                  <i class="fa fa-arrow-left" aria-hidden="true"></i>
                 </button>
               </div>
             </div>

@@ -103,8 +103,7 @@ export default class Hotel extends React.Component {
       self.setState({loading: true});
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
-        let txOptions = await self.state.hotelManager.addUnit(self.state.hotel.address, self.state.unitType);
-        await self.queueTx(txOptions, 'add a new ' + self.state.unitType);
+        self.state.hotelManager.addUnit(self.state.hotel.address, self.state.unitType, self.props.getCallbacks('add a new ' + self.state.unitType));
         self.setState({section: 'hotels', hotelSection: 'list', loading: false});
       }
       catch(e) {
@@ -231,7 +230,6 @@ export default class Hotel extends React.Component {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
         args.push(self.props.getCallbacks(action));
         self.state.hotelManager[self.state.editHotelFunction](...args);
-        //await self.queueTx(txOptions, action);
         self.setState({loading: false});
       } catch(e) {
         console.log("Error editing hotel room", e);
@@ -384,9 +382,8 @@ export default class Hotel extends React.Component {
 
       try {
         web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
-        await self.state.hotelManager.confirmBooking(self.state.hotel.address, request.dataHash);
-        await self.loadBookings(self.state.hotel.address);
-        toast.success('Successfully confirmed booking ' + request.id);
+        self.state.hotelManager.confirmBooking(self.state.hotel.address, request.dataHash, self.props.getCallbacks('approve booking'));
+        self.setState({loading: false});
       } catch(e) {
         console.log("Error confirming booking", e);
         self.setState({loading: false});

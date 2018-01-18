@@ -95,9 +95,9 @@ export default class App extends React.Component {
           <Switch>
             <Route exact path="/" component={Home}></Route>
             <Route path="/wallet" component={Wallet}></Route>
-						<Route path="/explorer" component={Explorer}></Route>
+						<Route path="/explorer" render={() => <Explorer getCallbacks={this.getCallbacks.bind(this)}/>}></Route>
             <Route path="/mybookings" component={MyBookings}></Route>
-            <Route path="/hotel" render={() => <Hotel getCallbacks={this.getCallbacks.bind(this)} pendingTxHashes={this.state.pendingTxHashes}/>}></Route>
+            <Route path="/hotel" render={() => <Hotel getCallbacks={this.getCallbacks.bind(this)}/>}></Route>
             <Route path="/config" component={Config}></Route>
             <Route path="/search" component={Search}></Route>
           </Switch>
