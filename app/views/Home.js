@@ -18,6 +18,9 @@ export default class Home extends React.Component {
             <div className="page-header">
                 <h1><b class="main-header">Hotels App</b> <small class="text-muted">by WindingTree </small></h1>
                 <p class="lead">This app is demo of our platform</p>
+                <div class="alert alert-warning" role="alert">
+                  This app is a <strong>proof of concept</strong> and still work in progress, it runs over a testnet network, all the ETH and Lif tokens are just for testing porpuses.
+                </div>
               </div>
               <hr/>
 
