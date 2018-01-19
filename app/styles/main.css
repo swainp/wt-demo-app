@@ -332,10 +332,6 @@ label + .DateRangePicker {margin-left: 10px; }
   }
 }
 
-#actions li {
-  margin-bottom: 5px;
-}
-
 .DateRangePicker {
   z-index: 3;
 }
@@ -349,14 +345,7 @@ label + .DateRangePicker {margin-left: 10px; }
 }*/
 
 @media (max-width: 991px) {
-  #actions {
-    margin-left: -5px;
-  }
-  #actions li {
-    padding-right: 5px;
-    padding-left: 5px;
-    display: inline-block;
-  }
+
 }
 
 
@@ -492,17 +481,6 @@ label + .DateRangePicker {margin-left: 10px; }
   }
   #app-nav .material-icons {
     font-size: 42px;
-  }
-}
-@media (max-width: 570px) {}
-  #actions {
-    display: block;
-    margin: 0 8px 20px 7px;
-  }
-  #actions > * {
-    display:inline-block;
-    width: 33%;
-    padding: 8px 3px;
   }
 }
 
