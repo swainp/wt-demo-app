@@ -395,7 +395,7 @@ export default class Hotel extends React.Component {
       var self = this;
 
       var actions =
-      <div class="nav flex-column nav-pills" id="actions" role="tablist" aria-orientation="vertical">
+      <div class="nav flex-column nav-pills mb-3" id="actions" role="tablist" aria-orientation="vertical">
         <a class={'nav-link ' + (self.state.section == 'hotels' ? 'active bg-secondary' : '')}
           onClick={() => self.setState({section: 'hotels'})}>Home</a>
         <a class={'nav-link ' + (self.state.section == 'hotelBookings' ? 'active bg-secondary' : '')}
@@ -710,10 +710,10 @@ export default class Hotel extends React.Component {
               </div>
             </div>
             <div class="row">
-              <div class="col-sm-3 col-md-2 text-center">
+              <div class="col-sm-4 col-md-3  col-lg-2 text-center">
                 {actions}
               </div>
-              <div class="col-sm-9 col-md-10">
+              <div class="col-sm-8 col-md-9 col-lg-10">
                 {self.state.section == 'hotelTxs' ?
                   <div>{hotelTxs}</div>
                 : self.state.section == 'hotels' && self.state.hotelSection == 'edit' ?
