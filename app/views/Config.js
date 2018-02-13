@@ -82,6 +82,9 @@ export default class Config extends React.Component {
                   <p className="h6"><b>Test Ethereum Network (Ropsten)</b></p>
                   <p>https://ropsten.infura.io/WKNyJ0kClh8Ao5LdmO7z</p>
 
+                  <p className="h6"><b>RSK Test Network (Ginger)</b></p>
+                  <p>http://ec2-34-239-166-177.compute-1.amazonaws.com</p>
+
                   <hr/>
 
                   <div class="form-group">
