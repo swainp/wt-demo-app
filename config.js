@@ -1,6 +1,6 @@
 module.exports = {
   "WEB3_PROVIDER": "https://ropsten.infura.io/WKNyJ0kClh8Ao5LdmO7z",
-  "LIFTOKEN_ADDRESS": "0xB6e225194a1C892770c43D4B529841C99b3DA1d7",
+  "LIFTOKEN_ADDRESS": "0x4e9deee821a923e43ff076c4c57a3668938e664b",
   "WT_INDEXES": [
     {
       "version": "0.0.1 (Ropsten)",
