@@ -4,9 +4,8 @@ import Modal from 'react-modal';
 
 import moment from 'moment';
 import { ToastContainer } from 'react-toastify';
-
-import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
+import { web3provider, HotelManager, BookingData, User } from '../services/web3provider';
+import config from '../services/config';
 
 export default class MyBookings extends React.Component {
   constructor () {
@@ -33,18 +32,17 @@ export default class MyBookings extends React.Component {
     if (this.state.importKeystore) {
       let address = (this.state.importKeystore ? this.state.importKeystore.address : '0x0000000000000000000000000000000000000000');
       let hotelManager = new HotelManager({
-        indexAddress: window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length - 1].address,
+        indexAddress: window.localStorage.wtIndexAddress || config.get('WT_INDEXES')[config.get('WT_INDEXES').length - 1].address,
         owner: address,
-        web3: web3,
-        gasMargin: 1.5,
+        web3provider: web3provider,
+        gasMargin: 2,
       });
-      hotelManager.setWeb3(web3);
-      let bookingData = new BookingData(web3);
+      let bookingData = new BookingData({ web3provider: web3provider });
       let user = new User({
         account: address, // Client's account address
         gasMargin: 2, // Multiple to increase gasEstimate by to ensure tx success.
-        tokenAddress: window.localStorage.lifTokenAddress || LIFTOKEN_ADDRESS, // LifToken contract address
-        web3: web3, // Web3 object instantiated with a provider
+        tokenAddress: window.localStorage.lifTokenAddress || config.get('LIFTOKEN_ADDRESS'), // LifToken contract address
+        web3provider: web3provider,
       });
       await this.setState({ hotelManager: hotelManager, bookingData: bookingData, user: user });
       await this.loadTxs();
@@ -53,13 +51,12 @@ export default class MyBookings extends React.Component {
 
   async loadTxs () {
     var self = this;
-    let network = await web3.eth.net.getNetworkType();
+    let network = await web3provider.web3.eth.net.getNetworkType();
     self.setState({ loading: true });
-    let txs = await Utils.getBookingTransactions(
+    let txs = await web3provider.data.getBookingTransactions(
       '0x' + self.state.importKeystore.address,
-      (window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length - 1].address),
-      (window.localStorage.wtIndexBlock || WT_INDEXES[WT_INDEXES.length - 1].block),
-      web3,
+      (window.localStorage.wtIndexAddress || config.get('WT_INDEXES')[config.get('WT_INDEXES').length - 1].address),
+      (window.localStorage.wtIndexBlock || config.get('WT_INDEXES')[config.get('WT_INDEXES').length - 1].block),
       network);
     console.log('got TXs');
     console.log(txs);

@@ -5,11 +5,13 @@ import PlacesAutocomplete from 'react-places-autocomplete';
 import { formatResult } from '../helpers/geocodeFormatter';
 import googleMaps from '@google/maps';
 
+import config from '../services/config';
+
 export default class EditHotel extends React.Component {
   constructor (props) {
     super(props);
     let googleMapsClient = googleMaps.createClient({
-      key: MAPS_API_KEY,
+      key: config.get('MAPS_API_KEY'),
       Promise: Promise,
     });
     this.state = {
@@ -106,7 +108,7 @@ export default class EditHotel extends React.Component {
                   <div className="col-sm-12 col-md-5 col-lg-3">
                     <div className="nav flex-column nav-pills mb-4" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                       <a onClick={() => this.props.onFunctionChange('changeHotelInfo')} className={'nav-link text-muted ' + (this.props.editHotelFunction === 'changeHotelInfo' ? 'active bg-light text-dark' : '')}>Basic information</a>
-                      <a onClick={() => this.props.onFunctionChange('changeHotelAddress')} className={'nav-link text-muted ' + (this.props.editHotelFunction === 'changeHotelAddress' ? 'active bg-light text-dark' : '')}>Address</a>
+                      <a onClick={() => this.props.onFunctionChange('changeHotelLocation')} className={'nav-link text-muted ' + (this.props.editHotelFunction === 'changeHotelLocation' ? 'active bg-light text-dark' : '')}>Address</a>
                       <a onClick={() => this.props.onFunctionChange('setRequireConfirmation')} className={'nav-link text-muted ' + (this.props.editHotelFunction === 'setRequireConfirmation' ? 'active bg-light text-dark' : '')}>Confirmation required</a>
                       <a onClick={() => this.props.onFunctionChange('addImageHotel')} className={'nav-link text-muted ' + (this.props.editHotelFunction === 'addImageHotel' ? 'active bg-light text-dark' : '')}>Add image</a>
                       <a onClick={() => this.props.onFunctionChange('removeImageHotel')} className={'nav-link text-muted ' + (this.props.editHotelFunction === 'removeImageHotel' ? 'active bg-light text-dark' : '')}>Remove image</a>
@@ -116,9 +118,8 @@ export default class EditHotel extends React.Component {
                   </div>
                   <div className="col-sm-12 col-md-9 col-lg-6">
                     <div className="tab-content" id="v-pills-tabContent">
-
                       {{
-                        changeHotelAddress: (
+                        changeHotelLocation: (
                           <div>
                             <div className="form-group">
                               <label><b>Search for Address</b></label>

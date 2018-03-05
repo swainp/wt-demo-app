@@ -1,7 +1,6 @@
 import React from 'react';
 import DateRangePicker from 'react-dates/lib/components/DateRangePicker';
 import Select from 'react-select';
-import currencyCodeData from 'currency-codes/data';
 
 export default class EditUnit extends React.Component {
   constructor (props) {
@@ -22,10 +21,6 @@ export default class EditUnit extends React.Component {
   }
 
   render () {
-    let currencyCodeOptions = currencyCodeData.map(e => { return { value: e.code, label: e.code + ' (' + e.number + ')' }; });
-    let selectedCurrency = currencyCodeOptions.find(e => e.value === this.state.newUnit.currencyCode);
-    if (selectedCurrency === undefined || selectedCurrency.value === undefined) selectedCurrency = null;
-
     return (
       <div className="card">
         <div className="card-header">
@@ -42,7 +37,7 @@ export default class EditUnit extends React.Component {
         </div>
         <div className="card-body">
           <form onSubmit={(e) => { e.preventDefault(); this.props.editHotelUnit(this.state.newUnit, this.state.password); }}>
-            <label><b>{this.props.unit.substring(3, 6)}</b></label>
+            <label><b>{this.props.unit.substring(2, 6)}</b></label>
             <div className="row">
               <div className="col-sm-12 col-md-9 col-lg-6">
                 <div className="form-group">
@@ -70,42 +65,6 @@ export default class EditUnit extends React.Component {
                         autoFocus="true"
                         checked={this.state.newUnit.active}
                         onChange={e => this.editUnitInfo({ active: e.target.checked })}
-                      />
-                    </div>
-                  ),
-                  setCurrencyCode: (
-                    <div className="form-group">
-                      <label><b>Currency Code</b></label>
-                      <Select
-                        options={currencyCodeOptions}
-                        name="selected-state"
-                        value={selectedCurrency}
-                        onChange={e => this.editUnitInfo({ currencyCode: e.value })}
-                        searchable
-                      />
-                    </div>
-                  ),
-                  setDefaultLifPrice: (
-                    <div className="form-group">
-                      <label><b>Default Lif Price</b></label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        autoFocus="true"
-                        value={this.state.newUnit.defaultLifPrice || ''}
-                        onChange={e => this.editUnitInfo({ defaultLifPrice: Number(e.target.value) })}
-                      />
-                    </div>
-                  ),
-                  setDefaultPrice: (
-                    <div className="form-group">
-                      <label><b>Default Price</b></label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        autoFocus="true"
-                        value={this.state.newUnit.defaultPrice || ''}
-                        onChange={e => this.editUnitInfo({ defaultPrice: Number(e.target.value) })}
                       />
                     </div>
                   ),

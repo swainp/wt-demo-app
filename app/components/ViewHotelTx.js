@@ -2,13 +2,6 @@ import React from 'react';
 import moment from 'moment';
 
 export default class ViewHotelTx extends React.Component {
-  constructor (props) {
-    super(props);
-    this.state = {
-
-    };
-  }
-
   componentWillMount () {
     console.log('[ViewHotelTx] componentWillMount');
     this.props.loadTxs();
@@ -36,7 +29,7 @@ export default class ViewHotelTx extends React.Component {
                 </thead>
                 <tbody>
                   {self.props.hotelTxs.map(function (tx, i) {
-                    let hotel = self.props.hotelOptions.find(hotel => hotel.value == tx.hotel);
+                    let hotel = self.props.hotelOptions.find(hotel => hotel.value === tx.hotel);
                     return (
                       <tr key={'tx' + i} className="pointer">
                         <td>{hotel ? hotel.label : ''}</td>

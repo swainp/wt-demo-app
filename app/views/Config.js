@@ -2,12 +2,12 @@ import React from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import Select from 'react-select';
 
-import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(WEB3_PROVIDER));
+import config from '../services/config';
 
 var wtIndexes = [];
-for (var i = 0; i < WT_INDEXES.length; i++) {
-  wtIndexes.push(WT_INDEXES[i]);
+const preconfiguredIndexes = config.get('WT_INDEXES');
+for (var i = 0; i < preconfiguredIndexes.length; i++) {
+  wtIndexes.push(preconfiguredIndexes[i]);
   wtIndexes[i].version = wtIndexes[i].version + ' - ' + wtIndexes[i].address;
   wtIndexes[i].value = wtIndexes[i].address;
 }
@@ -16,9 +16,9 @@ export default class Config extends React.Component {
   constructor () {
     super();
     this.state = {
-      web3Provider: window.localStorage.web3Provider || WEB3_PROVIDER,
+      web3Provider: window.localStorage.web3Provider || config.get('WEB3_PROVIDER'),
       wtIndexAddresses: window.localStorage.wtIndexAddress || wtIndexes[wtIndexes.length - 1].address,
-      lifTokenAddress: window.localStorage.lifTokenAddress || LIFTOKEN_ADDRESS,
+      lifTokenAddress: window.localStorage.lifTokenAddress || config.get('LIFTOKEN_ADDRESS'),
     };
   }
 
@@ -27,7 +27,7 @@ export default class Config extends React.Component {
     window.localStorage.wtIndexAddress = this.state.wtIndexAddress;
     window.localStorage.lifTokenAddress = this.state.lifTokenAddress;
     for (var i = 0; i < wtIndexes.length; i++) {
-      if (this.state.wtIndexAddress == wtIndexes[i].address) {
+      if (this.state.wtIndexAddress === wtIndexes[i].address) {
         window.localStorage.wtIndexBlock = wtIndexes[wtIndexes.length - 1].block;
       }
     }
@@ -35,14 +35,14 @@ export default class Config extends React.Component {
   }
 
   restoreDefault () {
-    window.localStorage.web3Provider = WEB3_PROVIDER;
+    window.localStorage.web3Provider = config.get('WEB3_PROVIDER');
     window.localStorage.wtIndexAddress = wtIndexes[wtIndexes.length - 1].address;
     window.localStorage.wtIndexBlock = wtIndexes[wtIndexes.length - 1].block;
-    window.localStorage.lifTokenAddress = LIFTOKEN_ADDRESS;
+    window.localStorage.lifTokenAddress = config.get('LIFTOKEN_ADDRESS');
     this.setState({
-      web3Provider: WEB3_PROVIDER,
+      web3Provider: config.get('WEB3_PROVIDER'),
       wtIndexAddress: wtIndexes[wtIndexes.length - 1].address,
-      lifTokenAddress: LIFTOKEN_ADDRESS,
+      lifTokenAddress: config.get('LIFTOKEN_ADDRESS'),
     });
     toast.success('Configuration restored to default');
   }

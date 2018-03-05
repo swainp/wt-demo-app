@@ -1,6 +1,8 @@
 import React from 'react';
 import moment from 'moment';
 
+import { web3provider } from '../services/web3provider';
+
 export default class WalletTx extends React.Component {
   constructor (props) {
     super(props);
@@ -15,7 +17,7 @@ export default class WalletTx extends React.Component {
 
   async getHotelInfo (hotelAddr) {
     var self = this;
-    var hotelInstance = Utils.getInstance('Hotel', hotelAddr, { web3: self.props.web3 });
+    var hotelInstance = web3provider.contracts.getHotelInstance(hotelAddr);
     let hotelNames = self.state.hotelNames;
     hotelNames[hotelAddr] = await hotelInstance.methods.name().call();
     self.setState({ hotelNames: hotelNames });

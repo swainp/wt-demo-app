@@ -1,7 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Modal from 'react-modal';
-import PromiEvent from 'web3-core-promievent';
 import Select from 'react-select';
 
 import { ToastContainer, toast } from 'react-toastify';
@@ -16,8 +15,8 @@ import EditUnitType from '../components/EditUnitType';
 import ViewBookings from '../components/ViewBookings';
 import ViewHotelTx from '../components/ViewHotelTx';
 
-import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
+import { web3provider, HotelManager, BookingData } from '../services/web3provider';
+import config from '../services/config';
 
 export default class Hotel extends React.Component {
   constructor () {
@@ -61,16 +60,16 @@ export default class Hotel extends React.Component {
     if (
     // window.localStorage.wtIndexAddress
     // && window.localStorage.wtIndexAddress.length > 0
-    // && web3.eth.getCode(window.localStorage.wtIndexAddress) != '0x0'
+    // && web3provider.web3.eth.getCode(window.localStorage.wtIndexAddress) != '0x0'
       this.state.importKeystore
     ) {
       let hotelManager = new HotelManager({
-        indexAddress: window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length - 1].address,
+        indexAddress: window.localStorage.wtIndexAddress || config.get('WT_INDEXES')[config.get('WT_INDEXES').length - 1].address,
         owner: this.state.importKeystore.address,
-        web3: web3,
-        gasMargin: 1.5,
+        web3provider: web3provider,
+        gasMargin: 3,
       });
-      const bookingData = new BookingData(web3);
+      const bookingData = new BookingData({ web3provider: web3provider });
       this.setState({ hotelManager: hotelManager, bookingData: bookingData }, () => { this.getHotels(); });
     }
   }
@@ -79,7 +78,7 @@ export default class Hotel extends React.Component {
     var self = this;
     self.setState({ loading: true });
     try {
-      web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+      web3provider.web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
       self.state.hotelManager.createHotel(hotel.name, hotel.description, self.props.getCallbacks('register hotel ' + hotel.name));
       self.setState({ loading: false, hotelSection: 'list' });
     } catch (e) {
@@ -93,7 +92,7 @@ export default class Hotel extends React.Component {
     var self = this;
     self.setState({ loading: true });
     try {
-      web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+      web3provider.web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
       self.state.hotelManager.addUnit(self.state.hotel.address, self.state.unitType, self.props.getCallbacks('add a new ' + self.state.unitType));
       self.setState({ section: 'hotels', hotelSection: 'list', loading: false });
     } catch (e) {
@@ -108,7 +107,7 @@ export default class Hotel extends React.Component {
     self.setState({ loading: true });
 
     try {
-      web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+      web3provider.web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
       self.state.hotelManager.addUnitType(self.state.hotel.address, newUnitType, self.props.getCallbacks('add room type ' + newUnitType));
       self.setState({ section: 'hotels', hotelSection: 'list', loading: false });
     } catch (e) {
@@ -127,35 +126,46 @@ export default class Hotel extends React.Component {
       self.state.unitType,
     ];
 
+    // async setDefaultLifPrice(hotelAddress: Address, unitType: String, price: String | Number | BN)
+    // async setDefaultPrice(hotelAddress: Address, unitType: String, price: Number)
+    // async setCurrencyCode(hotelAddress: Address, unitType: String, code: Number, converter: Function, convertStart: Date, convertEnd: Date)
     // async addAmenity(hotelAddress: Address, unitType: String, amenity: Number): Promievent
     // async removeAmenity(hotelAddress: Address, unitType: String, amenity: Number): Promievent
-    // async editUnitType(hotelAddress: Address, unitType: String, description: String, minGuests: Number, maxGuests: Number, price: String): Promievent
+    // async editUnitType(hotelAddress: Address, unitType: String, description: String, minGuests: Number, maxGuests: Number): Promievent
     // async addImageUnitType(hotelAddress: Address, unitType: String, url: String): Promievent
     // async removeImageUnitType(hotelAddress: Address, unitType: String, imageIndex: Number): Promievent
     // async removeUnitType(hotelAddress: Address, unitType: String): Promievent
     switch (self.state.editHotelUnitTypeFunction) {
-    case 'addAmenity':
-    case 'removeAmenity':
-      args.push(self.state.amenityCode);
-      break;
-    case 'editUnitType':
-      args.push((newUnitType.description || self.state.unitTypeInfo.description));
-      args.push((newUnitType.minGuests || self.state.unitTypeInfo.minGuests));
-      args.push((newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests));
-      args.push((newUnitType.price || self.state.unitTypeInfo.price));
-      break;
-    case 'addImageUnitType':
-      args.push(image.imageUrl);
-      break;
-    case 'removeImageUnitType':
-      args.push(image.imageIndex);
-      break;
-    case 'removeUnitType':
-      break;
-    }
+      case 'addAmenity':
+      case 'removeAmenity':
+        args.push(self.state.amenityCode);
+        break;
+      case 'editUnitType':
+        args.push((newUnitType.description || self.state.unitTypeInfo.description));
+        args.push((newUnitType.minGuests || self.state.unitTypeInfo.minGuests));
+        args.push((newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests));
+        break;
+      case 'addImageUnitType':
+        args.push(image.imageUrl);
+        break;
+      case 'removeImageUnitType':
+        args.push(image.imageIndex);
+        break;
+      case 'setDefaultPrice':
+        args.push(newUnitType.defaultPrice);
+        break;
+      case 'setDefaultLifPrice':
+        args.push(newUnitType.defaultLifPrice);
+        break;
+      case 'setCurrencyCode':
+        args.push(Number(currencyCodes.code(newUnitType.currencyCode).number));
+        break;
+      case 'removeUnitType':
+        break;
+      }
 
     try {
-      web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+      web3provider.web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
       args.push(self.props.getCallbacks('edit room type ' + self.state.unitType));
       self.state.hotelManager[self.state.editHotelUnitTypeFunction](...args);
       self.setState({ section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {} });
@@ -174,50 +184,46 @@ export default class Hotel extends React.Component {
     let args = [
       self.state.hotel.address,
     ];
-    // async changeHotelAddress(hotelAddress: Address, lineOne: String, lineTwo: String, zipCode: String, country: String)
     // async changeHotelInfo(hotelAddress: Address, name: String, description: String)
-    // async changeHotelLocation(hotelAddress: Address, timezone: Number, latitude: Number, longitude: Number)
+    // async changeHotelLocation(hotelAddress: Address, lineOne: String, lineTwo: String, zipCode: String, country: String, timezone: Number, latitude: Number, longitude: Number)
     // async setRequireConfirmation(hotelAddress: Address, value: Boolean)
     // async addImageHotel(hotelAddress: Address, url: String): Promievent
     // async removeImageHotel(hotelAddress: Address, imageIndex: Number): Promievent
     // async removeHotel(address: Address): Promievent
     switch (self.state.editHotelFunction) {
-    case 'changeHotelAddress':
-      args.push(hotel.lineOne);
-      args.push(hotel.lineTwo);
-      args.push(hotel.zip);
-      args.push(hotel.country);
-      action = 'change address of ' + self.state.hotel.name;
-      break;
-    case 'changeHotelInfo':
-      args.push(hotel.name);
-      args.push(hotel.description);
-      action = 'change name and description of ' + self.state.hotel.name;
-      break;
-    case 'changeHotelLocation':
-      args.push(hotel.timezone);
-      args.push(hotel.latitude);
-      args.push(hotel.longitude);
-      action = 'change location of ' + self.state.hotel.name;
-      break;
-    case 'setRequireConfirmation':
-      args.push(hotel.waitConfirmation);
-      action = 'require confirmation before booking for ' + self.state.hotel.name;
-      break;
-    case 'addImageHotel':
-      args.push(image.imageUrl);
-      action = 'add an image to ' + self.state.hotel.name;
-      break;
-    case 'removeImageHotel':
-      args.push(image.imageIndex);
-      action = 'remove an image from ' + self.state.hotel.name;
-      break;
-    case 'removeHotel':
-      break;
-    }
+      case 'changeHotelInfo':
+        args.push(hotel.name);
+        args.push(hotel.description);
+        action = 'change name and description of ' + self.state.hotel.name;
+        break;
+      case 'changeHotelLocation':
+        args.push(hotel.lineOne);
+        args.push(hotel.lineTwo);
+        args.push(hotel.zip);
+        args.push(hotel.country);
+        args.push(hotel.timezone);
+        args.push(hotel.latitude);
+        args.push(hotel.longitude);
+        action = 'change location of ' + self.state.hotel.name;
+        break;
+      case 'setRequireConfirmation':
+        args.push(hotel.waitConfirmation);
+        action = 'require confirmation before booking for ' + self.state.hotel.name;
+        break;
+      case 'addImageHotel':
+        args.push(image.imageUrl);
+        action = 'add an image to ' + self.state.hotel.name;
+        break;
+      case 'removeImageHotel':
+        args.push(image.imageIndex);
+        action = 'remove an image from ' + self.state.hotel.name;
+        break;
+      case 'removeHotel':
+        break;
+      }
 
     try {
-      web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+      web3provider.web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
       args.push(self.props.getCallbacks(action));
       self.state.hotelManager[self.state.editHotelFunction](...args);
       self.setState({ loading: false });
@@ -237,42 +243,30 @@ export default class Hotel extends React.Component {
       self.state.unit,
     ];
 
-    // async setCurrencyCode(hotelAddress: Address, unitAddress: Address, code: Number, converter: Function, convertStart: Date, convertEnd: Date)
-    // async setDefaultLifPrice(hotelAddress: Address, unitAddress: Address, price: String | Number | BN)
-    // async setDefaultPrice(hotelAddress: Address, unitAddress: Address, price: Number)
     // async setUnitActive(hotelAddress: Address, unitAddress: Address, active: Boolean)
     // async setUnitSpecialLifPrice(hotelAddress: Address, unitAddress: Address, price: String | Number | BN, fromDate: Date, amountDays: Number)
     // async setUnitSpecialPrice(hotelAddress: Address, unitAddress: Addres, price: Number, fromDate: Date, amountDays: Number)
     // async removeUnit(hotelAddress: Address, unitAddress: Address): Promievent
     switch (self.state.editHotelUnitFunction) {
-    case 'setUnitActive':
-      args.push(newUnit.active);
-      break;
-    case 'setDefaultPrice':
-      args.push(newUnit.defaultPrice);
-      break;
-    case 'setDefaultLifPrice':
-      args.push(newUnit.defaultLifPrice);
-      break;
-    case 'setCurrencyCode':
-      args.push(Number(currencyCodes.code(newUnit.currencyCode).number));
-      break;
-    case 'setUnitSpecialLifPrice':
-      args.push(newUnit.specialLifPrice);
-      args.push(newUnit.startDate.toDate());
-      args.push(newUnit.endDate.diff(newUnit.startDate, 'days'));
-      break;
-    case 'setUnitSpecialPrice':
-      args.push(newUnit.specialPrice);
-      args.push(newUnit.startDate.toDate());
-      args.push(newUnit.endDate.diff(newUnit.startDate, 'days'));
-      break;
-    case 'removeUnit':
-      break;
-    }
+      case 'setUnitActive':
+        args.push(newUnit.active);
+        break;
+      case 'setUnitSpecialLifPrice':
+        args.push(newUnit.specialLifPrice);
+        args.push(newUnit.startDate.toDate());
+        args.push(newUnit.endDate.diff(newUnit.startDate, 'days'));
+        break;
+      case 'setUnitSpecialPrice':
+        args.push(newUnit.specialPrice);
+        args.push(newUnit.startDate.toDate());
+        args.push(newUnit.endDate.diff(newUnit.startDate, 'days'));
+        break;
+      case 'removeUnit':
+        break;
+      }
 
     try {
-      web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+      web3provider.web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
       args.push(self.props.getCallbacks('edit ' + self.state.unitType + ' ' + self.state.unit.substring(2, 6)));
       await self.state.hotelManager[self.state.editHotelUnitFunction](...args);
       self.setState({ section: 'hotels', hotelSection: 'list', loading: false, newUnitType: {} });
@@ -292,11 +286,15 @@ export default class Hotel extends React.Component {
       unitTypeOptions.push({ value: key, label: key });
     });
 
+    var unitTypeInfo = unitTypeOptions[0] ? selectedHotel.unitTypes[unitTypeOptions[0].value].info : {};
+    unitTypeInfo.currencyCode = unitTypeOptions[0] ? selectedHotel.unitTypes[unitTypeOptions[0].value].currencyCode : '';
+    unitTypeInfo.defaultLifPrice = unitTypeOptions[0] ? selectedHotel.unitTypes[unitTypeOptions[0].value].defaultLifPrice : '';
+
     self.setState({
       hotel: selectedHotel,
       createNewUnitType: selectedHotel.unitTypeNames.length === 0,
       unitType: unitTypeOptions[0] ? unitTypeOptions[0].value : '',
-      unitTypeInfo: unitTypeOptions[0] ? selectedHotel.unitTypes[unitTypeOptions[0].value].info : '',
+      unitTypeInfo: unitTypeInfo,
       amenities: unitTypeOptions[0] ? selectedHotel.unitTypes[unitTypeOptions[0].value].amenities : '',
       unitTypeOptions: unitTypeOptions,
     });
@@ -312,7 +310,7 @@ export default class Hotel extends React.Component {
   async getHotels () {
     var self = this;
     self.setState({ loading: true });
-    let hotelsAddrs = await self.state.hotelManager.WTIndex.methods.getHotelsByManager('0x' + self.state.hotelManager.owner).call();
+    let hotelsAddrs = await self.state.hotelManager.getIndexInstance().methods.getHotelsByManager('0x' + self.state.hotelManager.owner).call();
     hotelsAddrs = hotelsAddrs.filter(addr => addr !== '0x0000000000000000000000000000000000000000');
 
     let hotels = [];
@@ -329,8 +327,7 @@ export default class Hotel extends React.Component {
   }
 
   async getHotelInfo (hotelAddr) {
-    var self = this;
-    var hotelInstance = Utils.getInstance('Hotel', hotelAddr, self.state.hotelManager.context);
+    var hotelInstance = web3provider.contracts.getHotelInstance(hotelAddr);
     return {
       instance: hotelInstance,
       name: await hotelInstance.methods.name().call(),
@@ -353,13 +350,12 @@ export default class Hotel extends React.Component {
 
   async loadTxs () {
     var self = this;
-    let network = await web3.eth.net.getNetworkType();
+    let network = await web3provider.web3.eth.net.getNetworkType();
     self.setState({ loading: true });
-    let txs = await Utils.getDecodedTransactions(
+    let txs = await web3provider.data.getDecodedTransactions(
       '0x' + self.state.importKeystore.address,
-      (window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length - 1].address),
-      (window.localStorage.wtIndexBlock || WT_INDEXES[WT_INDEXES.length - 1].block),
-      web3,
+      (window.localStorage.wtIndexAddress || config.get('WT_INDEXES')[config.get('WT_INDEXES').length - 1].address),
+      (window.localStorage.wtIndexBlock || config.get('WT_INDEXES')[config.get('WT_INDEXES').length - 1].block),
       network);
     self.setState({ hotelTxs: txs, loading: false });
   }
@@ -369,7 +365,7 @@ export default class Hotel extends React.Component {
     self.setState({ loading: true });
 
     try {
-      web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
+      web3provider.web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
       self.state.hotelManager.confirmBooking(self.state.hotel.address, request.dataHash, self.props.getCallbacks('approve booking'));
       self.setState({ loading: false });
     } catch (e) {
@@ -399,7 +395,6 @@ export default class Hotel extends React.Component {
         />;
 
     let editHotelFunctions = [
-      { value: 'changeHotelAddress', label: 'Address' },
       { value: 'changeHotelInfo', label: 'Main Info' },
       { value: 'changeHotelLocation', label: 'Location' },
       { value: 'setRequireConfirmation', label: 'Confirmation Required' },
@@ -436,6 +431,9 @@ export default class Hotel extends React.Component {
 
     let editHotelUnitTypeFunctions = [
       { value: 'editUnitType', label: 'Main Info' },
+      { value: 'setCurrencyCode', label: 'Currency Code' },
+      { value: 'setDefaultLifPrice', label: 'Default Lif Price' },
+      { value: 'setDefaultPrice', label: 'Default Price' },
       { value: 'addAmenity', label: 'Add Amenity' },
       { value: 'removeAmenity', label: 'Remove Amenity' },
       { value: 'addImageUnitType', label: 'Add Image' },
@@ -472,9 +470,6 @@ export default class Hotel extends React.Component {
 
     let editHotelUnitFunctions = [
       { value: 'setUnitActive', label: 'Active' },
-      { value: 'setCurrencyCode', label: 'Currency Code' },
-      { value: 'setDefaultLifPrice', label: 'Default Lif Price' },
-      { value: 'setDefaultPrice', label: 'Default Price' },
       { value: 'setUnitSpecialLifPrice', label: 'Special Lif Price' },
       { value: 'setUnitSpecialPrice', label: 'Special Price' },
       { value: 'removeUnit', label: 'Remove this room' },
@@ -622,7 +617,7 @@ export default class Hotel extends React.Component {
                                   <td className="text-center">{unit[0].substring(2, 6)}</td>
                                   <td className="shortCell">{entryTypeInfo.description}</td>
                                   <td className="text-center">{entryTypeInfo.maxGuests}</td>
-                                  <td className="text-center">{unit[1].defaultPrice || 0} {unit[1].currencyCode || ''}</td>
+                                  <td className="text-center">{entryTypeInfo.defaultPrice || 0} {entryTypeInfo.currencyCode || ''}</td>
                                   <td className="text-center">{unit[1].active ? 'Active' : 'Inactive'}</td>
                                   <td className="text-right">
                                     <button
@@ -678,7 +673,7 @@ export default class Hotel extends React.Component {
           loadTxs={self.loadTxs.bind(self)}
           hotelOptions={self.state.hotelOptions}
           hotelTxs={self.state.hotelTxs}
-          web3={web3}
+          web3={web3provider.web3}
         />;
 
     return (

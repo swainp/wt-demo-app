@@ -1,6 +1,5 @@
 import React from 'react';
-import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider));
+import { web3provider } from '../services/web3provider';
 
 export default class App extends React.Component {
   constructor () {
@@ -19,8 +18,8 @@ export default class App extends React.Component {
   async createWallet () {
     var self = this;
     self.setState({ loading: true });
-    web3.eth.accounts.wallet.create(1);
-    let wallet = web3.eth.accounts.wallet.encrypt(self.state.password)[0];
+    web3provider.web3.eth.accounts.wallet.create(1);
+    let wallet = web3provider.web3.eth.accounts.wallet.encrypt(self.state.password)[0];
     self.setState({ authSection: 'show', walleyKeystore: wallet, loading: false });
   }
 
@@ -29,7 +28,7 @@ export default class App extends React.Component {
     var self = this;
     self.setState({ loading: true, walletError: false });
     try {
-      web3.eth.accounts.wallet.decrypt([self.state.walleyKeystore], self.state.password);
+      web3provider.web3.eth.accounts.wallet.decrypt([self.state.walleyKeystore], self.state.password);
       self.setState({ authSection: 'show', walleyKeystore: self.state.walleyKeystore, loading: false });
       self.updateBalances();
     } catch (e) {
@@ -41,8 +40,8 @@ export default class App extends React.Component {
   async updateBalances () {
     var self = this;
     self.setState({
-      ethBalance: web3.utils.fromWei(
-        await web3.eth.getBalance(self.state.walleyKeystore.address),
+      ethBalance: web3provider.web3.utils.fromWei(
+        await web3provider.web3.eth.getBalance(self.state.walleyKeystore.address),
         'ether'
       ),
     });

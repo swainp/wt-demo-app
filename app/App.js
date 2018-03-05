@@ -1,5 +1,6 @@
 import React from 'react';
 import { HashRouter, Route, Switch } from 'react-router-dom';
+import { ToastContainer, toast } from 'react-toastify';
 
 // Views
 import Layout from './Layout';
@@ -11,11 +12,9 @@ import Config from './views/Config';
 import Search from './views/Search';
 import MyBookings from './views/MyBookings';
 
-import { ToastContainer, toast } from 'react-toastify';
 import Tx from './components/Tx';
-
-import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
+import { web3provider } from './services/web3provider';
+import config from './services/config';
 
 export default class App extends React.Component {
   constructor () {
@@ -23,6 +22,7 @@ export default class App extends React.Component {
     this.state = {
       pendingTxHashes: [],
       txReceipts: [],
+      latestTxHash: null,
       wallet: window.localStorage.wallet ? JSON.parse(window.localStorage.wallet) : null,
     };
   }
@@ -32,10 +32,15 @@ export default class App extends React.Component {
       console.log('got hash', hash);
       toast.info('Sent Tx to ' + action);
       toast.info(<Tx hash={hash} />);
-      Utils.decodeTxInput(hash, (window.localStorage.wtIndexAddress || WT_INDEXES[WT_INDEXES.length - 1].address), this.state.wallet.address, web3)
+      web3provider.data.decodeTxInput(hash, (window.localStorage.wtIndexAddress || config.get('WT_INDEXES')[config.get('WT_INDEXES').length - 1].address), this.state.wallet.address)
         .then(decodedTx => {
           console.log('App.addPendingTx decodedTx', decodedTx);
-          this.setState({ pendingTxHashes: this.state.pendingTxHashes.concat([decodedTx]) }, () => { window.localStorage.pendingTxHashes = this.state.pendingTxHashes; });
+          this.setState({
+            pendingTxHashes: this.state.pendingTxHashes.concat([decodedTx]),
+            latestTxHash: hash,
+          }, () => { window.localStorage.pendingTxHashes = this.state.pendingTxHashes; });
+        }).catch((err) => {
+          console.log('Failed decoding tx input of ', hash, err);
         });
     };
   }
@@ -46,7 +51,7 @@ export default class App extends React.Component {
       toast.success('Mined TX to ' + action);
       toast.success(<Tx hash={receipt.transactionHash} />);
       this.setState({
-        pendingTxHashes: this.state.pendingTxHashes.filter(e => e.hash != receipt.transactionHash),
+        pendingTxHashes: this.state.pendingTxHashes.filter(e => e.hash !== receipt.transactionHash),
         txReceipts: this.state.txReceipts.concat([receipt]),
       }, () => {
         window.localStorage.pendingTxHashes = this.state.pendingTxHashes;
@@ -59,20 +64,26 @@ export default class App extends React.Component {
     return async (error) => {
       // if it's a "not mined within 50 blocks" error, perform a check
       if (error.toString().includes('Transaction was not mined within 50 blocks')) {
-        // TODO this can't work, txHash is never defined
-        let receipt = await web3.eth.getTransactionReceipt(txHash);
+        let receipt = await web3provider.web3.eth.getTransactionReceipt(this.state.latestTxHash);
         console.log('double checking receipt', receipt);
         // it was in fact mined!
         if (receipt && receipt.blockNumber) {
           toast.success('Mined TX to ' + action);
-          this.setState({ pendingTxHashes: this.state.pendingTxHashes.filter(e => e.hash != receipt.transactionHash) }, () => { window.localStorage.pendingTxHashes = this.state.pendingTxHashes; });
-          this.setState({ txReceipts: this.state.txReceipts.concat([receipt]) }, () => { window.localStorage.txReceipts = this.state.txReceipts; });
+          this.setState({
+            pendingTxHashes: this.state.pendingTxHashes.filter(e => e.hash !== receipt.transactionHash),
+            txReceipts: this.state.txReceipts.concat([receipt]),
+          }, () => {
+            window.localStorage.pendingTxHashes = this.state.pendingTxHashes;
+            window.localStorage.txReceipts = this.state.txReceipts;
+          });
           return;
         }
       }
       toast.error('Error in TX to ' + action);
       toast.error(error.toString());
-      this.setState({ pendingTxHashes: this.state.pendingTxHashes.filter(e => e.hash != txHash) }, () => { window.localStorage.pendingTxHashes = this.state.pendingTxHashes; });
+      this.setState({
+        pendingTxHashes: this.state.pendingTxHashes.filter(e => e.hash !== this.state.latestTxHash),
+      }, () => { window.localStorage.pendingTxHashes = this.state.pendingTxHashes; });
     };
   }
 

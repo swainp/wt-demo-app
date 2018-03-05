@@ -1,6 +1,6 @@
 import React from 'react';
-
 import Select from 'react-select';
+import currencyCodeData from 'currency-codes/data';
 
 export default class EditUnitType extends React.Component {
   constructor (props) {
@@ -22,7 +22,9 @@ export default class EditUnitType extends React.Component {
     newUnitType.description = (this.props.unitTypeInfo.description || '');
     newUnitType.minGuests = (this.props.unitTypeInfo.minGuests || '');
     newUnitType.maxGuests = (this.props.unitTypeInfo.maxGuests || '');
-    newUnitType.price = (this.props.unitTypeInfo.price || '');
+    newUnitType.defaultPrice = (this.props.unitTypeInfo.defaultPrice || '');
+    newUnitType.defaultLifPrice = (this.props.unitTypeInfo.defaultLifPrice || '');
+    newUnitType.currencyCode = (this.props.unitTypeInfo.currencyCode || '');
     this.setState({ newUnitType: newUnitType });
   }
 
@@ -31,6 +33,12 @@ export default class EditUnitType extends React.Component {
   }
 
   render () {
+    let currencyCodeOptions = currencyCodeData.map(e => { return { value: e.code, label: e.code + ' (' + e.number + ')' }; });
+    let selectedCurrency = currencyCodeOptions.find(e => e.value === this.state.newUnitType.currencyCode);
+    if (selectedCurrency === undefined || selectedCurrency.value === undefined) {
+      selectedCurrency = null;
+    }
+
     return (
       <div className="card">
         <div className="card-header">
@@ -110,19 +118,42 @@ export default class EditUnitType extends React.Component {
                           onChange={e => this.editUnitTypeInfo({ maxGuests: e.target.value })}
                         />
                       </div>
-                      <div className="form-group">
-                        <label><b>Price</b></label>
-                        <div className="input-group">
-                          <input
-                            type="text"
-                            className="form-control"
-                            placeholder="Price per night, including taxes"
-                            required
-                            value={this.state.newUnitType.price || ''}
-                            onChange={e => this.editUnitTypeInfo({ price: e.target.value })}
-                          />
-                        </div>
-                      </div>
+                    </div>
+                  ),
+                  setCurrencyCode: (
+                    <div className="form-group">
+                      <label><b>Currency Code</b></label>
+                      <Select
+                        options={currencyCodeOptions}
+                        name="selected-state"
+                        value={selectedCurrency}
+                        onChange={e => this.editUnitTypeInfo({ currencyCode: e.value })}
+                        searchable
+                      />
+                    </div>
+                  ),
+                  setDefaultLifPrice: (
+                    <div className="form-group">
+                      <label><b>Default Lif Price</b></label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        autoFocus="true"
+                        value={this.state.newUnitType.defaultLifPrice || ''}
+                        onChange={e => this.editUnitTypeInfo({ defaultLifPrice: Number(e.target.value) })}
+                      />
+                    </div>
+                  ),
+                  setDefaultPrice: (
+                    <div className="form-group">
+                      <label><b>Default Price</b></label>
+                      <input
+                        type="number"
+                        className="form-control"
+                        autoFocus="true"
+                        value={this.state.newUnitType.defaultPrice || ''}
+                        onChange={e => this.editUnitTypeInfo({ defaultPrice: Number(e.target.value) })}
+                      />
                     </div>
                   ),
                   addAmenity: (

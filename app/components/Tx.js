@@ -1,6 +1,5 @@
 import React from 'react';
-import Web3 from 'web3';
-var web3 = new Web3(new Web3.providers.HttpProvider(window.localStorage.web3Provider || WEB3_PROVIDER));
+import { web3provider } from '../services/web3provider';
 
 export default class Tx extends React.Component {
   constructor (props) {
@@ -12,7 +11,7 @@ export default class Tx extends React.Component {
   }
 
   async componentWillMount () {
-    const networkType = await web3.eth.net.getNetworkType();
+    const networkType = await web3provider.web3.eth.net.getNetworkType();
     this.setState({ network: networkType });
   }
 
