@@ -511,7 +511,7 @@ export default class Explorer extends React.Component {
                     <ul class="nav nav-tabs mb-3">
                       <li class="nav-item">
                         <a class={"nav-link "+ (hotelManagerSection=='hotels'?'active':'')}
-                          onClick={()=>{
+                          onClick={() => {
                             this.setState({hotelManagerSection:'hotels'});
                           }}>
                           Hotels
@@ -519,7 +519,7 @@ export default class Explorer extends React.Component {
                       </li>
                       <li class="nav-item">
                         <a class={"nav-link "+ (hotelManagerSection=='detail'?'active':'')}
-                          onClick={()=>{
+                          onClick={() => {
                             this.setState({hotelManagerSection:'detail'});
                           }}>
                           Detail

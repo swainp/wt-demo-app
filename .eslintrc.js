@@ -1,7 +1,8 @@
 module.exports = {
   "extends" : [
     "standard",
-    "plugin:promise/recommended"
+    "plugin:promise/recommended",
+    "plugin:react/recommended"
   ],
   "plugins": [
     "promise"
@@ -46,6 +47,21 @@ module.exports = {
     "object-curly-spacing": [2, "always"],
     "generator-star-spacing": ["error", "before"],
     "promise/avoid-new": 0,
-    "promise/always-return": 0
+    "promise/always-return": 0,
+    "react/no-unescaped-entities": 0,
+    "react/prop-types": 0
+  },
+  "settings": {
+    "react": {
+      "createClass": "createReactClass", // Regex for Component Factory to use,
+                                         // default to "createReactClass"
+      "pragma": "React",  // Pragma to use, default to "React"
+      "version": "15.0", // React version, default to the latest React stable release
+      "flowVersion": "0.53" // Flow version
+    },
+    "propWrapperFunctions": [ "forbidExtraProps" ] // The names of any functions used to wrap the
+                                                   // propTypes object, e.g. `forbidExtraProps`.
+                                                   // If this isn't set, any propTypes wrapped in
+                                                   // a function will be skipped.
   }
 };
