@@ -1,0 +1,12 @@
+{
+  "WEB3_PROVIDER": "http://localhost:8545",
+  "LIFTOKEN_ADDRESS": "0xad84405aef5d241e1bb264f0a58e238e221d70de",
+  "WT_INDEXES": [
+    {
+      "version": "0.0.1",
+      "address":"0xc0465ae8a859600b11e45566791d316a07841a38",
+      "block": "0"
+    }
+  ],
+  "MAPS_API_KEY": "AIzaSyAmxaZIZKNk2jBChEOpSBSTI1SGLXLAhM0"
+}

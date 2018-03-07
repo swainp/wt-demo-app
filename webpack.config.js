@@ -1,7 +1,12 @@
 const webpack = require('webpack');
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const config = require('./config');
+let config;
+if (process.env.USE_LOCALDEVNET) {
+  config = require('./localdevnet-config');
+} else {
+  config = require('./config');
+}
 
 var WEB3_PROVIDER = process.env.WEB3_PROVIDER || config.WEB3_PROVIDER;
 var LIFTOKEN_ADDRESS = config.LIFTOKEN_ADDRESS;

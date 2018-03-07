@@ -8,10 +8,9 @@
   },
   "scripts": {
     "lint": "eslint app",
-    "testrpc": "scripts/test.sh",
     "build": "rimraf build && webpack --config webpack.prod.js --mode production",
-    "deploy": "scripts/deploy.sh",
-    "start": "webpack-dev-server --config webpack.config.js --mode development"
+    "start": "USE_LOCALDEVNET=1 scripts/localdevnet.sh",
+    "start-client": "webpack-dev-server --config webpack.config.js"
   },
   "keywords": [
     "winding-tree",
@@ -67,7 +66,9 @@
     "eslint-plugin-node": "^5.2.1",
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-react": "^7.7.0",
-    "eslint-plugin-standard": "^3.0.1"
+    "eslint-plugin-standard": "^3.0.1",
+    "truffle": "^4.1.0",
+    "truffle-contract": "^3.0.4"
   },
   "engines": {
     "node": ">=8.9.4"

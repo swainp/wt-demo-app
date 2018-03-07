@@ -136,33 +136,33 @@ export default class Hotel extends React.Component {
     // async removeImageUnitType(hotelAddress: Address, unitType: String, imageIndex: Number): Promievent
     // async removeUnitType(hotelAddress: Address, unitType: String): Promievent
     switch (self.state.editHotelUnitTypeFunction) {
-      case 'addAmenity':
-      case 'removeAmenity':
-        args.push(self.state.amenityCode);
-        break;
-      case 'editUnitType':
-        args.push((newUnitType.description || self.state.unitTypeInfo.description));
-        args.push((newUnitType.minGuests || self.state.unitTypeInfo.minGuests));
-        args.push((newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests));
-        break;
-      case 'addImageUnitType':
-        args.push(image.imageUrl);
-        break;
-      case 'removeImageUnitType':
-        args.push(image.imageIndex);
-        break;
-      case 'setDefaultPrice':
-        args.push(newUnitType.defaultPrice);
-        break;
-      case 'setDefaultLifPrice':
-        args.push(newUnitType.defaultLifPrice);
-        break;
-      case 'setCurrencyCode':
-        args.push(Number(currencyCodes.code(newUnitType.currencyCode).number));
-        break;
-      case 'removeUnitType':
-        break;
-      }
+    case 'addAmenity':
+    case 'removeAmenity':
+      args.push(self.state.amenityCode);
+      break;
+    case 'editUnitType':
+      args.push((newUnitType.description || self.state.unitTypeInfo.description));
+      args.push((newUnitType.minGuests || self.state.unitTypeInfo.minGuests));
+      args.push((newUnitType.maxGuests || self.state.unitTypeInfo.maxGuests));
+      break;
+    case 'addImageUnitType':
+      args.push(image.imageUrl);
+      break;
+    case 'removeImageUnitType':
+      args.push(image.imageIndex);
+      break;
+    case 'setDefaultPrice':
+      args.push(newUnitType.defaultPrice);
+      break;
+    case 'setDefaultLifPrice':
+      args.push(newUnitType.defaultLifPrice);
+      break;
+    case 'setCurrencyCode':
+      args.push(Number(currencyCodes.code(newUnitType.currencyCode).number));
+      break;
+    case 'removeUnitType':
+      break;
+    }
 
     try {
       web3provider.web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
@@ -191,36 +191,36 @@ export default class Hotel extends React.Component {
     // async removeImageHotel(hotelAddress: Address, imageIndex: Number): Promievent
     // async removeHotel(address: Address): Promievent
     switch (self.state.editHotelFunction) {
-      case 'changeHotelInfo':
-        args.push(hotel.name);
-        args.push(hotel.description);
-        action = 'change name and description of ' + self.state.hotel.name;
-        break;
-      case 'changeHotelLocation':
-        args.push(hotel.lineOne);
-        args.push(hotel.lineTwo);
-        args.push(hotel.zip);
-        args.push(hotel.country);
-        args.push(hotel.timezone);
-        args.push(hotel.latitude);
-        args.push(hotel.longitude);
-        action = 'change location of ' + self.state.hotel.name;
-        break;
-      case 'setRequireConfirmation':
-        args.push(hotel.waitConfirmation);
-        action = 'require confirmation before booking for ' + self.state.hotel.name;
-        break;
-      case 'addImageHotel':
-        args.push(image.imageUrl);
-        action = 'add an image to ' + self.state.hotel.name;
-        break;
-      case 'removeImageHotel':
-        args.push(image.imageIndex);
-        action = 'remove an image from ' + self.state.hotel.name;
-        break;
-      case 'removeHotel':
-        break;
-      }
+    case 'changeHotelInfo':
+      args.push(hotel.name);
+      args.push(hotel.description);
+      action = 'change name and description of ' + self.state.hotel.name;
+      break;
+    case 'changeHotelLocation':
+      args.push(hotel.lineOne);
+      args.push(hotel.lineTwo);
+      args.push(hotel.zip);
+      args.push(hotel.country);
+      args.push(hotel.timezone);
+      args.push(hotel.latitude);
+      args.push(hotel.longitude);
+      action = 'change location of ' + self.state.hotel.name;
+      break;
+    case 'setRequireConfirmation':
+      args.push(hotel.waitConfirmation);
+      action = 'require confirmation before booking for ' + self.state.hotel.name;
+      break;
+    case 'addImageHotel':
+      args.push(image.imageUrl);
+      action = 'add an image to ' + self.state.hotel.name;
+      break;
+    case 'removeImageHotel':
+      args.push(image.imageIndex);
+      action = 'remove an image from ' + self.state.hotel.name;
+      break;
+    case 'removeHotel':
+      break;
+    }
 
     try {
       web3provider.web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
@@ -248,22 +248,22 @@ export default class Hotel extends React.Component {
     // async setUnitSpecialPrice(hotelAddress: Address, unitAddress: Addres, price: Number, fromDate: Date, amountDays: Number)
     // async removeUnit(hotelAddress: Address, unitAddress: Address): Promievent
     switch (self.state.editHotelUnitFunction) {
-      case 'setUnitActive':
-        args.push(newUnit.active);
-        break;
-      case 'setUnitSpecialLifPrice':
-        args.push(newUnit.specialLifPrice);
-        args.push(newUnit.startDate.toDate());
-        args.push(newUnit.endDate.diff(newUnit.startDate, 'days'));
-        break;
-      case 'setUnitSpecialPrice':
-        args.push(newUnit.specialPrice);
-        args.push(newUnit.startDate.toDate());
-        args.push(newUnit.endDate.diff(newUnit.startDate, 'days'));
-        break;
-      case 'removeUnit':
-        break;
-      }
+    case 'setUnitActive':
+      args.push(newUnit.active);
+      break;
+    case 'setUnitSpecialLifPrice':
+      args.push(newUnit.specialLifPrice);
+      args.push(newUnit.startDate.toDate());
+      args.push(newUnit.endDate.diff(newUnit.startDate, 'days'));
+      break;
+    case 'setUnitSpecialPrice':
+      args.push(newUnit.specialPrice);
+      args.push(newUnit.startDate.toDate());
+      args.push(newUnit.endDate.diff(newUnit.startDate, 'days'));
+      break;
+    case 'removeUnit':
+      break;
+    }
 
     try {
       web3provider.web3.eth.accounts.wallet.decrypt([self.state.importKeystore], password);
