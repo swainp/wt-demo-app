@@ -1,16 +1,16 @@
 {
   "name": "WT-Demo-App",
   "version": "0.0.1",
-  "description": "Demo app for WT Hoetl Manager",
+  "description": "Demo app for WT Hotel Manager",
   "main": "truffle.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "testrpc": "scripts/test.sh",
-    "compile": "scripts/build.sh",
+    "build": "rimraf build && webpack --config webpack.prod.js --mode production",
     "deploy": "scripts/deploy.sh",
-    "start": "webpack-dev-server --config webpack.config.js"
+    "start": "webpack-dev-server --config webpack.config.js --mode development"
   },
   "keywords": [
     "winding-tree",
@@ -45,14 +45,18 @@
     "react-select": "^1.0.0-rc.10",
     "react-toastify": "^3",
     "reactstrap": "^5.0.0-alpha.4",
-    "style-loader": "^0.19.0",
     "superagent": "^3.8.2",
-    "url-loader": "^0.6.2",
-    "web3": "^1.0.0-beta.24",
-    "webpack": "^3.8.1",
-    "webpack-dev-server": "^2.9.3"
+    "web3": "^1.0.0-beta.24"
   },
   "devDependencies": {
-    "ethereumjs-testrpc": "^3.0.3"
+    "ethereumjs-testrpc": "^3.0.3",
+    "copy-webpack-plugin": "^4.5.0",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.10",
+    "webpack-dev-server": "^3.1.0",
+    "webpack-merge": "^4.1.2",
+    "url-loader": "^1.0.1",
+    "style-loader": "^0.20.2",
+    "rimraf": "^2.6.2"
   }
 }

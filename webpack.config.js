@@ -1,5 +1,6 @@
-var webpack = require('webpack');
-var path = require('path');
+const webpack = require('webpack');
+const path = require('path');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 const config = require('./config');
 
 var WEB3_PROVIDER = process.env.WEB3_PROVIDER || config.WEB3_PROVIDER;
@@ -42,9 +43,9 @@ module.exports = {
         query: { mimetype: "image/png" }
       },
       {
-      test: /\.svg$/,
+        test: /\.svg$/,
         loader: "url-loader"
-      }
+      },
     ]
   },
   output: {
@@ -52,6 +53,10 @@ module.exports = {
     filename: "index.min.js"
   },
   plugins: [
+    new CopyWebpackPlugin([
+      {from: './*.html'},
+      {from: './assets', to: 'assets'}
+    ]),
     new webpack.DefinePlugin({
       'WEB3_PROVIDER': JSON.stringify(WEB3_PROVIDER),
       'LIFTOKEN_ADDRESS': JSON.stringify(LIFTOKEN_ADDRESS),
