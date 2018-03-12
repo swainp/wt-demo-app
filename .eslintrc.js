@@ -17,7 +17,11 @@ module.exports = {
     "artifacts": false,
     "contract": false,
     "assert": false,
-    "web3": false
+    "web3": false,
+    'WEB3_PROVIDER': true,
+    'LIFTOKEN_ADDRESS': true,
+    'WT_INDEXES': true,
+    'MAPS_API_KEY': true
   },
   "rules": {
 
