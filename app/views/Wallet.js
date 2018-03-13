@@ -7,7 +7,6 @@ import superagent from 'superagent';
 
 import { web3provider } from '../services/web3provider';
 import config from '../services/config';
-var BN = web3provider.web3.utils.BN;
 var LifABI = web3provider.contracts.abis.LifToken;
 
 export default class Wallet extends React.Component {
@@ -100,7 +99,6 @@ export default class Wallet extends React.Component {
   async updateBalances () {
     var self = this;
     self.setState({ ethBalance: '...', lifBalance: '...', loading: true });
-
     self.setState({
       ethBalance: web3provider.web3.utils.fromWei(
         await web3provider.web3.eth.getBalance(self.state.walletKeystore.address),
@@ -113,13 +111,11 @@ export default class Wallet extends React.Component {
 
   async getLifBalance (addr) {
     var self = this;
-    var balanceBN = new BN(web3provider.web3.utils.toBN(
-      await web3provider.web3.eth.call({
-        to: self.state.lifTokenAddress, // contract address
-        data: self.state.lifContract.methods.balanceOf(self.state.walletKeystore.address).encodeABI(),
-      })
-    ));
-    return web3provider.web3.utils.fromWei(balanceBN, 'ether').toString();
+    var rawBalance = await web3provider.web3.eth.call({
+      to: self.state.lifTokenAddress, // contract address
+      data: self.state.lifContract.methods.balanceOf(self.state.walletKeystore.address).encodeABI(),
+    });
+    return web3provider.web3.utils.fromWei(rawBalance, 'ether').toString();
   }
 
   async sendTx () {

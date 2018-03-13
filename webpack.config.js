@@ -9,8 +9,8 @@ if (process.env.USE_LOCALDEVNET) {
 }
 
 var WEB3_PROVIDER = process.env.WEB3_PROVIDER || config.WEB3_PROVIDER;
-var LIFTOKEN_ADDRESS = config.LIFTOKEN_ADDRESS;
-var WT_INDEXES = config.WT_INDEXES;
+var LIFTOKEN_ADDRESS = process.env.LIFTOKEN_ADDRESS || config.LIFTOKEN_ADDRESS;
+var WT_INDEXES = process.env.WT_INDEXES || config.WT_INDEXES;
 var MAPS_API_KEY = config.MAPS_API_KEY;
 
 module.exports = {

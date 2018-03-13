@@ -20,14 +20,15 @@ This is great for UI development, because everything runs locally.
 
 **!!!DO NOT USE THIS WALLET ON ANY OTHER NETWORK!!!**
 
-## Run against Ropsten network
+## Run against any other network
 
-In the terminal:
+We provide a sample WT network instance on Ropsten network. For that to run, just type `npm run start-client`
 
 1. Set env var `WEB3_PROVIDER` with the url of the ethereum network provider.
+1. Set env var `LIFTOKEN_ADDRESS` with the address of your `LifToken` contract. Demo app uses a LifToken flavor with faucet.
+1. Set env var `WT_INDEXES` with the configuration of available `WTIndex` contracts like `[{"version": "0.1.0","address":"deployAddress","block": "deployBlock"}]`
+1. If you'd like to see what is necessary to deploy the whole network, check the `migrations` folder.
 1. `npm start-client` and the app will start in port 8080.
-1. You might need to alter the `config.json`, there are hardcoded contract addresses on Ropsten network.
-
 
 ## Run via Docker (optional)
 

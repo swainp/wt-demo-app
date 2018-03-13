@@ -10,7 +10,7 @@
     "lint": "eslint app",
     "build": "rimraf build && webpack --config webpack.prod.js --mode production",
     "start": "USE_LOCALDEVNET=1 scripts/localdevnet.sh",
-    "start-client": "webpack-dev-server --config webpack.config.js"
+    "start-client": "webpack-dev-server --config webpack.config.js --mode development"
   },
   "keywords": [
     "winding-tree",
@@ -21,7 +21,7 @@
   "license": "MIT",
   "dependencies": {
     "@google/maps": "^0.4.5",
-    "@windingtree/wt-js-libs": "^0.1.0",
+    "@windingtree/wt-js-libs": "^0.1.2",
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
