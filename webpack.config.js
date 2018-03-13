@@ -11,6 +11,7 @@ if (process.env.USE_LOCALDEVNET) {
 var WEB3_PROVIDER = process.env.WEB3_PROVIDER || config.WEB3_PROVIDER;
 var LIFTOKEN_ADDRESS = process.env.LIFTOKEN_ADDRESS || config.LIFTOKEN_ADDRESS;
 var WT_INDEXES = process.env.WT_INDEXES || config.WT_INDEXES;
+var GAS_MARGIN = parseFloat(process.env.GAS_MARGIN || config.GAS_MARGIN);
 var MAPS_API_KEY = config.MAPS_API_KEY;
 
 module.exports = {
@@ -66,7 +67,8 @@ module.exports = {
       'WEB3_PROVIDER': JSON.stringify(WEB3_PROVIDER),
       'LIFTOKEN_ADDRESS': JSON.stringify(LIFTOKEN_ADDRESS),
       'WT_INDEXES': JSON.stringify(WT_INDEXES),
-      'MAPS_API_KEY': JSON.stringify(MAPS_API_KEY)
+      'MAPS_API_KEY': JSON.stringify(MAPS_API_KEY),
+      'GAS_MARGIN': JSON.stringify(GAS_MARGIN),
     })
   ]
 };

@@ -21,6 +21,7 @@ module.exports = {
     'WEB3_PROVIDER': true,
     'LIFTOKEN_ADDRESS': true,
     'WT_INDEXES': true,
+    'GAS_MARGIN': true,
     'MAPS_API_KEY': true
   },
   "rules": {

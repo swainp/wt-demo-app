@@ -67,7 +67,7 @@ export default class Hotel extends React.Component {
         indexAddress: window.localStorage.wtIndexAddress || config.get('WT_INDEXES')[config.get('WT_INDEXES').length - 1].address,
         owner: this.state.importKeystore.address,
         web3provider: web3provider,
-        gasMargin: 3,
+        gasMargin: config.get('GAS_MARGIN'),
       });
       const bookingData = new BookingData({ web3provider: web3provider });
       this.setState({ hotelManager: hotelManager, bookingData: bookingData }, () => { this.getHotels(); });

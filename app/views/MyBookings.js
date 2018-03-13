@@ -35,12 +35,12 @@ export default class MyBookings extends React.Component {
         indexAddress: window.localStorage.wtIndexAddress || config.get('WT_INDEXES')[config.get('WT_INDEXES').length - 1].address,
         owner: address,
         web3provider: web3provider,
-        gasMargin: 2,
+        gasMargin: config.get('GAS_MARGIN'),
       });
       let bookingData = new BookingData({ web3provider: web3provider });
       let user = new User({
         account: address, // Client's account address
-        gasMargin: 2, // Multiple to increase gasEstimate by to ensure tx success.
+        gasMargin: config.get('GAS_MARGIN'),
         tokenAddress: window.localStorage.lifTokenAddress || config.get('LIFTOKEN_ADDRESS'), // LifToken contract address
         web3provider: web3provider,
       });
