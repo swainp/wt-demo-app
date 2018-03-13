@@ -15,7 +15,10 @@ import EditUnitType from '../components/EditUnitType';
 import ViewBookings from '../components/ViewBookings';
 import ViewHotelTx from '../components/ViewHotelTx';
 
-import { web3provider, HotelManager, BookingData } from '../services/web3provider';
+import { web3provider } from '../services/web3provider';
+import BookingData from '@windingtree/wt-js-libs/src/BookingData';
+import HotelManager from '@windingtree/wt-js-libs/src/HotelManager';
+
 import config from '../services/config';
 
 export default class Hotel extends React.Component {

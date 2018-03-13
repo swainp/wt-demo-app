@@ -1,5 +1,6 @@
 const webpack = require('webpack');
 const path = require('path');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 let config;
 if (process.env.USE_LOCALDEVNET) {
@@ -17,12 +18,18 @@ var MAPS_API_KEY = config.MAPS_API_KEY;
 module.exports = {
   context: path.join(__dirname, "app"),
   devtool: "cheap-module-source-map",
-  entry: "./index.js",
+  entry: {
+    index: "./index.js",
+    styles: "./styles.js",
+  },
   devServer: {
     historyApiFallback: true,
     contentBase: path.join(__dirname, "app"),
     compress: true,
     port: 8080
+  },
+  node: {
+    net: 'empty'
   },
   module: {
     rules: [
@@ -54,13 +61,13 @@ module.exports = {
       },
     ]
   },
-  output: {
-    path: __dirname + "/dist/",
-    filename: "index.min.js"
-  },
   plugins: [
+    new HtmlWebpackPlugin({
+      template: 'index.html',
+      filename: 'index.html',
+      inject: true,
+    }),
     new CopyWebpackPlugin([
-      {from: './*.html'},
       {from: './assets', to: 'assets'}
     ]),
     new webpack.DefinePlugin({
