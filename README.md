@@ -29,34 +29,3 @@ We provide a sample WT network instance on Ropsten network. For that to run, jus
 1. Set env var `WT_INDEXES` with the configuration of available `WTIndex` contracts like `[{"version": "0.1.0","address":"deployAddress","block": "deployBlock"}]`
 1. If you'd like to see what is necessary to deploy the whole network, check the `migrations` folder.
 1. `npm start-client` and the app will start in port 8080.
-
-## Run via Docker (optional)
-
-If you run `docker-machine` and it runs on port `192.168.99.100` you don't have to change anything.
-
-Just spin up the demo container by running:
-
-```sh
-docker-compose run --service-ports --entrypoint /bin/sh demo
-```
-
-There you can install all the dependencies:
-
-```sh
-apk add -t .gyp --no-cache git python g++ make bash
-cd /app
-npm install --production; npm link;
-```
-
-Compile solidity contracts and run the server:
-
-```sh
-truffle compile
-npm start -- --host 0.0.0.0 --public $DOCKER_HOST:8080
-```
-
-If you run your docker host on a different IP, figure it and pass the proper env variables:
-
-```sh
-docker-compose run -e 'DOCKER_HOST=1.1.1.1' -e 'RPC_HOST=1.1.1.1' --entrypoint /bin/sh demo
-```
