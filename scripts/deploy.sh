@@ -1,2 +1,2 @@
-git add build -f && git commit -m "gh-pages build"
-git subtree push --prefix build origin gh-pages
+git add dist -f && git commit -m "gh-pages dist"
+git subtree push --prefix dist origin gh-pages
