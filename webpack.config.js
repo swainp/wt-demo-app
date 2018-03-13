@@ -55,7 +55,7 @@ module.exports = {
     ]
   },
   output: {
-    path: __dirname + "/build/",
+    path: __dirname + "/dist/",
     filename: "index.min.js"
   },
   plugins: [

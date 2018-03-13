@@ -8,7 +8,8 @@
   },
   "scripts": {
     "lint": "eslint app",
-    "build": "rimraf build && webpack --config webpack.prod.js --mode production",
+    "clean": "rimraf build && rimraf dist",
+    "build": "rimraf dist && webpack --config webpack.prod.js --mode production",
     "start": "USE_LOCALDEVNET=1 scripts/localdevnet.sh",
     "start-client": "webpack-dev-server --config webpack.config.js --mode development"
   },
