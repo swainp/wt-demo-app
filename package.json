@@ -1,6 +1,6 @@
 {
   "name": "@windingtree/WT-Demo-App",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Demo app for WT Hotel Manager",
   "main": "app/index.js",
   "directories": {
@@ -27,10 +27,9 @@
     "smart-contracts"
   ],
   "author": "Augusto Lemble <augusto@windingtree.com>",
-  "repository":
-  {
-    "type" : "git",
-    "url" : "https://github.com/windingtree/wt-demo-app"
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/windingtree/wt-demo-app"
   },
   "license": "MIT",
   "dependencies": {
