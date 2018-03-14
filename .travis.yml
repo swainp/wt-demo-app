@@ -2,10 +2,11 @@ language: node_js
 node_js:
 - node
 cache: npm
+install: true
 jobs:
   include:
   - stage: build and deploy
-#    if: tag IS present
+    if: tag IS present
     script:
     - npm i -g now
     - npm run deploy
