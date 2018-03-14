@@ -6,7 +6,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import BookUnit from '../components/BookUnit';
 import Address from '../components/Address';
 
-import { web3provider, HotelManager, BookingData, User } from '../services/web3provider';
+import { web3provider } from '../services/web3provider';
+import BookingData from '@windingtree/wt-js-libs/src/BookingData';
+import HotelManager from '@windingtree/wt-js-libs/src/HotelManager';
+import User from '@windingtree/wt-js-libs/src/User';
+
 import config from '../services/config';
 
 const hotelsPerPage = 5;

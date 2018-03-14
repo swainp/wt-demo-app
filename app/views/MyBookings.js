@@ -4,7 +4,11 @@ import Modal from 'react-modal';
 
 import moment from 'moment';
 import { ToastContainer } from 'react-toastify';
-import { web3provider, HotelManager, BookingData, User } from '../services/web3provider';
+import { web3provider } from '../services/web3provider';
+import BookingData from '@windingtree/wt-js-libs/src/BookingData';
+import HotelManager from '@windingtree/wt-js-libs/src/HotelManager';
+import User from '@windingtree/wt-js-libs/src/User';
+
 import config from '../services/config';
 
 export default class MyBookings extends React.Component {

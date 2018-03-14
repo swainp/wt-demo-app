@@ -9,9 +9,17 @@
   "scripts": {
     "lint": "eslint app",
     "clean": "rimraf build && rimraf dist",
-    "build": "rimraf dist && webpack --config webpack.prod.js --mode production",
+    "prebuild": "npm run clean",
+    "build": "webpack --config webpack.prod.js --mode production",
     "start": "USE_LOCALDEVNET=1 scripts/localdevnet.sh",
-    "start-client": "webpack-dev-server --config webpack.config.js --mode development"
+    "start-client": "webpack-dev-server --config webpack.config.js --mode development",
+    "now-start": "serve --single ./dist",
+    "deploy": "now deploy -e NODE_ENV=production --token $NOW_TOKEN --npm --public",
+    "alias": "now alias --token=$NOW_TOKEN"
+  },
+  "now": {
+    "name": "wt-demo-app",
+    "alias": "demo.windingtree.com"
   },
   "keywords": [
     "winding-tree",
@@ -19,6 +27,11 @@
     "smart-contracts"
   ],
   "author": "Augusto Lemble <augusto@windingtree.com>",
+  "repository":
+  {
+    "type" : "git",
+    "url" : "https://github.com/windingtree/wt-demo-app"
+  },
   "license": "MIT",
   "dependencies": {
     "@google/maps": "^0.4.5",
@@ -47,20 +60,13 @@
     "react-select": "^1.0.0-rc.10",
     "react-toastify": "^3",
     "reactstrap": "^5.0.0-alpha.4",
+    "serve": "^6.5.3",
     "superagent": "^3.8.2",
     "web3": "^1.0.0-beta.24"
   },
   "devDependencies": {
-    "ethereumjs-testrpc": "^3.0.3",
-    "copy-webpack-plugin": "^4.5.0",
-    "webpack": "^4.1.1",
-    "webpack-cli": "^2.0.10",
-    "webpack-dev-server": "^3.1.0",
-    "webpack-merge": "^4.1.2",
-    "url-loader": "^1.0.1",
-    "style-loader": "^0.20.2",
-    "rimraf": "^2.6.2",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
+    "copy-webpack-plugin": "^4.5.0",
     "eslint": "^4.16.0",
     "eslint-config-standard": "^10.2.1",
     "eslint-plugin-import": "^2.8.0",
@@ -68,8 +74,17 @@
     "eslint-plugin-promise": "^3.6.0",
     "eslint-plugin-react": "^7.7.0",
     "eslint-plugin-standard": "^3.0.1",
+    "ethereumjs-testrpc": "^3.0.3",
+    "html-webpack-plugin": "^3.0.6",
+    "rimraf": "^2.6.2",
+    "style-loader": "^0.20.2",
     "truffle": "^4.1.0",
-    "truffle-contract": "^3.0.4"
+    "truffle-contract": "^3.0.4",
+    "url-loader": "^1.0.1",
+    "webpack": "^4.1.1",
+    "webpack-cli": "^2.0.10",
+    "webpack-dev-server": "^3.1.0",
+    "webpack-merge": "^4.1.2"
   },
   "engines": {
     "node": ">=8.9.4"
