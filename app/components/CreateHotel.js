@@ -59,7 +59,7 @@ export default class CreateHotel extends React.Component {
                       this.setState({ password: event.target.value, createHotelError: false });
                     }}
                   />
-                  <span className="input-group-addon">
+                  <span className="input-group-append">
                     {this.state.showPassword
                       ? <span className="fa fa-eye" onClick={() => this.setState({ showPassword: false })}></span>
                       : <span className="fa fa-eye-slash" onClick={() => this.setState({ showPassword: true })}></span>
