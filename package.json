@@ -12,7 +12,14 @@
     "prebuild": "npm run clean",
     "build": "webpack --config webpack.prod.js --mode production",
     "start": "USE_LOCALDEVNET=1 scripts/localdevnet.sh",
-    "start-client": "webpack-dev-server --config webpack.config.js --mode development"
+    "start-client": "webpack-dev-server --config webpack.config.js --mode development",
+    "now-start": "serve --single ./dist",
+    "deploy": "now deploy -e NODE_ENV=production --token $NOW_TOKEN --npm --public",
+    "alias": "now alias --token=$NOW_TOKEN"
+  },
+  "now": {
+    "name": "wt-demo-app",
+    "alias": "demo.windingtree.com"
   },
   "keywords": [
     "winding-tree",
@@ -20,6 +27,11 @@
     "smart-contracts"
   ],
   "author": "Augusto Lemble <augusto@windingtree.com>",
+  "repository":
+  {
+    "type" : "git",
+    "url" : "https://github.com/windingtree/wt-demo-app"
+  },
   "license": "MIT",
   "dependencies": {
     "@google/maps": "^0.4.5",
@@ -48,6 +60,7 @@
     "react-select": "^1.0.0-rc.10",
     "react-toastify": "^3",
     "reactstrap": "^5.0.0-alpha.4",
+    "serve": "^6.5.3",
     "superagent": "^3.8.2",
     "web3": "^1.0.0-beta.24"
   },
