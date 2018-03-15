@@ -64,7 +64,7 @@ export default class App extends React.Component {
                   defaultValue={self.state.password}
                   placeholder="This password will be used to encrypt your new wallet. Use a strong one!"
                   onChange={(event) => self.setState({ password: event.target.value })}/>
-                <span className="input-group-append">
+                <span className="input-group-append input-group-text">
                   {self.state.showPassword
                     ? <span className="fa fa-eye" onClick={() => self.setState({ showPassword: false })}></span>
                     : <span className="fa fa-eye-slash" onClick={() => self.setState({ showPassword: true })}></span>
@@ -90,10 +90,10 @@ export default class App extends React.Component {
                   onChange={(event) => {
                     self.setState({ walleyKeystore: event.target.value, walletError: false });
                   }}/>
-                <span className="input-group-append">
+                <span className="input-group-append input-group-text">
                   <a className="fa fa-download" style={{ color: '#555' }} href={'data:application/json;base64,' + window.btoa(JSON.stringify(self.state.walleyKeystore))} download="WT Keystore.json"></a>
                 </span>
-                <span className="input-group-append" onClick={() => {
+                <span className="input-group-append input-group-text" onClick={() => {
                   document.getElementById('inputFile').click();
                 }}>
                   <span className="fa fa-upload"></span>
@@ -128,7 +128,7 @@ export default class App extends React.Component {
                   onChange={(event) => {
                     self.setState({ password: event.target.value });
                   }}/>
-                <span className="input-group-append">
+                <span className="input-group-append input-group-text">
                   {self.state.showPassword
                     ? <span className="fa fa-eye" onClick={() => self.setState({ showPassword: false })}></span>
                     : <span className="fa fa-eye-slash" onClick={() => self.setState({ showPassword: true })}></span>
