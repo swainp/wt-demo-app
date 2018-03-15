@@ -1,0 +1,13 @@
+{
+  "WEB3_PROVIDER": "https://ropsten.infura.io/WKNyJ0kClh8Ao5LdmO7z",
+  "LIFTOKEN_ADDRESS": "0xB6e225194a1C892770c43D4B529841C99b3DA1d7",
+  "GAS_MARGIN": "1.5",
+  "WT_INDEXES": [
+    {
+      "version": "0.1.0",
+      "address":"0X09C0AECBA9BBEBCCDAAF3FE8473591A69C4C11BE",
+      "block": "2821450"
+    }
+  ],
+  "MAPS_API_KEY": "AIzaSyAmxaZIZKNk2jBChEOpSBSTI1SGLXLAhM0"
+}
