@@ -10,7 +10,7 @@
     "lint": "eslint app",
     "clean": "rimraf build && rimraf dist",
     "prebuild": "npm run clean",
-    "build": "webpack --config webpack.prod.js --mode production",
+    "build": "GIT_REV=`git rev-parse --short HEAD` webpack --config webpack.prod.js --mode production",
     "start": "USE_LOCALDEVNET=1 scripts/localdevnet.sh",
     "start-client": "webpack-dev-server --config webpack.config.js --mode development",
     "now-start": "serve --single ./dist",
