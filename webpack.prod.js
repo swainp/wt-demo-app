@@ -7,7 +7,7 @@ module.exports = merge(webpackConfig, {
   devtool: "source-map",
   output: {
     path: __dirname + "/dist/",
-    filename: "[name].min.js",
+    filename: "[name]-[hash].min.js",
   },
   optimization: {
     splitChunks: {
