@@ -2,6 +2,8 @@ const webpack = require('webpack');
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const packageFile = require('./package');
+
 let config;
 if (process.env.USE_LOCALDEVNET) {
   config = require('./localdevnet-config');
@@ -14,6 +16,8 @@ var LIFTOKEN_ADDRESS = process.env.LIFTOKEN_ADDRESS || config.LIFTOKEN_ADDRESS;
 var WT_INDEXES = process.env.WT_INDEXES || config.WT_INDEXES;
 var GAS_MARGIN = parseFloat(process.env.GAS_MARGIN || config.GAS_MARGIN);
 var MAPS_API_KEY = config.MAPS_API_KEY;
+var GIT_REV = process.env.GIT_REV || 'unknown';
+var VERSION_NUMBER = packageFile.version || '0.0.0';
 
 module.exports = {
   context: path.join(__dirname, "app"),
@@ -76,6 +80,8 @@ module.exports = {
       'WT_INDEXES': JSON.stringify(WT_INDEXES),
       'MAPS_API_KEY': JSON.stringify(MAPS_API_KEY),
       'GAS_MARGIN': JSON.stringify(GAS_MARGIN),
+      'GIT_REV': JSON.stringify(GIT_REV),
+      'VERSION_NUMBER': JSON.stringify(VERSION_NUMBER),
     })
   ]
 };
