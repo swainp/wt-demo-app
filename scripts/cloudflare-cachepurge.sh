@@ -3,6 +3,7 @@
 
 echo "Purging cloudflare cache for index.html"
 
+# https://api.cloudflare.com/#zone-purge-individual-files-by-url
 # These env vars have to be set before this script is run
 # CF_ZONE=12345 # cloudflare Zone ID - see Overview page
 # CF_USER=demo@example.com #  Email address associated with cloudflare account
