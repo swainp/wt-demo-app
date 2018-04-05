@@ -222,7 +222,7 @@ export default class Wallet extends React.Component {
                         required
                         placeholder="Enter your password here"
                         onChange={(event) => self.setState({ password: event.target.value })}/>
-                      <span className="input-group-addon">
+                      <span className="input-group-append input-group-text">
                         {self.state.showPassword
                           ? <span onClick={() => self.setState({ showPassword: false })}>
                             <span style={{ paddingRight: 6 }}>Show/Hide</span>
@@ -290,7 +290,7 @@ export default class Wallet extends React.Component {
                           onChange={(event) => {
                             self.setState({ walletKeystore: event.target.value, walletError: false });
                           }}/>
-                        <span className="input-group-addon pointer" onClick={() => {
+                        <span className="input-group-append input-group-text pointer" onClick={() => {
                           document.getElementById('inputFile').click();
                         }}> <span style={{ paddingRight: 6 }}>Select File</span> <span className="fa fa-upload"> </span>
                           <input id="inputFile" className="file-upload" accept=".json" type="file" onChange={(event) => {
@@ -332,7 +332,7 @@ export default class Wallet extends React.Component {
                           onChange={(event) => {
                             self.setState({ password: event.target.value });
                           }}/>
-                        <span className="input-group-addon">
+                        <span className="input-group-append input-group-text">
                           {self.state.showPassword
                             ? <span onClick={() => self.setState({ showPassword: false })} style={{ cursor: 'pointer' }}>
                               <span style={{ paddingRight: 6 }}>Show/Hide</span>
@@ -488,7 +488,7 @@ export default class Wallet extends React.Component {
                                   defaultValue={self.state.sendAmount}
                                   placeholder="Amount to send"
                                   onChange={(event) => self.setState({ sendAmount: event.target.value })}/>
-                                <span className="input-group-addon">{self.state.currency}</span>
+                                <span className="input-group-append">{self.state.currency}</span>
                               </div>
                             </div>
                           </div>

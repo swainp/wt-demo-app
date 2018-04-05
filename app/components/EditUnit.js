@@ -137,7 +137,7 @@ export default class EditUnit extends React.Component {
                       defaultValue={this.state.password}
                       onChange={e => this.setState({ password: e.target.value })}
                     />
-                    <span className="input-group-addon">
+                    <span className="input-group-append">
                       {this.state.showPassword
                         ? <span className="fa fa-eye" onClick={() => this.setState({ showPassword: false })}></span>
                         : <span className="fa fa-eye-slash" onClick={() => this.setState({ showPassword: true })}></span>

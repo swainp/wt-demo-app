@@ -145,7 +145,7 @@ export default class ViewBookings extends React.Component {
                           self.setState({ password: event.target.value });
                         }}
                       />
-                      <span className="input-group-addon">
+                      <span className="input-group-append">
                         {self.state.showPassword
                           ? <span className="fa fa-eye" onClick={() => self.setState({ showPassword: false })}></span>
                           : <span className="fa fa-eye-slash" onClick={() => self.setState({ showPassword: true })}></span>
