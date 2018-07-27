@@ -1,11 +1,14 @@
 language: node_js
 node_js:
 - node
-cache: npm
+cache:
+  directories:
+  - "$HOME/.npm"
 install: true
 jobs:
   include:
   - stage: build and deploy
+    install: true
     if: tag IS present
     script:
     - npm i -g now
