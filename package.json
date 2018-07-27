@@ -14,7 +14,7 @@
     "start": "USE_LOCALDEVNET=1 scripts/localdevnet.sh",
     "start-client": "webpack-dev-server --config webpack.config.js --mode development",
     "now-start": "serve --single ./dist",
-    "deploy": "now deploy -e GIT_REV=`git rev-parse --short HEAD` -e NODE_ENV=production --token $NOW_TOKEN --npm --public",
+    "deploy": "now deploy -e GIT_REV=`git rev-parse --short HEAD` -e NODE_ENV=production --team windingtree --token $NOW_TOKEN --npm --public",
     "alias": "now alias --token=$NOW_TOKEN",
     "postalias": "./scripts/cloudflare-cachepurge.sh"
   },
