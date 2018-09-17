@@ -1,3 +1,10 @@
+# Disclaimer
+
+**This is a discontinued project, to see the capabilities of [Winding Tree](https://windingtree.com)
+platform, go visit our [wiki](https://github.com/windingtree/wiki) or the newer example web app, the
+[Hotel explorer](https://github.com/windingtree/wt-hotel-explorer). To see it in action, go to
+[our playground deployment](http://hotel-explorer-playground.windingtree.com).**
+
 # WT Demo App
 
 ## Install
